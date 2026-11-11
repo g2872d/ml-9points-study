@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- 白天：浅米白底。启动瞬间 WebView 还没画出来，靠这个避免闪一下纯白 -->
-    <color name="bg_launch">#FFF7F8FA</color>
-</resources>

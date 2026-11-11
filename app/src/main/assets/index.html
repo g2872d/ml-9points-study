@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <title>机器学习 9 考点</title>
+<link rel="stylesheet" href="katex/katex.min.css">
 <style>
 /* ========== 主题变量 ========== */
 html[data-theme="light"]{
@@ -174,6 +175,29 @@ canvas{display:block; width:100%; border-radius:10px; background:var(--panel2); 
 .kv .k{color:var(--muted)}
 .kv .v{font-family:ui-monospace,Consolas,monospace; font-weight:600; color:var(--accent)}
 .tag{display:inline-block; font-size:11px; padding:1px 7px; border-radius:6px; background:var(--chip); color:var(--chipfg); margin-right:5px}
+/* ========== 数学公式（KaTeX） ========== */
+.math{background:var(--panel2); border-radius:10px; padding:12px 14px; margin:9px 0; overflow-x:auto; overflow-y:hidden}
+.math .katex{font-size:1.06em}
+.math .katex-display{margin:0}
+.math-inline .katex{font-size:1.02em}
+.mathblock{
+  background:var(--panel2); border-radius:10px; padding:12px 14px; margin:9px 0;
+  overflow-x:auto; overflow-y:hidden;
+}
+.mathblock .katex-display{margin:.2em 0}
+.mathblock .katex{font-size:1.05em}
+/* 逐步演算的旁注 */
+.calc{background:var(--panel); border:1px solid var(--line); border-radius:12px; margin:12px 0; overflow:hidden}
+.calc .ch{background:var(--chip); color:var(--chipfg); padding:9px 13px; font-size:13px; font-weight:600}
+.calc .cb{padding:4px 13px 12px}
+.cstep{margin:12px 0; padding-left:11px; border-left:2px solid var(--line)}
+.cstep .lbl{font-size:12px; color:var(--accent); font-weight:700; margin-bottom:5px}
+.cstep .eq{overflow-x:auto; padding:2px 0}
+.cstep .eq .katex{font-size:1.02em}
+.cstep .note{font-size:12.5px; color:var(--fg2); line-height:1.65; margin-top:6px;
+  background:var(--panel2); border-radius:8px; padding:8px 10px}
+.cstep .note b{color:var(--fg)}
+.cstep .res{font-size:13px; color:var(--accent2); font-weight:600; margin-top:5px}
 /* ========== 解释块（讲原理用） ========== */
 .explain{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; margin:12px 0; box-shadow:var(--shadow)}
 .explain h4{margin:0 0 10px; font-size:14.5px; color:var(--accent); display:flex; align-items:center; gap:7px;
@@ -219,8 +243,30 @@ canvas{display:block; width:100%; border-radius:10px; background:var(--panel2); 
   <button data-tab="about"><span class="ic">ⓘ</span>关于</button>
 </nav>
 
+<script src="katex/katex.min.js"></script>
 <script>
 "use strict";
+/* =========================================================
+   KaTeX 数学公式
+   ========================================================= */
+function K(t, block){
+  try{
+    return katex.renderToString(t, { displayMode: !!block, throwOnError: false, strict: false });
+  }catch(e){
+    return '<span style="color:#dc2626">[公式错误] ' + t + '</span>';
+  }
+}
+/** 块级公式 */
+function MB(t){ return '<div class="mathblock">' + K(t, true) + '</div>'; }
+/** 行内公式 */
+function MI(t){ return '<span class="math-inline">' + K(t, false) + '</span>'; }
+/** 一步演算：标签 + 公式 + 旁注 */
+function STEP(label, tex, note, res){
+  return '<div class="cstep"><div class="lbl">' + label + '</div>' +
+    '<div class="eq">' + K(tex, true) + '</div>' +
+    (note ? '<div class="note">' + note + '</div>' : '') +
+    (res ? '<div class="res">' + res + '</div>' : '') + '</div>';
+}
 /* =========================================================
    0. 主题
    ========================================================= */
@@ -312,9 +358,26 @@ if (window.matchMedia){
   }catch(e){}
 }
 
+/* 圆角矩形路径。
+   canvas 原生 ctx.roundRect 在 Android WebView 较旧版本上不存在，
+   自己用二次曲线画一遍，任何版本都能用。 */
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
 /* 画坐标系 */
-function axes(ctx, w, h, pad, xmin, xmax, ymin, ymax){
-  var X = function(v){ return pad.l + (v - xmin) / (xmax - xmin) * (w - pad.l - pad.r); };
+function axes(ctx, w, h, pad, xmin, xmax, ymin, ymax){  var X = function(v){ return pad.l + (v - xmin) / (xmax - xmin) * (w - pad.l - pad.r); };
   var Y = function(v){ return h - pad.b - (v - ymin) / (ymax - ymin) * (h - pad.t - pad.b); };
   ctx.strokeStyle = cssVar("--grid"); ctx.lineWidth = 1;
   ctx.beginPath();
@@ -556,8 +619,8 @@ SECTIONS.push({
     root.appendChild(ex1b);
     var c3 = el("div", "card");
     c3.innerHTML =
-      '<div class="formula">经验风险  R<sub>emp</sub>(θ) = (1/N) · Σ<sub>i</sub> ℓ(f<sub>θ</sub>(x<sub>i</sub>), y<sub>i</sub>)</div>' +
-      '<div class="formula">期望风险  R(θ) = E<sub>(x,y)~P</sub>[ ℓ(f<sub>θ</sub>(x), y) ]</div>' +
+      MB('R_{\\text{emp}}(\\theta) = \\frac{1}{N}\\sum_{i=1}^{N}\\ell\\big(f_\\theta(x_i),\\, y_i\\big)') +
+      MB('R(\\theta) = \\mathbb{E}_{(x,y)\\sim P}\\big[\\,\\ell\\big(f_\\theta(x),\\, y\\big)\\,\\big]') +
       '<p>前者是<b>能算出来的</b>（训练集上 N 个损失取平均）；后者是<b>真实分布上的平均</b>，P 你不知道，只能估。</p>' +
       '<div class="note">例：三条训练样本损失 1、3、2 → 经验风险 = (1+3+2)/3 = <b>2</b>。『2』这个数不能告诉你未来房子的平均误差。</div>';
     root.appendChild(c3);
@@ -714,8 +777,10 @@ SECTIONS.push({
     ex.innerHTML =
       '<h4>先说清楚「神经元」在干什么</h4>' +
       '<p>一个神经元做两件事，只做两件：</p>' +
-      '<div class="deriv">第一步  z = w₁x₁ + w₂x₂ + … + b     ← 加权求和（再偏一点）\n' +
-      '第二步  h = φ(z)                      ← 过一道非线性函数 φ</div>' +
+      '<p><b>第一步</b>：加权求和（再偏一点），也就是画一条直线。</p>' +
+      MB('z = w_1x_1 + w_2x_2 + \\cdots + b') +
+      '<p><b>第二步</b>：过一道非线性函数，也就是把这条线掰弯。</p>' +
+      MB('h = \\varphi(z)') +
       '<p>第一步是「画一条线」（严格说叫<span class="term">仿射映射</span>，就是直线加偏移）。' +
       '第二步是「把这条线掰弯」。</p>' +
       '<div class="analogy"><span class="lbl">打个比方</span>' +
@@ -742,7 +807,7 @@ SECTIONS.push({
       '<div class="deriv">第一层输出：  h = W₁x + b₁\n' +
       '第二层输入 h：  y = W₂h + b₂</div>' +
       '<p>把 h 代进去（这一步就是把第一个式子塞进第二个式子的 h 位置）：</p>' +
-      '<div class="deriv">y = W₂(W₁x + b₁) + b₂</div>' +
+      MB('y = W_2(W_1x + b_1) + b_2') +
       '<p>然后展开括号。注意矩阵乘法的分配律（和普通乘法一样）：</p>' +
       '<div class="deriv">y = W₂W₁x + W₂b₁ + b₂\n\n' +
       '  前面那坨 W₂W₁   → 记成新的 W′\n' +
@@ -758,7 +823,7 @@ SECTIONS.push({
       '调来调去都是同一条直线。</p>';
     root.appendChild(ex3b);
     var c1 = el("div", "card");
-    c1.innerHTML = '<div class="formula">W₂(W₁x + b₁) + b₂ = (W₂W₁)x + (W₂b₁ + b₂)</div>' +
+    c1.innerHTML = MB('W_2(W_1x + b_1) + b_2 \\;=\\; (W_2W_1)\\,x \\;+\\; (W_2b_1 + b_2)') +
       '<p>右边仍然能写成 W′x + b′ 的形式，其中 W′ = W₂W₁、b′ = W₂b₁ + b₂。<b>绕一圈还是同一种函数。</b></p>' +
       '<div class="note">一维例子：先算 2x+1，再乘 3 加 4 → 3(2x+1)+4 = <b>6x+7</b>，还是一条直线。</div>';
     var st = { W1: 2, b1: 1, W2: 3, b2: 4 };
@@ -961,28 +1026,42 @@ SECTIONS.push({
     /* ---- 先把概念讲明白，再让人动手 ---- */
     var ex = el("div", "explain");
     ex.innerHTML =
-      '<h4>先说清楚：什么叫「梯度」，为什么减掉它就下山了</h4>' +
-      '<p>想象你蒙着眼睛站在山坡上，要走到谷底。你只能做一件事：<b>用脚探一探哪个方向最陡，然后朝反方向迈一步。</b>' +
-      '然后再探、再迈。梯度下降就是这个动作，一个字的玄机都没有。</p>' +
-      '<div class="analogy"><span class="lbl">打个比方</span>' +
-      '<b>梯度</b> = 你脚下「最陡的上坡方向」<br>' +
-      '<b>负梯度</b> = 正相反，也就是最陡的下坡方向<br>' +
-      '<b>学习率 η</b> = 你一步迈多大<br>' +
-      '<b>迭代</b> = 每迈一步就重新探一次坡度（因为位置变了，坡度也变了）</div>' +
-      '<p><b>「梯度」这个词到底指什么？</b>只有一个参数 w 时，梯度就是<b>导数</b>，也就是曲线在该点的<b>斜率</b>：</p>' +
-      '<div class="deriv">R\'(w) &gt; 0   斜率朝上   →  往右走会升高  →  该往左走\n' +
-      'R\'(w) &lt; 0   斜率朝下   →  往右走会降低  →  该往右走\n' +
-      'R\'(w) = 0   平的       →  极值点（可能是谷底，也可能是山顶）</div>' +
-      '<p>这两种情况能不能合成一个式子？能。不管斜率正负，<b>往 −R\'(w) 的方向走，损失一定下降</b>：' +
-      '斜率 +2 就往左（−2 方向），斜率 −2 就往右（+2 方向）。</p>' +
-      '<p>参数有多个时，把每个参数的偏导排成一个向量，这个向量就叫<span class="term">梯度</span>。' +
-      '它指向<b>函数上升最快的方向</b>，所以前面加负号，就变成下降最快的方向。</p>' +
-      '<div class="why"><span class="lbl">为什么「减梯度」一定没错？一行数学说清</span>' +
-      '把损失用切线近似（泰勒一阶）：<b>R(w + Δ) ≈ R(w) + R\'(w)·Δ</b><br>' +
-      '想让新位置的损失更小，就要让 <b>R\'(w)·Δ &lt; 0</b>。<br>' +
-      '取 Δ = −η·R\'(w)（η 为正），代进去得 R\'(w)·Δ = −η·[R\'(w)]²。<br>' +
-      '平方一定 ≥ 0、η 一定 &gt; 0，所以这一项一定 ≤ 0 —— <b>只要步子不太大，走这步损失就不会变大。</b><br>' +
-      '这就是「为什么是减号」的全部答案。</div>';
+      '<h4>先别管公式。你被扔进一座大雾的山里，要下山</h4>' +
+      '<p>能见度只有一米。你看不见山脚在哪，也不知道自己离山脚还有多远。你能做的只有一个动作：</p>' +
+      '<p style="text-align:center;font-size:14.5px"><b>抬起脚往旁边探一下，感觉地面是变高了还是变低了。</b></p>' +
+      '<p>比如你往右探，发现地面变高了——右边是上坡，那你该往左走。你往左挪一步，站定，<b>再探一次</b>。' +
+      '这一次的坡度和刚才不一样了，因为你换了位置。然后再挪、再探。</p>' +
+      '<p>就这么重复下去，你最后会停在一个"四面都不比这里低"的地方，那就是谷底。</p>' +
+      '<div class="analogy"><span class="lbl">这个动作，就是梯度下降，一个字都不差</span>' +
+      '训练模型时做的事和它完全一样：<br>' +
+      '· 你站的位置　=　模型当前的参数值<br>' +
+      '· 山的高度　　=　模型答错的程度（叫「损失」）<br>' +
+      '· 探脚感觉坡度 =　算一次梯度<br>' +
+      '· 往下坡挪一步 =　更新一次参数<br>' +
+      '训练跑一百万轮，就是挪一百万步。就这么朴素的重复。</div>' +
+      '<p><b>「梯度」这个词，说的就是你探脚的那个感觉。</b>它的准确定义是：' +
+      '在当前位置，函数<b>上升最快</b>的那个方向。</p>' +
+      '<p>所以想"下降"，自然就<b>朝它的反方向</b>走。这就是公式里那个减号的来历——' +
+      '它不是谁规定的，就是"上坡的反面是下坡"这么一句话。</p>' +
+      '<p>写成数学，是这样一行：</p>' +
+      MB('\\theta_{t+1} \\;=\\; \\theta_t \\;-\\; \\eta\\cdot g_t') +
+      '<div class="why"><span class="lbl">这四个符号，一个一个认</span>' +
+      '· <b>θ</b>（读 theta）：模型的参数，也就是"你站在哪"。下标 t 表示第 t 步。<br>' +
+      '· <b>g</b>：梯度，也就是"你探到的坡度"。<b>正数表示往右是上坡，负数表示往右是下坡。</b><br>' +
+      '· <b>η</b>（读 eta）：学习率，也就是"你一步迈多大"。<br>' +
+      '· <b>负号</b>：方向反过来，上坡变下坡。</div>' +
+      '<p><b>为什么不用正号？</b>用正号就是顺着上坡走，那是爬山，损失会越来越大。' +
+      '看个具体数字就明白：如果 g = +2（往右是上坡），<b>加</b>上去会变成 w+2η，位置变大、往右、更高了；' +
+      '<b>减</b>掉则是 w−2η，往左、更低。显然要减。</p>' +
+      '<p><b>为什么每一步都要重新算梯度？</b>因为坡度只在"当前位置"附近才算数。' +
+      '你从山腰挪到山腰下面，路已经不是原来那条路了。' +
+      '一直用第一步的坡度往同一个方向冲，等于闭着眼睛蒙头走，很容易冲过头冲到对面山坡上。</p>' +
+      '<div class="why"><span class="lbl">为什么"减梯度"一定不会让损失变大（一行数学）</span>' +
+      '把损失用切线近似（相当于假设路是直的）：' + MI('R(w+\\Delta) \\approx R(w) + R\'(w)\\cdot\\Delta') + '<br>' +
+      '我们想让走完之后变小，就要让 ' + MI('R\'(w)\\cdot\\Delta &lt; 0') + '。<br>' +
+      '取 ' + MI('\\Delta = -\\eta R\'(w)') + ' 代进去：' + MI('R\'(w)\\cdot\\Delta = -\\eta [R\'(w)]^2') + '<br>' +
+      '平方一定 ≥ 0、η 一定 &gt; 0，所以这一坨一定 ≤ 0。' +
+      '<b>只要步子别太大，走这一步损失就不会变大。</b>这就是降号的数学保证。</div>';
     root.appendChild(ex);
 
     var card = el("div", "card");
@@ -1149,89 +1228,136 @@ SECTIONS.push({
     /* ---- 交互之后：把每个公式拆开讲 ---- */
     var ex2 = el("div", "explain");
     ex2.innerHTML =
-      '<h4>公式 w ← w − η·g 里，每个符号在说什么</h4>' +
-      '<div class="deriv">w  ←  w  −  η · g\n\n' +
-      'w    当前参数（我现在站在哪）\n' +
-      'η    学习率，控制一步迈多远（正数）\n' +
-      'g    在当前 w 处算出来的梯度 R\'(w)\n' +
-      '−    方向：逆着梯度，也就是往低处走\n' +
-      '←    把右边算出的新值覆盖左边</div>' +
-      '<p><b>为什么每一轮都必须重新算梯度？</b>因为梯度是<b>局部</b>信息，只在当前位置附近有效。' +
-      '从 w=1 挪到 w=1.5 之后，脚下的坡度已经变了（离谷底更近、坡更缓），必须重新探一次。' +
-      '一直沿用第一步的梯度，等于闭着眼按原方向一路冲，很容易冲过头。</p>' +
-      '<div class="why"><span class="lbl">这也是手算题最常见的扣分点</span>' +
-      '第 2 步的梯度必须代入<b>更新后的 w</b> 重新算。题目说「梯度依次为…」时，指的是每一步在<b>当时那个位置</b>的梯度。</div>';
+      '<h4>学习率 η：一步迈多大，这件事为什么这么要命</h4>' +
+      '<p>回到下山那个画面。你已经知道该往哪边走（方向由梯度定），但<b>迈多大一步，梯度管不了</b>，' +
+      '这是你自己定的。这个"步子大小"就是学习率 η。</p>' +
+      '<p>损失函数是个碗，最低点在 w = 3，你从 w = 1 出发：' + MB('R(w)=\\tfrac12 (w-3)^2') +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">·</div><div class="c"><b>η 太小</b>：每步只挪一丁点。方向完全正确，但要走几百步才到碗底。' +
+      '算力全浪费在挪步上。</div></div>' +
+      '<div class="st"><div class="n">·</div><div class="c"><b>η 正好</b>：几步就到碗底附近，然后停下。</div></div>' +
+      '<div class="st"><div class="n">·</div><div class="c"><b>η 太大</b>：一步跨过碗底，冲到对面<b>更高的地方</b>去了。' +
+      '下一步又从那边冲回来，越冲越高。</div></div>' +
+      '</div>' +
+      '<p>把 η = 2 代进去，一步一步看它怎么疯的（每步都重新算梯度）：</p>' +
+      STEP('第 1 步　从 w=1 出发',
+           'g = 1-3 = -2 \\quad\\Rightarrow\\quad w = 1 - 2\\times(-2) = 5',
+           '梯度是 <b>−2</b>，负的，说明往右是下坡。η=2，所以往右迈 2×2=4 格，从 1 冲到了 <b>5</b>。<br>' +
+           '注意：<b>碗底在 3，你一下冲过头冲到了 5</b>，跑到另一边去了。',
+           'w = 5　损失 R(5)=½(5−3)² = 2　（和出发时一样，一点没降）') +
+      STEP('第 2 步　现在在 w=5，重新探坡度',
+           'g = 5-3 = +2 \\quad\\Rightarrow\\quad w = 5 - 2\\times(+2) = 1',
+           '位置跑到碗底右边了，坡度变成<b>正的</b>，所以这回该往左走。<br>' +
+           '又是迈 4 格，从 5 冲回 <b>1</b>——正好是你出发的地方。',
+           'w = 1　损失又是 2') +
+      STEP('第 3 步　回到 w=1，和第 1 步完全一样',
+           'w = 1 - 2\\times(-2) = 5',
+           '你看，它开始循环了：1 → 5 → 1 → 5 ……<br>' +
+           '<b>参数每一轮都在变（所以"在训练"），但损失一次都没降（所以"没学到东西"）。</b>',
+           '永远在 1 和 5 之间来回，永远无法收敛') +
+      '<div class="why"><span class="lbl">为什么恰好是 η=2 出问题？有个简单判据</span>' +
+      '对这种碗形函数，可以证明：<b>η 必须小于 ' + MI('2/L') + ' 才收敛</b>，其中 L 是碗的"陡峭程度"（曲率）。<br>' +
+      '本例 ' + MI('R(w)=\\tfrac12(w-3)^2') + ' 的 L = 1，所以 η 必须 &lt; 2。<br>' +
+      '取 η = 2 正好卡在临界点 → 永远震荡（不掉下去也不飞出去）；取 η &gt; 2 → 越跳越远，直接发散。<br>' +
+      '<b>这就是"学习率要调"背后的真实机制，不是玄学。</b></div>' +
+      '<div class="why"><span class="lbl">手算题一定会踩的坑</span>' +
+      '第 2 步的梯度必须代入<b>更新后的 w</b> 重算，不能沿用第 1 步那个 −2。<br>' +
+      '上面这个例子里，正是因为在 w=5 处重算出了 +2（而不是继续用 −2），才会往左冲回去。' +
+      '如果一直用 −2，它会一路向右跑到无穷远，那是另一种错法。</div>';
     root.appendChild(ex2);
 
     var ex3 = el("div", "explain");
     ex3.innerHTML =
-      '<h4>学习率 η：为什么太大太小都不行</h4>' +
-      '<p>把损失想成一个碗：R(w) = ½(w−3)²，谷底在 w=3。你在 w=1。</p>' +
-      '<div class="deriv">η 太小   →  每步挪一点点，方向对但慢得要命\n' +
-      'η 合适   →  几步就到碗底附近\n' +
-      'η 太大   →  一步跨过碗底冲到对面更高处，再跨回来…来回震荡\n' +
-      'η 更大   →  越跳越远，损失越来越大，这叫发散</div>' +
-      '<p>用具体数字看震荡是怎么发生的。取 η=2，从 w=1 出发：</p>' +
-      '<div class="deriv">第1步：g = 1−3 = −2　w = 1 − 2×(−2) = <b>5</b>\n' +
-      '第2步：g = 5−3 = +2　w = 5 − 2×(+2) = <b>1</b>   ← 又回到原点\n' +
-      '第3步：回到 5 ……无限循环</div>' +
-      '<p>参数一直在「更新」，损失却一步都没降。这就是发散/震荡的真实画面。</p>' +
-      '<div class="why"><span class="lbl">一般判据（记不住可以跳过）</span>' +
-      '对形如 R(w)=½L(w−w*)² 的碗（L 是曲率），<b>η &lt; 2/L 才收敛</b>。本例 L=1，所以 η 必须小于 2；' +
-      '取 η=2 正好卡在临界点，于是一定震荡。这就是「学习率要调」背后的真实原因，不是玄学。</div>';
+      '<h4>六种方法不是六个要背的公式，是一条"打补丁"的路</h4>' +
+      '<p>很多人背这六个名字背得很痛苦，因为把它们当成了六个并列的知识点。' +
+      '其实它们是<b>依次解决前一个暴露出来的毛病</b>，串起来看一遍就忘不掉：</p>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>全批量 GD（最朴素的想法）</b><br>' +
+      '要探坡度，最准的办法是把<b>全部训练样本</b>都算一遍再取平均。<br>' +
+      '<span style="color:var(--muted)">它坏在哪：</span>假如你有十万条样本，探一次坡度就要把十万条全跑一遍。' +
+      '你才挪了一步。训练要几百万步，这根本跑不完。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>小批量 SGD（省时间的让步）</b><br>' +
+      '那我随便抓 32 条来估一下坡度行不行？行。抓的样本少，探出来的方向会有点抖，但<b>大方向是对的</b>。<br>' +
+      '<span style="color:var(--accent2)">换来了什么：</span>探一次坡度的成本降到几千分之一，' +
+      '同样的时间你能挪几千步。而且"抖"还有个意外好处——能帮模型跳出那些不太好的坑。</div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c"><b>动量 Momentum（治"抖"）</b><br>' +
+      '但每次方向都抖，参数就会在谷底两侧来回横跳，走大量冤枉路。<br>' +
+      '<b>办法</b>：别只看这一步的坡度，而是把过去所有坡度<b>加权平均</b>。' +
+      '就像滚下山的球有惯性——同一个方向的坡度越积越猛，左右摇摆的部分自己就抵消了。</div></div>' +
+      '<div class="st"><div class="n">4</div><div class="c"><b>AdaGrad（治"所有参数共用同一个步子"）</b><br>' +
+      '模型中有的参数一直很活跃（梯度大），有的一直很安静（梯度小）。让它们迈一样大的步很别扭：' +
+      '活跃的参数会走过头，安静的参数几乎不动。<br>' +
+      '<b>办法</b>：给每个参数<b>单独记账</b>——把它历史上所有梯度的平方加起来。' +
+      '平方和越大的参数，说明它"一贯很陡"，就把它的步子按比例调小。</div></div>' +
+      '<div class="st"><div class="n">5</div><div class="c"><b>RMSProp（治 AdaGrad 的"走死"）</b><br>' +
+      'AdaGrad 那个平方和只增不减，越训练越大，于是步子被压得越来越小。' +
+      '走到后期几乎所有参数都挪不动了——明明离谷底还差很远，却提前"走死"了。<br>' +
+      '<b>办法</b>：把"累加"改成"移动平均"。久远的历史会让它慢慢淡出，' +
+      '这样有效步子不会单调衰减，还能回升。</div></div>' +
+      '<div class="st"><div class="n">6</div><div class="c"><b>Adam（把 3 和 5 合起来用）</b><br>' +
+      '动量治"方向抖"，RMSProp 治"步子僵"。它们是治两个不同病症的，<b>完全可以一起吃</b>。<br>' +
+      'Adam 就是：用一套移动平均记住<b>方向</b>（带正负号），用另一套移动平均记住<b>坡度大小</b>（平方过，没有正负号），' +
+      '两个一起用。<br>' +
+      '<span style="color:var(--muted)">代价：</span>两个量都从 0 起步，前几步会被这个 0 拖得偏小，' +
+      '所以要额外打一个补丁叫「偏差修正」。这一步就是下面要单独讲的。</div></div>' +
+      '</div>' +
+      '<div class="analogy"><span class="lbl">一句话把六个串起来</span>' +
+      '"全量太慢 → 抽小批 → 但小批抖 → 加惯性 → 但步子不分参数 → 按参数各自调 → 但会调死 → 让它能恢复 → 两个合起来用"' +
+      '<br>沿着这条线读一遍，比单独背六个公式牢得多。</div>';
     root.appendChild(ex3);
 
     var ex4 = el("div", "explain");
     ex4.innerHTML =
-      '<h4>六种方法：每一个都是为了补前一个的短板</h4>' +
-      '<p>别把这六个名字当成六个并列公式去死背。它们是一条线，每一步都在解决上一个的实际困难：</p>' +
-      '<div class="steps">' +
-      '<div class="st"><div class="n">1</div><div class="c"><b>全批量 GD</b>：每步都用<b>全部</b>训练样本算梯度。<br>' +
-      '<span style="color:var(--muted)">痛点</span>：梯度最准，但十万条样本算一次梯度就要跑一遍全量前向+反向，一步都这么贵，根本训不完。</div></div>' +
-      '<div class="st"><div class="n">2</div><div class="c"><b>小批量 SGD</b>：每步只抽一小批（比如 32 条）来估计梯度。<br>' +
-      '<span style="color:var(--muted)">解决了</span>：一步便宜几十倍，同样时间能走几千步。代价是方向有点抖——而抖其实还有好处，能帮模型跳出不好的局部。</div></div>' +
-      '<div class="st"><div class="n">3</div><div class="c"><b>动量 Momentum</b>：<br>' +
-      '<span style="color:var(--muted)">痛点</span>：小批量的梯度方向抖，参数在山谷两侧来回横跳，走很多冤枉路。<br>' +
-      '<b>办法</b>：记一份「历史方向的平均」，像滚下山的球有惯性。同方向的分量越积越大，来回摇摆的分量互相抵消。</div></div>' +
-      '<div class="st"><div class="n">4</div><div class="c"><b>AdaGrad</b>：<br>' +
-      '<span style="color:var(--muted)">痛点</span>：不同参数该走多快完全不同（有的梯度一直很大，有的很小），大家共用一个 η 很别扭。<br>' +
-      '<b>办法</b>：给每个参数单独记「历史梯度平方和」，梯度大过的参数就把自己的步子调小。</div></div>' +
-      '<div class="st"><div class="n">5</div><div class="c"><b>RMSProp</b>：<br>' +
-      '<span style="color:var(--muted)">痛点</span>：AdaGrad 的历史量只增不减，走到后期分母越来越大，步子小到几乎不动，提前「走死」。<br>' +
-      '<b>办法</b>：把「累加」改成「移动平均」，让久远的梯度慢慢淡出，有效步子能恢复。</div></div>' +
-      '<div class="st"><div class="n">6</div><div class="c"><b>Adam = 动量 + RMSProp</b>：<br>' +
-      '既用移动平均记住<b>方向</b>（像动量），又用移动平均记住<b>尺度的平方</b>（像 RMSProp）。<br>' +
-      '<span style="color:var(--muted)">额外要处理</span>：两个量都从 0 开始，前几步会被这个 0 拖小，所以要「偏差修正」。</div></div>' +
-      '</div>';
-    root.appendChild(ex4);
+      '<h4>Adam：三个式子，每一块砖为什么这么摆</h4>' +
+      '<p>Adam 干的事，一句话说完：<b>一边记住"往哪个方向走"，一边记住"该走多大步"，两个都用滑动平均来算。</b></p>' +
+      '<p>它的三个式子长这样（先看整体，下面逐个拆）：</p>' +
+      MB('m_t = \\beta_1 m_{t-1} + (1-\\beta_1)\\,g_t') +
+      MB('v_t = \\beta_2 v_{t-1} + (1-\\beta_2)\\,g_t^{2}') +
+      MB('\\theta_t = \\theta_{t-1} - \\eta\\,\\frac{\\hat m_t}{\\sqrt{\\hat v_t}+\\epsilon}') +
+      '<p>其中带帽子的两个是"修正后"的值：' +
+      MI('\\hat m_t=\\dfrac{m_t}{1-\\beta_1^{\\,t}}') + '、' +
+      MI('\\hat v_t=\\dfrac{v_t}{1-\\beta_2^{\\,t}}') + '</p>' +
 
-    var ex5 = el("div", "explain");
-    ex5.innerHTML =
-      '<h4>Adam 的三个式子，每一项为什么长这样</h4>' +
-      '<div class="deriv">mₜ = β₁·mₜ₋₁ + (1 − β₁)·gₜ      ← 方向的移动平均\n' +
-      'vₜ = β₂·vₜ₋₁ + (1 − β₂)·gₜ²     ← 平方的移动平均\n' +
-      'θ  = θ − η · m̂ / (√v̂ + ε)       ← 修正之后才用来更新</div>' +
-      '<p><b>问题一：为什么有个 (1 − β)？</b>因为它要保证「加权平均」的权重加起来等于 1。展开看最清楚（取 β=0.5）：</p>' +
-      '<div class="deriv">m₁ = 0.5·m₀ + 0.5·g₁\n' +
-      'm₂ = 0.5·m₁ + 0.5·g₂ = 0.25·g₁ + 0.5·g₂\n' +
-      '  注：若直接写 β·m + g（漏了 1−β），权重和会变成 1.5，越滚越大</div>' +
-      '<p>加了 (1−β) 之后：越近的梯度权重越大、越远越小，且总权重恒为 1。这就是<span class="term">指数移动平均</span>。</p>' +
-      '<p><b>问题二：为什么 m 和 v 要分开记两个量？</b>因为它们回答两个不同的问题：</p>' +
-      '<div class="deriv">m 记「往哪个方向」  ← 带正负号，来回摆动会互相抵消\n' +
-      'v 记「坡度有多大」  ← 平方过，只剩大小，不会抵消</div>' +
-      '<p>你既要知道往哪走（方向），又要知道该走多大步（尺度）。缺一个都不行。</p>' +
-      '<p><b>问题三：偏差修正为什么是除以 (1 − β<sup>t</sup>)？</b></p>' +
-      '<p>因为 m、v 的初值是 0，第一步就被这个 0 稀释了：</p>' +
-      '<div class="deriv">m₁ = β·0 + (1−β)·g₁ = (1−β)·g₁</div>' +
-      '<p>真实梯度是 g₁，但 m₁ 只有它的 (1−β) 倍。如果 β=0.9，m₁ 只剩真值的 10% —— <b>步子被压小 10 倍，前几步几乎原地不动。</b></p>' +
-      '<p>修正办法就是<b>除回去</b>。因为第 t 步零初值造成的稀释恰好是 (1−β<sup>t</sup>)：</p>' +
-      '<div class="deriv">m̂ₜ = mₜ / (1 − β₁ᵗ)\n\n' +
-      't=1：1 − 0.9¹ = 0.1    → m̂ = m/0.1，放大 10 倍，正好还原真值\n' +
-      't=2：1 − 0.9² = 0.19   → 修正系数随 t 增大趋近 1，影响越来越小</div>' +
-      '<div class="why"><span class="lbl">为什么手算题专门爱考这里</span>' +
-      '因为它考的是「你知不知道修正值<b>只用于当轮更新</b>」。m̂、v̂ 是为这一步临时算出来的，' +
-      '<b>不写回</b> m、v。下一步递推必须用原始的 mₜ、vₜ，否则后面全错。</div>';
-    root.appendChild(ex5);
+      '<p style="margin-top:16px"><b>第一问：第一行里那个 (1 − β) 是干嘛的？</b></p>' +
+      '<p>它保证"权重加起来正好等于 1"。取 β = 0.5 展开两行就看见了：</p>' +
+      MB('m_1 = 0.5\\,m_0 + 0.5\\,g_1 \\\\[2pt] m_2 = 0.5\\,m_1 + 0.5\\,g_2 = 0.25\\,g_1 + 0.5\\,g_2 + 0.25\\,m_0') +
+      '<p>三个权重 0.25 + 0.5 + 0.25 = 1，正好。而且<b>越近的梯度权重越大</b>（g₂ 占 0.5，g₁ 只占 0.25）。</p>' +
+      '<div class="why"><span class="lbl">如果偷懒写成 m = β·m + g 会怎样</span>' +
+      '每一步都把完整的 g 加进去，权重和会变成 ' + MI('\\beta + 1') + '（β=0.5 时是 1.5）。' +
+      '下一年再套一次就是 1.5 倍再 1.5 倍……<b>m 会指数级膨胀</b>，几步之后就变成天文数字，训练直接崩。<br>' +
+      '所以这个 (1−β) 不是装饰，它是"平均"和"累加"的分界线。</div>' +
+
+      '<p style="margin-top:16px"><b>第二问：为什么要用 m 和 v 两个量，不能只用一个吗？</b></p>' +
+      '<p>因为<b>方向和大小是两件不同的事</b>，一个数表达不了两件事：</p>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">m</div><div class="c"><b>记方向</b>。它保留正负号。<br>' +
+      '如果梯度一会儿 +3 一会儿 −3 地来回摆，负号会把它们<b>互相抵消</b>，m 就接近 0 —— ' +
+      '意思是"这里在反复横跳，别急着往哪边走"。这正是动量想要的效果。</div></div>' +
+      '<div class="st"><div class="n">v</div><div class="c"><b>记大小</b>。它先把梯度<b>平方</b>再平均，' +
+      '所以正负号被抹掉了，只剩"这里陡不陡"。<br>' +
+      '平方的另一个作用是<b>放大差异</b>：梯度 10 和梯度 1，平方后是 100 和 1，' +
+      '陡的地方会被记住得更明显，于是步子会被压得更狠。</div></div>' +
+      '</div>' +
+      '<p>最后更新时 <b>m 当分子（方向）、' + MI('\\sqrt{v}') + ' 当分母（放大步子的倒数）</b>：' +
+      '陡的地方步子自动变小，平的地方步子自动变大。这就是 Adam 的"自适应"。</p>' +
+
+      '<p style="margin-top:16px"><b>第三问：偏差修正那个 ' + MI('1-\\beta^t') + ' 是怎么来的？</b></p>' +
+      '<p>这是三个问题里最难想通、也最爱考的一个。根源就一句话：<b>m 和 v 的初值都是 0。</b></p>' +
+      '<p>第一步的时候，m 还没攒下任何历史，只有那半个新梯度：</p>' +
+      MB('m_1 = \\beta\\cdot \\underbrace{m_0}_{=0} + (1-\\beta)\\,g_1 = (1-\\beta)\\,g_1') +
+      '<p>真实的梯度是 g₁，但 m₁ 只有它的 (1−β) 倍。如果 β = 0.9，' +
+      '<b>m₁ 只剩真值的 10%</b>——步子会被压小整整 10 倍，头几步几乎原地踏步。</p>' +
+      '<p>修法很直接：<b>既然被缩小了 10 倍，那就除回去 10 倍。</b>' +
+      '而第 t 步被缩小的倍率恰好是 ' + MI('1-\\beta^{\\,t}') + '，这个数可以推出来（把 m 展开成加权和就能看到），考试直接用就行：</p>' +
+      MB('\\hat m_t = \\frac{m_t}{1-\\beta_1^{\\,t}} \\qquad \\hat v_t = \\frac{v_t}{1-\\beta_2^{\\,t}}') +
+      '<p>代入 t = 1、β₁ = 0.9：分母 ' + MI('1-0.9=0.1') + '，所以 m̂ = m/0.1 = 放大 10 倍，正好还原成真值。<br>' +
+      't = 2 时分母 ' + MI('1-0.9^2=0.19') + '；t 越大，分母越接近 1，修正的影响就自动消失了。</p>' +
+      '<div class="why"><span class="lbl">手算题最容易被扣分的一点</span>' +
+      'm̂ 和 v̂ 是<b>为了这一步更新临时算出来的</b>，算完就丢。<br>' +
+      '<b>下一步递推时要用原始的 m、v，不能用修正后的 m̂、v̂。</b><br>' +
+      '如果你把修正值写回变量，第 2 步就会把已经放大过的数再放大一次，后面全崩。' +
+      '这也是为什么手算题要求你把"原始状态"和"修正状态"两列都写出来。</div>';
+    root.appendChild(ex4);
 
     /* 公式与两种特例 */
     root.appendChild(el("h3", null, "六种方法一张辨认表"));
@@ -1246,46 +1372,153 @@ SECTIONS.push({
       '<div class="note"><b>三步辨认：</b>只累计 g² → AdaGrad；对 g² 做指数移动平均 → RMSProp；同时平滑 g 和 g² 并做初值修正 → Adam。</div>';
     root.appendChild(tb);
 
-    root.appendChild(el("h3", null, "Adam 两步手算（模拟卷第 4 题原题）"));
+    root.appendChild(el("h3", null, "例题 · Adam 两步更新（模拟卷第 4 题）"));
     var cA = el("div", "card");
     cA.innerHTML =
-      '<p>条件：w₀=1，m₀=v₀=0，η=0.1，β₁=β₂=0.5，梯度 g₁=−2、g₂=4，忽略 ε。</p>' +
-      '<div class="formula">第 1 步：\n' +
-      '  m₁ = 0.5·0 + 0.5·(−2) = −1\n' +
-      '  v₁ = 0.5·0 + 0.5·4     = 2\n' +
-      '  1−β₁ = 0.5 → m̂₁ = −1/0.5 = −2\n' +
-      '  1−β₂ = 0.5 → v̂₁ =  2/0.5 = 4\n' +
-      '  w₁ = 1 − 0.1·(−2)/√4 = 1 + 0.1 = 1.1</div>' +
-      '<div class="formula">第 2 步（从原始 m₁、v₁ 递推！）：\n' +
-      '  m₂ = 0.5·(−1) + 0.5·4 = 1.5\n' +
-      '  v₂ = 0.5·2 + 0.5·16   = 9\n' +
-      '  1−β₁² = 0.75 → m̂₂ = 1.5/0.75 = 2\n' +
-      '  1−β₂² = 0.75 → v̂₂ = 9/0.75  = 12\n' +
-      '  w₂ = 1.1 − 0.1·2/√12 ≈ 1.0423</div>' +
-      '<div class="note danger"><b>最大的坑：</b>第 2 步必须拿<b>原始的</b> m₁=−0.2… 不，本例是 m₁=−1、v₁=2 去递推，<b>不能用修正后的 −2 和 4</b>。修正值只用于当轮参数更新，不写回状态。</div>' +
-      '<div class="note ok"><b>给分要点：</b>同时写出两组数——原始状态（m、v）和修正状态（m̂、v̂）。只写一组会扣分。</div>';
+      '<div class="note">题目：' + MI('w_0=1') + '、' + MI('m_0=v_0=0') + '、' + MI('\\eta=0.1') +
+      '、' + MI('\\beta_1=\\beta_2=0.5') + '，两步梯度分别是 ' + MI('g_1=-2') + ' 和 ' + MI('g_2=4') +
+      '，忽略 ' + MI('\\epsilon') + '。求两步之后 w 是多少。<br>' +
+      '<b>下面每一步都是：先摆公式 → 代数字 → 说清这一步到底在干嘛。</b></div>' +
+      STEP('第 1 步　算方向的平均量 m₁',
+        'm_1 = \\beta_1 m_0 + (1-\\beta_1)\\,g_1 = 0.5\\times 0 + 0.5\\times(-2) = -1',
+        'm 是"方向的滑动平均"。m₀ = 0（还没开始，没有历史），所以这一步只有新梯度 g₁ = −2 的一半进来。<br>' +
+        '结果 <b>−1 是负数</b>，负号的意思是：往右是下坡，参数该往右走。',
+        'm₁ = −1') +
+      STEP('第 2 步　算坡度大小的平均量 v₁',
+        'v_1 = \\beta_2 v_0 + (1-\\beta_2)\\,g_1^{2} = 0.5\\times 0 + 0.5\\times 4 = 2',
+        '注意这里用的是 g 的<b>平方</b>。g₁ = −2，平方是 4，<b>负号没了</b>。<br>' +
+        '因为 v 只回答"这里陡不陡"，不关心往哪边陡。方向交给 m 去管。',
+        'v₁ = 2') +
+      STEP('第 3 步　修正 m₁ → m̂₁',
+        '\\hat m_1 = \\frac{m_1}{1-\\beta_1^{\\,1}} = \\frac{-1}{1-0.5} = \\frac{-1}{0.5} = -2',
+        '分母 1 − 0.5¹ = 0.5。为什么除？因为 m₁ 被"零初值"稀释掉了一半，除回去正好还原。<br>' +
+        '<b>自查：修正后 m̂₁ = −2，恰好等于真实梯度 g₁ = −2 —— 说明修正对了。</b>' +
+        '这就是判断偏差修正有没有算错的最快办法。',
+        'm̂₁ = −2') +
+      STEP('第 4 步　修正 v₁ → v̂₁',
+        '\\hat v_1 = \\frac{v_1}{1-\\beta_2^{\\,1}} = \\frac{2}{0.5} = 4',
+        '同样的道理。而且也可以自查：v̂₁ = 4 恰好等于 ' + MI('g_1^2=(-2)^2=4') + '，还原成功。',
+        'v̂₁ = 4') +
+      STEP('第 5 步　第一次更新 w',
+        'w_1 = w_0 - \\eta\\,\\frac{\\hat m_1}{\\sqrt{\\hat v_1}} = 1 - 0.1\\times\\frac{-2}{\\sqrt{4}} = 1 - 0.1\\times(-1) = 1.1',
+        '顺着算：' + MI('\\sqrt 4 = 2') + '，所以 ' + MI('-2/2=-1') + '；再乘 η：' + MI('0.1\\times(-1)=-0.1') + '。<br>' +
+        '公式前面是<b>减号</b>，减一个负数等于加：' + MI('1-(-0.1)=1.1') + '。<br>' +
+        'w 变大了（往右走了），和"负梯度意味着往右下坡"完全一致。',
+        'w₁ = 1.1') +
+      STEP('第 6 步　算第二步的 m₂（关键陷阱在这）',
+        'm_2 = \\beta_1 m_1 + (1-\\beta_1)\\,g_2 = 0.5\\times(-1) + 0.5\\times 4 = 1.5',
+        '【最容易错的一步】这里的 ' + MI('m_1') + ' 必须用<b>原始值 −1</b>，<b>不能用修正后的 −2</b>。<br>' +
+        '假如用了 −2，就会算出 ' + MI('0.5\\times(-2)+0.5\\times 4 = 1') + '，和正确答案 1.5 差很远，后面全崩。<br>' +
+        '<b>记住：修正值只服务于当轮更新，不进下一次递推。</b>',
+        'm₂ = 1.5') +
+      STEP('第 7 步　算第二步的 v₂',
+        'v_2 = \\beta_2 v_1 + (1-\\beta_2)\\,g_2^{2} = 0.5\\times 2 + 0.5\\times 16 = 9',
+        '同样用原始 ' + MI('v_1=2') + '，不用修正后的 4。<br>' +
+        '这一项 ' + MI('g_2^2=16') + ' 明显比上一步的 4 大，说明这个方向的坡度变陡了，' +
+        '于是 v 涨得很快（2 → 9），后面步长就会被压小。<b>这就是自适应的来源。</b>',
+        'v₂ = 9') +
+      STEP('第 8 步　修正 m₂、v₂',
+        '\\hat m_2 = \\frac{1.5}{1-0.5^{2}} = \\frac{1.5}{0.75} = 2,\\qquad \\hat v_2 = \\frac{9}{0.75} = 12',
+        '第 2 步的分母变成 ' + MI('1-0.5^2 = 0.75') + '。<br>' +
+        '对比第 1 步的分母 0.5，可以看到<b>分母在变大、趋近于 1</b>，' +
+        '说明修正的力度在自动减弱——因为零初值的影响本来就只在前几步明显。',
+        'm̂₂ = 2，v̂₂ = 12') +
+      STEP('第 9 步　第二次更新 w',
+        'w_2 = 1.1 - 0.1\\times\\frac{2}{\\sqrt{12}} \\approx 1.1 - 0.0577 \\approx 1.0423',
+        '顺着算：' + MI('\\sqrt{12}\\approx 3.464') + '，' + MI('2/3.464\\approx 0.577') + '，乘 0.1 得 0.0577。<br>' +
+        '这次梯度是<b>正的</b>，所以 w 变小了（往左退了一点）。<br>' +
+        '注意这一步的步长（0.0577）比第 1 步（0.1）小——因为坡度变陡，Adam 自动收小了步子。',
+        'w₂ ≈ 1.0423') +
+      '<div class="note ok"><b>给分要点：</b>这道题一定要写出<b>两组数</b>——原始状态（m、v）和修正状态（m̂、v̂）。' +
+      '只写一组会被认为没掌握偏差修正。</div>';
     root.appendChild(cA);
 
-    root.appendChild(el("h3", null, "动量的两步（最干净的一种推导）"));
+    root.appendChild(el("h3", null, "例题 · 动量为什么「记得住方向」"));
     var cM = el("div", "card");
-    cM.innerHTML = '<p>w₀=1，m₀=0，β=0.5，η=0.1，梯度依次 −2、+2。</p>' +
-      '<div class="formula">m₁ = 0.5·0 + 0.5·(−2) = −1　→　w₁ = 1 − 0.1·(−1) = 1.1\n' +
-      'm₂ = 0.5·(−1) + 0.5·2  = 0.5　→　w₂ = 1.1 − 0.1·0.5 = 1.05</div>' +
-      '<div class="note">第 2 步梯度已经是正的（+2，本该往左走），但上一步攒下的 −1 惯性把合力拉成 +0.5，' +
-      '所以参数<b>继续往左移</b>（1.1 → 1.05），只是退得少了。这就是「惯性让方向平滑」。</div>';
+    cM.innerHTML =
+      '<div class="note">题目：' + MI('w_0=1') + '、' + MI('m_0=0') + '、' + MI('\\beta=0.5') + '、' + MI('\\eta=0.1') +
+      '，梯度依次是 <b>−2</b> 和 <b>+2</b>（注意第二步梯度反向了）。</div>' +
+      STEP('第 1 步　累积动量并更新',
+        'm_1 = \\beta m_0 + (1-\\beta)g_1 = 0.5\\times 0 + 0.5\\times(-2) = -1',
+        '和 Adam 的 m 是一回事：方向的滑动平均。m₀=0，所以第一步就是 g₁ 的一半。',
+        '') +
+      STEP('　接着用 m 走一步',
+        'w_1 = w_0 - \\eta\\, m_1 = 1 - 0.1\\times(-1) = 1.1',
+        '注意动量法更新时用的是 ' + MI('m') + '，<b>不是原始的 g</b>。这是它和普通 GD 的唯一区别。',
+        'w₁ = 1.1') +
+      STEP('第 2 步　梯度反向了，动量会怎么反应',
+        'm_2 = 0.5\\times(-1) + 0.5\\times(+2) = 0.5',
+        '这一步是理解动量的关键。' +
+        '当前梯度 g₂ = +2 是<b>正的</b>（按理该往左走），上一步攒下的 m₁ = −1 是<b>负的</b>（惯性推着往右）。<br>' +
+        '两者相加：' + MI('(-0.5) + (+1) = +0.5') + ' —— <b>合力还是正的，但被惯性抵掉了大半。</b>',
+        'm₂ = +0.5（只剩原来一半的力度）') +
+      STEP('　继续更新',
+        'w_2 = 1.1 - 0.1\\times 0.5 = 1.05',
+        '结果是 w 从 1.1 变成 1.05，<b>继续往右移了一点点</b>。<br>' +
+        '为什么？因为惯性还没被消耗完。如果换成普通 GD，第 2 步会直接 ' + MI('1.1-0.1\\times 2 = 0.9') +
+        '，一下退回去很多。<br>' +
+        '<b>动量干的事就是：不轻易被一次反向的梯度带跑，方向更平滑。</b>',
+        'w₂ = 1.05') +
+      '<div class="analogy"><span class="lbl">把这两步连起来看</span>' +
+      '普通 GD 在两次反向梯度下会 1 → 1.1 → 0.9，来回折腾；' +
+      '动量则是 1 → 1.1 → 1.05，<b>稳步往前走</b>。<br>' +
+      '这就是"滚下山的球有惯性"这句话在数字上的样子。</div>';
     root.appendChild(cM);
 
-    root.appendChild(el("h3", null, "AdaGrad 与 RMSProp 的分母对比"));
+    root.appendChild(el("h3", null, "例题 · AdaGrad 与 RMSProp 的分母对比"));
     var cG = el("div", "card");
-    cG.innerHTML = '<p>从 r₀=0 开始，两次梯度 4、1，w₀=1，η=0.1，忽略 ε。</p>' +
-      '<div class="formula">AdaGrad：r₁=16, r₂=17\n' +
-      '  w₁ = 1 − 0.1·4/√16 = 0.9\n' +
-      '  w₂ = 0.9 − 0.1·1/√17 ≈ 0.8757\n\n' +
-      'RMSProp（ρ=0.5）：r₁=8, r₂=4.5\n' +
-      '  w₁ = 1 − 0.1·4/√8 ≈ 0.8586\n' +
-      '  w₂ = 0.8586 − 0.1·1/√4.5 ≈ 0.8114</div>' +
-      '<div class="note warn"><b>关键细节：</b>两种方法的分母都要用<b>该步刚刚更新过的 r</b>，不是上一步的 r。这是最容易算错的地方。</div>' +
-      '<div class="note">AdaGrad 的 r 只增不减 → 有效学习率越来越小；RMSProp 的 r 能回落 → 有效学习率可以回升。</div>';
+    cG.innerHTML =
+      '<div class="note">题目：' + MI('r_0=0') + '、' + MI('w_0=1') + '、' + MI('\\eta=0.1') +
+      '，两次梯度依次是 <b>4</b> 和 <b>1</b>（第二次明显变小），忽略 ' + MI('\\epsilon') + '。</div>' +
+      '<p style="margin:14px 0 6px;font-weight:600">先看 AdaGrad：分母一路变大</p>' +
+      STEP('第 1 步　把这次的梯度平方累加进 r',
+        'r_1 = r_0 + g_1^{2} = 0 + 16 = 16',
+        'AdaGrad 的记忆方式是"全部加起来"，来多少记多少。',
+        'r₁ = 16') +
+      STEP('　用 r₁ 更新 w',
+        'w_1 = 1 - 0.1\\times\\frac{4}{\\sqrt{16}} = 1 - 0.1\\times 1 = 0.9',
+        '分母是 ' + MI('\\sqrt{16}=4') + '，所以 ' + MI('4/4=1') + ' —— 梯度被分母<b>正好抵消成 1</b>。' +
+        '这就是"自适应"：梯度大，分母也大，步子就被标准化了。',
+        'w₁ = 0.9') +
+      STEP('第 2 步　继续累加',
+        'r_2 = r_1 + g_2^{2} = 16 + 1 = 17',
+        '这次梯度只有 1，平方也是 1。<b>但 r 只能往上走，17 回不到 16。</b>',
+        'r₂ = 17') +
+      STEP('　用 r₂ 更新 w',
+        'w_2 = 0.9 - 0.1\\times\\frac{1}{\\sqrt{17}} \\approx 0.9 - 0.0243 \\approx 0.8757',
+        '分母 ' + MI('\\sqrt{17}\\approx 4.123') + '。<br>' +
+        '<b>注意问题来了</b>：这次梯度已经小到 1 了，理论上应该走得很轻松，' +
+        '但分母还被上一步那个 16 撑着，所以步子只有 0.0243，非常小。<br>' +
+        '<b>这就是 AdaGrad 的病：历史包袱永远甩不掉，越训练步子越小。</b>',
+        'w₂ ≈ 0.8757') +
+      '<p style="margin:18px 0 6px;font-weight:600">再看 RMSProp：分母能缩回去</p>' +
+      STEP('第 1 步　用"移动平均"记梯度平方',
+        'r_1 = \\rho r_0 + (1-\\rho)g_1^{2} = 0.5\\times 0 + 0.5\\times 16 = 8',
+        '骨架和 AdaGrad 一模一样，只把"直接加"换成"按 ρ 掺着加"。<br>' +
+        '取 ρ=0.5，意思是一半看历史、一半看现在。<b>r₁ 只有 8，比 AdaGrad 的 16 小一半</b>——' +
+        '因为它把"历史是 0"这件事也掺进去了。',
+        'r₁ = 8') +
+      STEP('　用 r₁ 更新 w',
+        'w_1 = 1 - 0.1\\times\\frac{4}{\\sqrt{8}} \\approx 1 - 0.1414 \\approx 0.8586',
+        '分母 ' + MI('\\sqrt 8\\approx 2.828') + '，比 AdaGrad 的 4 小，所以这一步迈得更大（0.141 vs 0.1）。',
+        'w₁ ≈ 0.8586') +
+      STEP('第 2 步　关键看 r 能不能降下来',
+        'r_2 = 0.5\\times 8 + 0.5\\times 1 = 4 + 0.5 = 4.5',
+        '<b>这里是和 AdaGrad 的核心区别</b>：r 从 8 <b>降到了 4.5</b>。<br>' +
+        '因为老的历史（8）被打了对折，新的（1）也只占一半，加权平均下来就小了。<br>' +
+        '<b>于是有效步子能够回升，不会像 AdaGrad 那样越走越僵。</b>',
+        'r₂ = 4.5（比 r₁ 小了）') +
+      STEP('　用 r₂ 更新 w',
+        'w_2 = 0.8586 - 0.1\\times\\frac{1}{\\sqrt{4.5}} \\approx 0.8586 - 0.0471 \\approx 0.8114',
+        '分母 ' + MI('\\sqrt{4.5}\\approx 2.121') + '。尽管梯度更小了（1），但步子（0.0471）反而比 AdaGrad 的 0.0243 大，' +
+        '因为分母也跟着降下来了。',
+        'w₂ ≈ 0.8114') +
+      '<div class="why"><span class="lbl">两种方法结果对比 + 必踩的坑</span>' +
+      '同样走两步：<br>' +
+      '· AdaGrad：w = 1 → <b>0.9</b> → <b>0.8757</b>（第二步几乎挪不动）<br>' +
+      '· RMSProp：w = 1 → <b>0.8586</b> → <b>0.8114</b>（两步都走得开）<br><br>' +
+      '<b>手算时最容易错的地方：</b>分母必须用<b>该步刚刚更新过的 r</b>，不能沿用上一步的 r。<br>' +
+      '比如第 2 步要先用新的 r₂ 算分母，再代进更新式。用错 r，整道题的数字全不对。</div>';
     root.appendChild(cG);
   }
 });
@@ -1491,12 +1724,19 @@ SECTIONS.push({
     ex5c.innerHTML =
       '<h4>params = (Kh × Kw × Cin + 1) × Cout，每一项从哪来</h4>' +
       '<p>把一个卷积层拆成「一个核长什么样」和「有几个这样的核」两件事看：</p>' +
-      '<div class="deriv">params = ( Kh × Kw × Cin + 1 ) × Cout\n\n' +
-      '拆开读：\n' +
-      '  Kh × Kw   一个核在空间上的格子数\n' +
-      '  × Cin     它要覆盖全部输入通道，所以要再乘通道数\n' +
-      '  + 1       每个核配一个偏置\n' +
-      '  × Cout    有几个这样的核（就等于输出通道数）</div>' +
+      MB('\\text{params} = \\big(K_h K_w C_{in} + 1\\big)\\times C_{out}') +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c">' + MI('K_h\\times K_w') +
+      '：一个核在空间上的格子数（比如 3×3 就是 9）。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c">' + MI('\\times C_{in}') +
+      '：<b>最容易漏的一项</b>。一个核要同时和所有输入通道打交道。RGB 图有 3 个通道，' +
+      '那这个核实际上不是一张 3×3 的薄片，而是 <b>3×3×3 的三层薄片</b>——每层负责一个输入通道。<br>' +
+      '<span style="color:var(--muted)">所以：核的通道数永远等于输入通道数，这不是巧合，是定义。</span></div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c">' + MI('+1') + '：每个核配一个偏置。</div></div>' +
+      '<div class="st"><div class="n">4</div><div class="c">' + MI('\\times C_{out}') +
+      '：输出多少个通道，就意味着有<b>多少个不同的核</b>。因为一个核只产出一张响应图，' +
+      '要 96 张就得有 96 个核。<b>「核的个数」和「输出通道数」是同一个数。</b></div></div>' +
+      '</div>' +
       '<div class="steps">' +
       '<div class="st"><div class="n">1</div><div class="c"><b>Kh × Kw</b>：一个核在空间上是 Kh 行 Kw 列，所以有这么多格。</div></div>' +
       '<div class="st"><div class="n">2</div><div class="c"><b>× Cin</b>：这是最容易被漏的一项。<br>' +
@@ -1578,26 +1818,42 @@ SECTIONS.push({
 
     var ex = el("div", "explain");
     ex.innerHTML =
-      '<h4>卷积到底在干什么？先别管公式</h4>' +
-      '<p>卷积核是一个<b>很小的「图案探测器」</b>。你把它在图上滑来滑去，每到一处就问一句：</p>' +
-      '<p style="text-align:center; font-size:14px"><b>「这一小块地方，长得像不像我要找的这个图案？」</b></p>' +
-      '<p>怎么回答？把这一小块和核<b>对应位置的数乘起来再相加</b>。像的地方得分高，不像的地方得分低，甚至是负数。' +
-      '于是滑完一整张图，你就得到了一张「哪里像这个图案」的<b>响应图</b>——这就是输出的那 4 个数字在说的事。</p>' +
-      '<div class="analogy"><span class="lbl">打个比方</span>' +
-      '你把一张半透明的模板（卷积核）盖在照片上，一格一格挪。<br>' +
-      '每挪到一处，就看模板上的刻度和照片对应位置的明暗有多吻合，记一个分。<br>' +
-      '挪完全图，得到一张「吻合度地图」。<b>这一整套动作就叫一次卷积。</b></div>' +
-      '<p><b>为什么核要「共享」？</b>同一个核在一张图上滑了 4 次（或几千次），用的是<b>同一组权重</b>。原因有两条：</p>' +
+      '<h4>先动手算一次，比讲十句定义都管用</h4>' +
+      '<p>下面左边是图片里的一小块（2 行 2 列），右边是一个「模板」（也就是卷积核，同样 2 行 2 列）：</p>' +
+      MB('\\underbrace{\\begin{pmatrix} 1 & 2 \\\\ 4 & 5 \\end{pmatrix}}_{\\text{图片的一小块}} \\qquad' +
+         '\\underbrace{\\begin{pmatrix} 1 & 0 \\\\ -1 & 2 \\end{pmatrix}}_{\\text{卷积核（模板）}}') +
+      '<p>现在做一个动作：<b>把对应位置的数两两相乘，再把四个结果加起来。</b></p>' +
+      MB('1\\times 1 + 2\\times 0 + 4\\times(-1) + 5\\times 2 = 1 + 0 - 4 + 10 = \\mathbf{7}') +
+      '<p>就这一个数字 <b>7</b>，它代表"这一小块和模板有多像"。</p>' +
+      '<div class="why"><span class="lbl">为什么这个数能代表"像不像"</span>' +
+      '你盯着那个模板看：它在<b>左上角和右下角</b>要正值（1 和 2），在<b>左下角</b>要负值（−1），右上角不要（0）。<br>' +
+      '现在看图片那一小块：左上 1、右下 5，都<b>不小</b>，乘正值贡献了 1 + 10 = 11；' +
+      '左下是 4，乘上负值贡献了 −4。<br>' +
+      '所以结果是 11 − 4 = 7，<b>正的、而且不小</b>——说明"这块图片的明暗分布，和模板想要的样子比较吻合"。' +
+      '如果图片左下角特别亮、左上角特别暗，得出来就会是个负数，表示"完全不像，甚至是反的"。</div>' +
+      '<p>然后呢？把这个模板<b>往右挪一格</b>，框住另外四个数，再做一次同样的乘加，得到第二个数。' +
+      '再挪、再算……直到框完整张图。最后得到的那一小张"分数表"，就是卷积的输出。</p>' +
+      '<div class="analogy"><span class="lbl">所以卷积核到底是什么</span>' +
+      '它就是一个"找特定花纹的小探测头"。<br>' +
+      '你把一张半透明的刻着数字的模板盖在照片上，一格一格挪。每挪一处，就看"这地方的明暗刻度和模板上的刻度有多吻合"，记一个分。' +
+      '挪完全图，得到一张<b>吻合度地图</b>。<br>' +
+      '<b>这一整套"挪 + 乘加"的动作，就叫一次卷积。</b>深度学习自己学出来的模板，' +
+      '可能是"横向边缘"、可能是"某个角"，人看不懂，但机器知道它在找什么。</div>' +
+      '<p><b>为什么同一个模板要反复用（权值共享）？</b>整张图上挪了几百次，用的都是<b>同一组 4 个数</b>。两个理由：</p>' +
       '<div class="steps">' +
-      '<div class="st"><div class="n">1</div><div class="c"><b>省参数。</b>一张 100×100 的图，如果全连接，要 1 万个输入各连一个权重；' +
-      '用 3×3 的核只要 9 个权重就能扫全图。这是卷积能处理图片的根本原因。</div></div>' +
-      '<div class="st"><div class="n">2</div><div class="c"><b>平移不变。</b>猫在左上角和在右下角，都是猫。' +
-      '共享权重意味着「这个探测器不管图里哪个位置都同样有效」，正好符合这个需求。</div></div>' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>参数少得离谱。</b>一张 100×100 的图，' +
+      '若用"每个位置都单独连一套权重"的全连接方式，要 1 万个输入各配一个权重；' +
+      '而一个 3×3 的模板只要 <b>9 个数</b>就能扫遍全图。<b>这就是卷积能处理图片的根本原因。</b></div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>猫在哪都是猫。</b>同一个花纹出现在左上角还是右下角，它都是那个花纹。' +
+      '共享权重意味着"这个探测头不管扫到哪儿都同样有效"——正好就是我们要的。</div></div>' +
       '</div>' +
-      '<div class="why"><span class="lbl">关于「翻转核」这件事，一句话讲清</span>' +
-      '数学课本里卷积的定义是「先把核翻过来，再乘加」。深度学习里<b>不翻</b>，直接乘加，' +
-      '这个动作严格叫<span class="term">互相关（cross-correlation）</span>，但习惯上还是叫卷积。<br>' +
-      '<b>所以：题面写「CNN 卷积」就用原核；明确写「按卷积定义」才翻核。</b>核若中心对称，翻不翻结果一样。</div>';
+      '<div class="why"><span class="lbl">「翻转核」是怎么回事（考试会挖坑）</span>' +
+      '数学课本里，卷积的严格定义是"先把模板<b>转 180°</b>，再乘加"。' +
+      '深度学习里大家偷懒<b>不转</b>，直接乘加——这个动作严格叫<span class="term">互相关 cross-correlation</span>，' +
+      '但习惯上还是喊它卷积。<br>' +
+      '<b>所以判据是看题面用词：</b>写「CNN 卷积」「卷积层」→ 用原模板，不翻；' +
+      '写「按卷积定义」「翻转卷积核」→ 老老实实先转 180°。<br>' +
+      '另外：模板若本身中心对称（比如全是 1），转不转结果一样，这时候纠结没意义。</div>';
     root.appendChild(ex);
 
     var CASES = {
@@ -1844,21 +2100,19 @@ SECTIONS.push({
     ex6b.innerHTML =
       '<h4>为什么求 dX 要「回填累加」，为什么 dX 用核、dK 用输入值</h4>' +
       '<p>这两个问题其实是同一件事的两面。从一个中学生都懂的式子开始看：</p>' +
-      '<div class="deriv">y = x · k\n\n' +
-      '对 x 求导 → 得到 k      （局部导数是 k）\n' +
-      '对 k 求导 → 得到 x      （局部导数是 x）</div>' +
+      MB('y = x \\cdot k \\quad\\Longrightarrow\\quad \\frac{\\partial y}{\\partial x}=k,\\;\\; \\frac{\\partial y}{\\partial k}=x') +
       '<p>看到没？<b>相乘的两个数互相是对方的导数。</b>卷积就是一大堆相乘再相加，所以这条规则直接搬过来：</p>' +
-      '<div class="deriv">求 dX 时：局部导数 = 卷积核里的权重 K\n' +
-      '求 dK 时：局部导数 = 窗口里的输入值 X</div>' +
+      MB('\\text{求 } dX \\text{ 时：局部导数} = K \\qquad \\text{求 } dK \\text{ 时：局部导数} = X') +
       '<p>就这么简单。<b>dX 拿核权重乘梯度，dK 拿输入值乘梯度</b>——不是两条要背的规则，是同一句话。</p>' +
       '<p><b>那「回填累加」又是怎么回事？</b></p>' +
       '<p>因为前向时，<b>输入里的同一个格子被好几个输出格反复用到了</b>。看中间那个格子，它同时落在左上、右上、左下、右下四个窗口里。</p>' +
       '<p>反向时，这四个输出格都想对「改它」这件事发表意见，各自送来一份梯度。' +
       '按链式法则，影晌要<b>全部加起来</b>，不能只取最后一份：</p>' +
-      '<div class="deriv">dL/dX(中央) = 来自左上窗的贡献\n' +
-      '           + 来自右上窗的贡献\n' +
-      '           + 来自左下窗的贡献\n' +
-      '           + 来自右下窗的贡献</div>' +
+      MB('\\frac{\\partial L}{\\partial X_{\\text{中央}}} = ' +
+         '\\underbrace{\\frac{\\partial L}{\\partial Y_{11}}\\cdot K_{22}}_{\\text{左上窗}} + ' +
+         '\\underbrace{\\frac{\\partial L}{\\partial Y_{12}}\\cdot K_{21}}_{\\text{右上窗}} + ' +
+         '\\underbrace{\\frac{\\partial L}{\\partial Y_{21}}\\cdot K_{12}}_{\\text{左下窗}} + ' +
+         '\\underbrace{\\frac{\\partial L}{\\partial Y_{22}}\\cdot K_{11}}_{\\text{右下窗}}') +
       '<div class="analogy"><span class="lbl">打个比方</span>' +
       '四个人共同出资买了一件东西（输入的那个格子被四次用到）。' +
       '现在要算「这件东西总共花了多少」，得把四份出资<b>加在一起</b>，不能只看最后一个掏钱的人。<br>' +
@@ -1872,7 +2126,7 @@ SECTIONS.push({
     var ex6c = el("div", "explain");
     ex6c.innerHTML =
       '<h4>输出尺寸那个公式，为什么要向下取整</h4>' +
-      '<div class="deriv">Lout = ⌊(Lin + 2P − K) / S⌋ + 1</div>' +
+      MB('L_{out} = \\left\\lfloor \\frac{L_{in} + 2P - K}{S} \\right\\rfloor + 1') +
       '<p>一项一项读：</p>' +
       '<div class="steps">' +
       '<div class="st"><div class="n">1</div><div class="c"><b>Lin + 2P</b>：先在左右各补 P 圈（通常是补 0）。' +
@@ -1903,44 +2157,64 @@ SECTIONS.push({
     });
     function refreshSz(){
       var Lo = outDim(sz.Lin, sz.K, sz.S, sz.P);
-      szOut.innerHTML = '<div class="formula">Lout = ⌊(' + sz.Lin + " + 2×" + sz.P + " − " + sz.K + ")/" + sz.S + "⌋ + 1 = ⌊" +
-        ((sz.Lin + 2 * sz.P - sz.K) / sz.S).toFixed(2) + "⌋ + 1 = <b>" + Lo + "</b></div>" +
-        '<div class="note">向下取整的含义：最后那个不完整的窗口<b>直接舍去</b>。高度和宽度要分别算。</div>' +
-        '<div class="formula">AlexNet 首层：输入 227×227×3，96 个 11×11 核，S=4，P=0\n' +
-        '  单边 = (227−11)/4+1 = 55　→ 输出 55×55×96\n' +
-        '  每核 = 11×11×3+1 = 364　→ 总参数 364×96 = <b>34944</b></div>' +
-        '<div class="formula">多通道：params = (Kh·Kw·Cin + 1)·Cout\n' +
-        '  32×32×3 用 6 个 5×5 核（S=1,P=0）\n' +
-        '  输出 (32−5)/1+1 = 28 → 28×28×6\n' +
-        '  参数 (5×5×3+1)×6 = 76×6 = <b>456</b></div>' +
-        '<div class="note warn"><b>权值共享：</b>每个核扫描 28×28 个位置，但复用同一组 76 个权重。这就是卷积比全连接省参数的根本原因。</div>';
+      szOut.innerHTML =
+        MB('L_{out} = \\left\\lfloor \\frac{L_{in} + 2P - K}{S} \\right\\rfloor + 1 ' +
+           '= \\left\\lfloor \\frac{' + sz.Lin + ' + 2\\times ' + sz.P + ' - ' + sz.K + '}{' + sz.S + '} \\right\\rfloor + 1 ' +
+           '= \\mathbf{' + Lo + '}') +
+        '<div class="note">看到那个 <b>⌊ ⌋</b>（向下取整）了吗？它的意思是：最后剩下那一截<b>不够一个完整窗口的，直接扔掉</b>。' +
+        '高度和宽度要分别算，输入不是正方形时两个方向的答案不一样。</div>' +
+        '<p style="margin:14px 0 6px;font-weight:600">走一遍 AlexNet 首层</p>' +
+        MB('L_{in}=227,\\; K=11,\\; S=4,\\; P=0 \\;\\Rightarrow\\; ' +
+           '\\left\\lfloor\\frac{227-11}{4}\\right\\rfloor+1 = 54+1 = 55') +
+        '<p>所以输出是 55×55×96（96 是因为有 96 个不同的核）。参数量这样算：</p>' +
+        MB('\\underbrace{11\\times 11\\times 3}_{\\text{一个核}} + \\underbrace{1}_{\\text{偏置}} = 364 ' +
+           '\\quad\\Rightarrow\\quad 364\\times 96 = \\mathbf{34{,}944}') +
+        '<p style="margin:14px 0 6px;font-weight:600">再走一遍 32×32×3、6 个 5×5 核</p>' +
+        MB('L_{out} = \\left\\lfloor\\frac{32-5}{1}\\right\\rfloor+1 = 28 \\;\\Rightarrow\\; 28\\times 28\\times 6') +
+        MB('(5\\times 5\\times 3 + 1)\\times 6 = 76\\times 6 = \\mathbf{456}') +
+        '<div class="note warn"><b>为什么才 456 个参数就能处理整张图？</b>' +
+        '因为每个核在 28×28 = 784 个位置上都用了<b>同一组 76 个权重</b>。' +
+        '如果换成"每个位置单独连一套"的全连接，参数量是 784×6×3072 的量级，差了四个数量级。<b>这就是权值共享的威力。</b></div>';
     }
     refreshSz(); root.appendChild(cc);
 
     /* ---------- 数学卷积 vs 互相关 ---------- */
     root.appendChild(el("h3", null, "数学卷积 vs 互相关（陷阱题）"));
     var cm = el("div", "card");
-    cm.innerHTML = '<p>CNN 里说的「卷积」实际上是<b>互相关</b>：直接把核盖上去乘加，<b>不翻核</b>。</p>' +
-      '<p>题面明确写「按卷积定义」时，要先把核上下翻转再左右翻转（等于转 180°）。</p>' +
-      '<div class="formula">原核 K：      翻转后：\n  1   0          2  -1\n -1   2          0   1</div>' +
-      '<div class="formula">同一左上窗口 (1,2 / 4,5)：\n' +
-      '  互相关：1×1 + 2×0 + 4×(−1) + 5×2 = <b>7</b>\n' +
-      '  数学卷积：1×2 + 2×(−1) + 4×0 + 5×1 = <b>5</b></div>' +
-      '<div class="note"><b>判据：</b>写「CNN 卷积」「卷积层」→ 用原核；写「按卷积定义」「翻转卷积核」→ 用翻过的核；' +
-      '核中心对称（比如全 1 的核）→ 翻不翻结果一样。</div>';
+    cm.innerHTML = '<p>CNN 里说的「卷积」其实是<b>互相关</b>：把模板直接盖上去乘加，<b>不翻</b>。</p>' +
+      '<p>只有在题面明确写「按卷积定义」时，才需要先把模板<b>转 180°</b>（上下翻一次、左右翻一次）。</p>' +
+      MB('\\text{原核}\\;\\begin{pmatrix} 1 & 0 \\\\ -1 & 2 \\end{pmatrix}' +
+         '\\qquad\\xrightarrow{\\text{转 180°}}\\qquad' +
+         '\\text{翻转后}\\;\\begin{pmatrix} 2 & -1 \\\\ 0 & 1 \\end{pmatrix}') +
+      '<p>同一个左上角窗口，两种算法给出的答案不一样：</p>' +
+      MB('\\text{互相关（不翻）}: 1\\times 1 + 2\\times 0 + 4\\times(-1) + 5\\times 2 = \\mathbf{7}') +
+      MB('\\text{数学卷积（翻了）}: 1\\times 2 + 2\\times(-1) + 4\\times 0 + 5\\times 1 = \\mathbf{5}') +
+      '<div class="note"><b>判据就一条——看题面用词：</b><br>' +
+      '写「CNN 卷积」「卷积层」→ 用原模板，<b>不翻</b>；<br>' +
+      '写「按卷积定义」「翻转卷积核」→ 先转 180°，<b>翻</b>；<br>' +
+      '模板本身中心对称（比如全是 1）→ 翻不翻结果一样，这时纠结没意义。</div>';
     root.appendChild(cm);
 
     /* ---------- 转置卷积公式 ---------- */
     root.appendChild(el("h3", null, "转置卷积的尺寸公式"));
     var ct = el("div", "card");
-    ct.innerHTML = '<div class="formula">Lout = (Lin − 1)·S − 2P + K</div>' +
-      '<div class="formula">课堂原题（照片 7211）：输入与核的两行都是 (0,1)、(2,3)，S=2，P=0\n' +
-      '  尺寸 = (2−1)×2 − 0 + 2 = <b>4</b>\n' +
-      '  铺块：0K、1K、2K、3K 依次放到四个角，S=核宽 → 不重叠\n' +
-      '  输出 = 0 0 0 1 / 0 0 2 3 / 0 2 0 3 / 4 6 6 9</div>' +
-      '<div class="note">若把 S 改成 1，输出变 3×3，四块在中央相遇，中央值 = 0×3 + 1×2 + 2×1 + 3×0 = <b>4</b>。</div>' +
-      '<div class="note warn">两种算法（铺块法 / 插零翻核法）结果相同，<b>考试只选一种做，别混着算</b>。</div>' +
-      '<div class="note">即使输出尺寸被放大，<b>原始像素信息无法靠这个操作普遍恢复</b>。「反卷积」这个名字有误导性。</div>';
+    ct.innerHTML =
+      MB('L_{out} = (L_{in}-1)\\times S - 2P + K') +
+      '<p>课堂原题（照片 7211）：输入和核的两行都是 (0,1)、(2,3)，S = 2，P = 0。</p>' +
+      MB('L_{out} = (2-1)\\times 2 - 0 + 2 = \\mathbf{4}') +
+      '<p>做法：把输入里的每个数，乘上整个核，<b>整块铺</b>到输出上。步长等于核宽，所以四块刚好不重叠：</p>' +
+      MB('\\underbrace{0}_{(0,0)}\\to\\mathbf{0}K\\;\\;\\; ' +
+         '\\underbrace{1}_{(0,1)}\\to\\mathbf{1}K\\;\\;\\; ' +
+         '\\underbrace{2}_{(1,0)}\\to\\mathbf{2}K\\;\\;\\; ' +
+         '\\underbrace{3}_{(1,1)}\\to\\mathbf{3}K') +
+      '<p>四块拼起来就是（对照你上面交互里按「一次算完」看到的矩阵）：</p>' +
+      MB('\\begin{pmatrix} 0&0&0&1 \\\\ 0&0&2&3 \\\\ 0&2&0&3 \\\\ 4&6&6&9 \\end{pmatrix}') +
+      '<div class="note">若把 S 改成 1，输出变 3×3，四块会在中间<b>撞在一起</b>，撞到的地方要累加：' +
+      '中央值 = 0×3 + 1×2 + 2×1 + 3×0 = <b>4</b>。</div>' +
+      '<div class="note warn">两种算法（<b>铺块法</b> / <b>插零翻核法</b>）结果完全一样。' +
+      '<b>考试只挑一种做到底，别混着算</b>——混着算最容易把中间步骤搞乱。</div>' +
+      '<div class="note">最后一个概念澄清：即使转置卷积把尺寸放大了，<b>原始像素信息也没法靠这个操作真正恢复</b>。' +
+      '它只是"把小的摊大"，不是"把丢的找回来"。「反卷积」这个名字有误导性。</div>';
     root.appendChild(ct);
   }
 });
@@ -1966,8 +2240,8 @@ SECTIONS.push({
       '  第二段：油门变一点，车速变多少\n' +
       '  乘起来：油门变一点，油耗变多少</div>' +
       '<p>这就是<span class="term">链式法则</span>，写成公式：</p>' +
-      '<div class="deriv">y = f(g(x))  →  dy/dx = f\'(g(x)) · g\'(x)\n\n' +
-      '一句话：外层导数 × 内层导数，一路乘下去。</div>' +
+      MB('y = f(g(x)) \\quad\\Longrightarrow\\quad \\frac{dy}{dx} = f\'(g(x))\\cdot g\'(x)') +
+      '<p style="text-align:center;margin:10px 0"><b>一句话：外层导数 × 内层导数，一路乘下去。</b></p>' +
       '<p><b>那「计算图」是干什么的？</b></p>' +
       '<p>一个复杂公式（比如 ŷ = ReLU(w·x+b) + w）没法一步求导。但如果把它<b>拆成一个个只做一件事的小节点</b>' +
       '（乘、加、减、ReLU、平方），每个小节点的导数都简单到可以心算，' +
@@ -2085,19 +2359,82 @@ SECTIONS.push({
       '<div class="note">每个局部导数回答的是<b>「只看这一个节点，改动一个输入会怎样」</b>。乘上已经传来的上游梯度，才得到这个输入对最终损失的影响。</div>';
     root.appendChild(c2);
 
-    root.appendChild(el("h3", null, "模拟卷第 7 题原题"));
+    root.appendChild(el("h3", null, "例题 · 一个「两条路径」的模型（模拟卷第 7 题）"));
     var c3 = el("div", "card");
-    c3.innerHTML = '<p>模型：h = ReLU(w·x + b)，ŷ = 2h + w，L = ½(ŷ − y)²。给 x=3、w=2、b=−1、y=4。</p>' +
-      '<div class="formula">前向：wx = 2×3 = 6　z = 6−1 = 5　h = ReLU(5) = 5\n' +
-      '      ŷ = 2×5 + 2 = 12　e = 12−4 = 8　L = ½×64 = <b>32</b></div>' +
-      '<div class="formula">反向：dL/de = e = 8　→　dL/dŷ = 8\n' +
-      '  路径①（直接加 w）：8 × 1 = 8\n' +
-      '  路径②（经 2、ReLU、wx）：8 × 2 × 1 × 3 = 48\n' +
-      '  dL/dw = 8 + 48 = <b>56</b>\n' +
-      '  dL/db = 8 × 2 × 1 × 1 = <b>16</b></div>' +
-      '<div class="note danger"><b>只在图上画一条 w 路径，答案就从 56 变成 48。</b>这是本题唯一的设计意图。</div>' +
-      '<div class="note">若还要更新（η=0.01）：w_new = 2 − 0.01×56 = 1.44，b_new = −1 − 0.01×16 = −1.16。' +
-      "两个更新都用旧位置算出的梯度。</div>";
+    c3.innerHTML =
+      '<div class="note">模型：' + MI('h=\\mathrm{ReLU}(wx+b)') + '，' + MI('\\hat y=2h+w') + '，' +
+      MI('L=\\tfrac12(\\hat y-y)^2') + '。<br>已知 ' + MI('x=3,\\;w=2,\\;b=-1,\\;y=4') +
+      '。求前向损失，以及 ' + MI('\\partial L/\\partial w') + '、' + MI('\\partial L/\\partial b') + '。</div>' +
+
+      '<p style="margin:16px 0 6px;font-weight:600">第一段：前向，每个中间值都记下来（反向要用）</p>' +
+      STEP('① 加权输入',
+        'wx = 2\\times 3 = 6',
+        'w 乘 x。这一步之后 w 就"离开"了，想再见到它只能靠反向时回头找。',
+        'wx = 6') +
+      STEP('② 加偏置',
+        'z = wx + b = 6 + (-1) = 5',
+        '加上偏置 b。',
+        'z = 5') +
+      STEP('③ 过激活函数',
+        'h = \\mathrm{ReLU}(5) = 5',
+        'ReLU 的规则：<b>正数原样通过，负数砍成 0</b>。现在是 5，大于 0，所以原样出来。<br>' +
+        '<b>顺便记住"它是开着的"</b>——反向时要靠这个判断导数取 1 还是取 0。',
+        'h = 5（ReLU 处于开启状态）') +
+      STEP('④ 再算预测值',
+        '\\hat y = 2h + w = 2\\times 5 + 2 = 12',
+        '<b>注意这里又用了一次 w</b>。这就是本题的机关：w 被用了两次，反向时会有两条路。<br>' +
+        '（另一个参数 2 是固定系数，不是要学的参数。）',
+        'ŷ = 12　←　w 在这里第二次出场') +
+      STEP('⑤ 算误差',
+        'e = \\hat y - y = 12 - 4 = 8',
+        '预测 12，正确答案 4，差得很远——误差 8。',
+        'e = 8') +
+      STEP('⑥ 算损失',
+        'L = \\tfrac12 e^2 = \\tfrac12\\times 64 = 32',
+        '平方再乘 1/2。乘 1/2 纯粹是为了求导时能消掉那个 2，让导数正好等于 e，看着干净。',
+        'L = 32') +
+
+      '<p style="margin:18px 0 6px;font-weight:600">第二段：反向，从损失一路乘回来</p>' +
+      STEP('⑦ 损失对误差求导',
+        '\\frac{\\partial L}{\\partial e} = e = 8',
+        MI('L=\\tfrac12e^2') + ' 对 e 求导就是 e。因为前面乘了 1/2，那个 2 被抵消了，所以结果干净利落。',
+        '∂L/∂e = 8') +
+      STEP('⑧ 传到预测值',
+        '\\frac{\\partial L}{\\partial \\hat y} = 8 \\times 1 = 8',
+        MI('e = \\hat y - y') + ' 对 ŷ 的导数是 1（减法是线性运算）。所以梯度原样传过去。',
+        '∂L/∂ŷ = 8') +
+      STEP('⑨ 分叉：ŷ 有两个"上游"',
+        '\\hat y = 2h + w',
+        '加法节点会把上游梯度 <b>8 复制成两份</b>，分别送往 h 和 w。<br>' +
+        '<b>这就是最重要的一步：不能只送一份。</b>',
+        '') +
+      STEP('⑩ 路径一：直接加 w 的那条',
+        '\\frac{\\partial \\hat y}{\\partial w}\\Big|_{\\text{直接}} = 1 \\;\\Rightarrow\\; 8\\times 1 = 8',
+        '式子 ' + MI('\\hat y = 2h + w') + ' 里，w 是加上的，对 w 求导得 1。所以这条路径贡献 <b>8</b>。',
+        '路径①贡献 = 8') +
+      STEP('⑪ 路径二：经过 2、ReLU、wx 的那条',
+        '\\frac{\\partial L}{\\partial h}=8\\times 2=16 \\;\\Rightarrow\\; ' +
+        '\\frac{\\partial h}{\\partial z}=1 \\;\\Rightarrow\\; \\frac{\\partial z}{\\partial w}=x=3',
+        '一路乘过来：<br>' +
+        '· ŷ 对 h 求导是 2（因为 ŷ = 2h + w）→ 16<br>' +
+        '· ReLU 对 z 求导是 <b>1</b>（因为 z=5 &gt; 0，它是开着的）→ 16<br>' +
+        '· z 对 w 求导是 <b>x = 3</b>（因为 z = wx + b）→ 16×3 = 48',
+        '路径②贡献 = 48') +
+      STEP('⑫ 两条路径相加',
+        '\\frac{\\partial L}{\\partial w} = 8 + 48 = \\mathbf{56}',
+        '<b>这是本题唯一的考点：w 出现了两次，所以梯度是两条路之和。</b><br>' +
+        '如果只在图上画了一条路，你会得到 48，或者 8，都是错的。',
+        '∂L/∂w = 56') +
+      STEP('⑬ 顺带求 b 的梯度',
+        '\\frac{\\partial L}{\\partial b} = 8\\times 2\\times 1\\times 1 = \\mathbf{16}',
+        'b 只在 ' + MI('z = wx+b') + ' 里出现过一次，没有第二条路。<br>' +
+        '它前面的链是：8（到 ŷ）→ ×2（到 h）→ ×1（ReLU 开）→ ×1（z 对 b 导数是 1）= 16。',
+        '∂L/∂b = 16') +
+      '<div class="note danger"><b>一句话记住这道题：</b>w 出现两次 → 两条路径 → 梯度相加。' +
+      '不画第二条路，答案就少一半。</div>' +
+      '<div class="note">若还要更新参数（η=0.01）：' + MI('w_{new}=2-0.01\\times 56=1.44') + '，' +
+      MI('b_{new}=-1-0.01\\times 16=-1.16') + '。<br>' +
+      '两个都用<b>旧位置</b>算出的梯度，不能先用新 w 去算 b 的梯度。</div>';
     root.appendChild(c3);
   }
 });
@@ -2212,12 +2549,15 @@ SECTIONS.push({
     ex8b.innerHTML =
       '<h4>交叉熵公式 H(p,q) = −Σ p log q，每个字母是谁</h4>' +
       '<p>这个式子最容易搞混的地方是：<b>为什么求和外面乘的是 p，而 log 里却是 q？</b></p>' +
-      '<div class="deriv">H(p,q) = − Σ p(x) · log q(x)\n\n' +
-      '拆开读：\n' +
-      '  p(x)      这件事在现实中发生的概率 → 当权重用，是固定的\n' +
-      '  log q(x)  模型给出的概率 → 被评价的对象，是要改的\n' +
-      '  −         加负号，把「多离谱」变成正数的「罚」\n' +
-      '  Σ         按现实情况加权求和</div>' +
+      MB('H(p,q) = -\\sum_{x} p(x)\\cdot \\log q(x)') +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">p</div><div class="c"><b>p(x) 是权重</b>，代表"这件事在现实中发生的概率有多大"。' +
+      '现实里发生了什么，是客观事实，不随模型改变，所以 p 是<b>固定的</b>。</div></div>' +
+      '<div class="st"><div class="n">q</div><div class="c"><b>log q(x) 是被评价的对象</b>。q 是模型自己猜的概率分布，' +
+      '是<b>要改的东西</b>。模型给某个结果的概率越离谱（q 越小），log q 越负，加上负号后罚得越狠。</div></div>' +
+      '<div class="st"><div class="n">Σ</div><div class="c"><b>加权求和</b>：按现实情况，把各种结果被罚的程度平均起来。' +
+      '不太可能发生的错误（p 小）罚一点；经常发生的错误（p 大）重罚。</div></div>' +
+      '</div>' +
       '<div class="steps">' +
       '<div class="st"><div class="n">1</div><div class="c"><b>p(x) 是权重</b>，代表「这件事在现实中发生的概率有多大」。' +
       '现实里发生了什么，是客观事实，不随模型变化。所以 p 是<b>固定的</b>。</div></div>' +
@@ -2249,8 +2589,8 @@ SECTIONS.push({
       '        = −H(p) + H(p,q)\n' +
       '        = H(p,q) − H(p)</div>' +
       '<p>当标签是 one-hot，设真类为 k，则 p(k)=1、其余 0：</p>' +
-      '<div class="formula">H(p) = −[1·log1 + 0 + 0] = <b>0</b>\n' +
-      'KL(p‖q) = H(p,q) − 0 = H(p,q) = <b>−log q(k)</b></div>' +
+      MB('H(p) = -\\big[\\,1\\cdot\\log 1 + 0 + 0\\,\\big] = \\mathbf{0}') +
+      MB('\\mathrm{KL}(p\\Vert q) = H(p,q) - 0 = H(p,q) = -\\log q(k)') +
       '<div class="note ok"><b>三层结论，按这个层次记：</b><br>' +
       '① p 是标签分布、固定不变，H(p) 是常数 → 最小化交叉熵 ≡ 最小化 KL。one-hot 下 H(p)=0，两者数值也相等。<br>' +
       '② 损失的实际数值就是 −log(模型给正确类别的概率)。越自信且答对，越接近 0。<br>' +
@@ -2260,17 +2600,81 @@ SECTIONS.push({
       '<div class="note warn"><b>工程提醒：</b>PyTorch 的 CrossEntropyLoss 内部是 log_softmax + NLLLoss，输入要<b>未过 softmax 的 logits</b>。自己再做一次 softmax 就是重复归一化。</div>';
     root.appendChild(c2);
 
-    root.appendChild(el("h3", null, "模拟卷第 8 题原题"));
+    root.appendChild(el("h3", null, "例题 · 交叉熵与梯度（模拟卷第 8 题）"));
     var c3 = el("div", "card");
-    c3.innerHTML = '<p>三类分数 (0, ln3, ln2)，真类为第 3 类。另一条样本真类概率 3/4，求两条平均交叉熵。</p>' +
-      '<div class="formula">指数 = (1, 3, 2)，和 = 6 → q = (1/6, 1/2, 1/3)\n' +
-      'ℓ₁ = −ln(1/3) = ln3 ≈ 1.099\n' +
-      '梯度 q − p = (1/6, 1/2, −2/3)　和 = 1/6+3/6−4/6 = 0 ✓\n' +
-      'ℓ₂ = −ln(3/4) = ln(4/3)\n' +
-      '平均 = [ln3 + ln(4/3)]/2 = ln4/2 = <b>ln2 ≈ 0.693</b></div>' +
-      '<div class="note ok"><b>这道题的精妙处：</b>相加后对数合并成 ln4，除以 2 正好是 ln2。算完发现答案很整齐，说明走对了。</div>' +
-      '<div class="note">二分类：ℓ = −[y·ln q + (1−y)·ln(1−q)]。y=0 时要用<b>负类概率 1−q</b>，不是 q。' +
-      '例：q=0.9，y=1 → −ln0.9≈0.105；y=0 → −ln0.1≈2.303。</div>';
+    c3.innerHTML =
+      '<div class="note">某样本的三个原始分数是 ' + MI('(0,\\; \\ln 3,\\; \\ln 2)') +
+      '，真实类别是<b>第 3 类</b>。<br>求：Softmax 概率、交叉熵损失、对三个分数的梯度。' +
+      '再加一条真类概率为 3/4 的样本，求两条的平均损失。</div>' +
+
+      '<p style="margin:16px 0 6px;font-weight:600">第一段：原始分数 → 概率</p>' +
+      STEP('① 每个分数取 exp',
+        '\\exp(0)=1,\\qquad \\exp(\\ln 3)=3,\\qquad \\exp(\\ln 2)=2',
+        '取 exp 有两个作用：<b>把负数变正数</b>（概率不能是负的），' +
+        '以及<b>把差距拉开</b>。<br>' +
+        '这里题目很贴心，用的是 ' + MI('\\ln') + ' 形式，所以 ' + MI('e^{\\ln 3}=3') + ' 直接就出来了。',
+        '指数 = (1, 3, 2)') +
+      STEP('② 求和',
+        '1+3+2 = 6',
+        '这个和是后面做归一化用的分母。',
+        '总和 = 6') +
+      STEP('③ 除以总和，得到概率',
+        'q = \\left(\\frac{1}{6},\\; \\frac{3}{6},\\; \\frac{1}{3}\\right) = \\left(\\frac16,\\; \\frac12,\\; \\frac13\\right)',
+        '每个数除以 6。<b>检查一件事：三项加起来必须等于 1。</b>' +
+        MI('\\tfrac16+\\tfrac12+\\tfrac13 = \\tfrac16+\\tfrac36+\\tfrac26 = 1') + ' ✓<br>' +
+        '如果不等于 1，说明中间算错了，立刻停下重来。',
+        'q = (1/6, 1/2, 1/3)') +
+
+      '<p style="margin:18px 0 6px;font-weight:600">第二段：算损失</p>' +
+      STEP('④ 取真类那一项',
+        '\\ell = -\\ln q_3 = -\\ln\\frac13',
+        '真实类别是第 3 类，所以只看 q₃。<b>其余两项完全不用管</b>——' +
+        '因为真实标签是 one-hot，其他类的 p 都是 0，' + MI('0\\times\\ln q') + ' 恒为 0。',
+        '') +
+      STEP('⑤ 化简',
+        '\\ell_1 = -\\ln\\frac13 = \\ln 3 \\approx 1.0986',
+        '负号把倒数翻上来：' + MI('-\\ln\\tfrac13 = \\ln 3') + '。<br>' +
+        '直观检查：模型给真实类别的概率只有 1/3，挺不自信的，所以损失接近 1.1，' +
+        '比"完全确定"（损失 0）差远了。合理。',
+        'ℓ₁ = ln3 ≈ 1.0986') +
+
+      '<p style="margin:18px 0 6px;font-weight:600">第三段：求梯度（这条公式最好记）</p>' +
+      STEP('⑥ 用 q − p 直接算',
+        '\\frac{\\partial \\ell}{\\partial z} = q - p = ' +
+        '\\left(\\frac16-0,\\;\\; \\frac12-0,\\;\\; \\frac13-1\\right) = \\left(\\frac16,\\;\\frac12,\\;-\\frac23\\right)',
+        'p 是真实标签的 one-hot 向量 ' + MI('(0,0,1)') + '。<br>' +
+        '所以只有第三项减了 1，前两项减 0 不变。<br>' +
+        '<b>这个结果非常好记：预测概率减去真实标签，就完了。</b>',
+        '') +
+      STEP('⑦ 自查：三项之和必须为 0',
+        '\\frac16+\\frac12-\\frac23 = \\frac16+\\frac36-\\frac46 = 0 \\;\\checkmark',
+        '为什么必然为 0？因为 Softmax 输出的三项和恒为 1（被约束在一个平面上），' +
+        '所以它的梯度在这三个方向上必然抵消。<br>' +
+        '<b>算完梯度顺手加一下，和不是 0 就一定错了</b>——这是最快的自检。',
+        '梯度 = (1/6, 1/2, −2/3)，和为 0 ✓') +
+      STEP('⑧ 这个梯度想告诉我们什么',
+        '\\theta \\leftarrow \\theta - \\eta\\,\\nabla',
+        '看符号：第三项是 <b>−2/3</b>（负的），前两项是正的。<br>' +
+        '更新时是<b>减去</b>梯度，所以第三类分数会<b>变大</b>，前两类会<b>变小</b>。<br>' +
+        '换句话说：<b>模型在往"更相信第 3 类"的方向调。</b>方向正确。',
+        '') +
+
+      '<p style="margin:18px 0 6px;font-weight:600">第四段：两条样本求平均</p>' +
+      STEP('⑨ 第二条样本的损失',
+        '\\ell_2 = -\\ln\\frac34 = \\ln\\frac43 \\approx 0.2877',
+        '真类概率是 3/4，比第一条的 1/3 自信多了，所以损失小得多（0.29 vs 1.10）。',
+        'ℓ₂ = ln(4/3) ≈ 0.2877') +
+      STEP('⑩ 取平均',
+        '\\bar\\ell = \\frac{\\ell_1+\\ell_2}{2} = \\frac{\\ln 3 + \\ln\\frac43}{2} = \\frac{\\ln 4}{2} = \\ln 2 \\approx 0.693',
+        '这里有个漂亮的地方：两个对数相加可以合并（' + MI('\\ln 3 + \\ln\\tfrac43 = \\ln 4') + '），' +
+        '再除以 2 正好是 ' + MI('\\ln 2') + '。<br>' +
+        '<b>算出这么整齐的答案，说明你走对了。</b>如果得出一串乱七八糟的小数，多半哪里错了。<br>' +
+        '<b>顺序不能反</b>：是先各自取对数、再平均，不是先平均概率再取对数。',
+        '平均损失 = ln2 ≈ 0.693') +
+      '<div class="note"><b>二分类版本，别记混：</b>' + MI('\\ell = -[\\,y\\ln q + (1-y)\\ln(1-q)\\,]') + '<br>' +
+      '· ' + MI('q=0.9') + ' 且 ' + MI('y=1') + '：' + MI('-\\ln 0.9 \\approx 0.105') + '<br>' +
+      '· ' + MI('q=0.9') + ' 但 ' + MI('y=0') + '：<b>要用负类概率 1−q = 0.1</b>，' + MI('-\\ln 0.1 \\approx 2.303') + '<br>' +
+      '第二个是最常见的错：看到 q=0.9 就直接用 0.9，忘了 y=0 时正确标签的概率其实是 0.1。</div>';
     root.appendChild(c3);
   }
 });
@@ -2299,7 +2703,7 @@ SECTIONS.push({
       '</div>' +
       '<p>满足「p=1 时为 0」「单调递减」「可加」这三个要求的函数，对数恰好是唯一自然的选择。' +
       '因为独立事件的概率是<b>相乘</b>的（p₁×p₂），而对数能把相乘变成<b>相加</b>：</p>' +
-      '<div class="deriv">log(p₁ · p₂) = log p₁ + log p₂</div>' +
+      MB('\\log(p_1\\cdot p_2) = \\log p_1 + \\log p_2') +
       '<p>再配上负号让结果为正，就得到 <b>信息量 = −log p</b>。</p>' +
       '<div class="why"><span class="lbl">底数为什么常用 2</span>' +
       '用 2 为底时，单位叫 <b>bit</b>，含义很实在：<b>「用最优编码方案编这条消息，平均要几位二进制」</b>。<br>' +
@@ -2307,13 +2711,16 @@ SECTIONS.push({
       '<p><b>那「熵」又是什么？</b></p>' +
       '<p>信息量说的是「某一个结果」有多意外。但抽之前我们面对的是<b>一整个分布</b>。' +
       '熵 = 把每种结果的信息量，<b>按它出现的概率加权平均</b>：</p>' +
-      '<div class="deriv">H(p) = − Σ pₖ · log pₖ\n\n' +
-      '拆开读：\n' +
-      '  pₖ        这个结果出现的概率（当权重用）\n' +
-      '  −log pₖ   这个结果一旦出现，能带来多少信息量\n' +
-      '  Σ         按概率加权平均\n\n' +
-      '所以熵 = 「平均每个结果带来多少信息量」\n' +
-      '       = 「抽之前，平均有多不确定」</div>' +
+      MB('H(p) = -\\sum_{k} p_k \\log p_k') +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c">' + MI('p_k') +
+      '：这个结果出现的概率，拿来当<b>权重</b>。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c">' + MI('-\\log p_k') +
+      '：这个结果一旦出现，能带来<b>多少信息量</b>。</div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c">' + MI('\\sum') +
+      '：按概率加权平均。</div></div>' +
+      '</div>' +
+      '<p><b>所以熵 = "平均每个结果带来多少信息量" = "抽之前，平均有多不确定"。</b>两个说法是同一件事。</p>' +
       '<p>所以熵的含义是：<b>抽之前，平均有多不确定。</b>或者说「平均每次要接收多少信息量才能确定结果」。</p>' +
       '<div class="analogy"><span class="lbl">决策树为什么盯上熵</span>' +
       '决策树每一步都在问「用哪个特征把样本分开，能让每组里的人尽量一致」。<br>' +
@@ -2325,7 +2732,8 @@ SECTIONS.push({
     /* --- 熵曲线 --- */
     root.appendChild(el("h3", null, "① 熵是什么：惊讶程度的平均"));
     var c1 = el("div", "card");
-    c1.innerHTML = '<div class="formula">概率 p 的事件发生，信息量 = −log₂p\nH(p) = −Σ pₖ log₂ pₖ</div>' +
+    c1.innerHTML = MB('-\\log_2 p \\quad\\text{←　这件事一旦发生，带来的信息量}') +
+      MB('H(p) = -\\sum_{k} p_k \\log_2 p_k') +
       '<div class="note">概率 1 的事件 → 信息量 0；概率 1/2 → 1 bit；概率 1/8 → 3 bit。<br>' +
       '熵还等于「用最优编码方案编这个分布，平均每条消息要多少位」——两种说法是同一件事。</div>';
     var rw = el("div", "row"), rg = el("input"), rv = el("span", "val");
@@ -2367,39 +2775,48 @@ SECTIONS.push({
     var ex9b = el("div", "explain");
     ex9b.innerHTML =
       '<h4>四个公式，逐个符号拆开看它到底在算谁</h4>' +
-      '<p><b>① 条件熵 H(D|A) = Σ (|Dᵥ|/|D|) · H(Dᵥ)</b></p>' +
-      '<div class="deriv">H(D|A) = Σ (|Dᵥ| / |D|) · H(Dᵥ)\n\n' +
-      '拆开读：\n' +
-      '  Σ            把各组的贡献加起来\n' +
-      '  |Dᵥ| / |D|   这一组样本数 ÷ 总样本数 = 这组占多大比例（权重）\n' +
-      '  H(Dᵥ)        这一组内部的乱度\n\n' +
-      '一句话：按「每组占多大比例」，把「各组的乱度」加权平均。\n' +
-      '直观：分完之后，整体还有多乱？</div>' +
-      '<p><b>② 信息增益 g = H(D) − H(D|A)</b></p>' +
-      '<div class="deriv">分之前多乱  −  分之后还有多乱  =  乱度减少了多少\n' +
-      '减少得多 → 这个问题问得好 → 值得拿它来分</div>' +
-      '<p><b>③ 划分熵 HA(D) = −Σ (|Dᵥ|/|D|) log₂(|Dᵥ|/|D|)</b></p>' +
-      '<div class="deriv">注意：式子里只有「组有多大」——\n' +
-      '      完全没有出现标签！\n\n' +
-      '它算的是「样本被分到哪一支有多不确定」，\n' +
-      '和标签是什么、纯不纯，一点关系都没有。</div>' +
-      '<p><b>④ 增益比 gR = g / HA</b></p>' +
-      '<div class="deriv">信息增益 ÷ 划分熵\n' +
-      '= 「乱度减少量」÷「分得多零碎」\n\n' +
-      '分得越零碎（支数越多），HA 越大，除下来越小\n' +
-      '→ 这就是压制「偏爱多取值特征」的机制</div>' +
-      '<div class="why"><span class="lbl">最容易混的一处，说到底就是「求和里面放什么」</span>' +
-      '两个公式的<b>加权权重完全一样</b>，都是 |Dᵥ|/|D|。<br>' +
-      '区别只在<b>求和的是什么东西</b>：<br>' +
-      '· 条件熵 → 求和里面是 <b>H(Dᵥ)，组内标签的乱度</b>（关心标签）<br>' +
-      '· 划分熵 → 求和里面是 <b>log₂(组占比)</b>（只关心组有多大，不看标签）<br>' +
-      '抓住这一句，这两个量就再也不会搞反。</div>' +
-      '<div class="analogy"><span class="lbl">为什么「按学号拆」是经典反例</span>' +
-      '假设你按唯一学号把 15 人拆成 15 组，每组只有 1 个人。<br>' +
-      '每组内部标签必然「纯」（就一个人，不是批就是拒），所以每个 H(Dᵥ) = 0，条件熵 = 0，' +
-      '信息增益 = H(D) − 0 = 最大值。<b>看起来很完美。</b><br>' +
-      '但这毫无意义——你没学到任何规律，只是把每个人的答案原样记住了。<br>' +
-      '<b>划分熵此时是 log₂15 ≈ 3.9，很大</b>，增益比 = 大数/大数，一下就被压下去。这就是它存在的理由。</div>';
+
+      '<p style="margin:14px 0 4px;font-weight:600">① 条件熵 —— 用某个特征分完以后，整体还剩多乱</p>' +
+      MB('H(D \\mid A) \\;=\\; \\sum_{v} \\frac{|D_v|}{|D|}\\, H(D_v)') +
+      '<div class="why"><span class="lbl">一个字一个字读</span>' +
+      '· ' + MI('\\sum_{v}') + '：把每个分支的贡献加起来（v 遍历所有分支）<br>' +
+      '· ' + MI('\\dfrac{|D_v|}{|D|}') + '：这一支的样本数 ÷ 总样本数 = "这一支占多大比例"，拿来当<b>权重</b><br>' +
+      '· ' + MI('H(D_v)') + '：这一支<b>内部</b>的乱度<br>' +
+      '<b>合起来读就是：按每支占的比例，把各支的乱度加权平均。</b><br>' +
+      '直观理解：分完之后，整体还有多乱？这个数越小，说明分得越干净。</div>' +
+
+      '<p style="margin:16px 0 4px;font-weight:600">② 信息增益 —— 乱度减少了多少</p>' +
+      MB('g(D,A) \\;=\\; H(D) - H(D \\mid A)') +
+      '<div class="why"><span class="lbl">这一条几乎不用解释</span>' +
+      '「分之前多乱」减去「分之后还有多乱」= <b>乱度被消灭了多少</b>。<br>' +
+      '减少得越多，说明这个问题问得越有价值，就越该拿它当根节点。<br>' +
+      'ID3 算法就是「在所有候选特征里，挑 g 最大的那一个」。</div>' +
+
+      '<p style="margin:16px 0 4px;font-weight:600">③ 划分熵 —— 只看"分得多零碎"，和标签毫无关系</p>' +
+      MB('HA(D) \\;=\\; -\\sum_{v} \\frac{|D_v|}{|D|}\\log_2\\frac{|D_v|}{|D|}') +
+      '<div class="why"><span class="lbl">注意这里少了什么</span>' +
+      '仔细对比①和③：<b>加权权重一模一样，都是 ' + MI('|D_v|/|D|') + '</b>。<br>' +
+      '区别只在于<b>求和的是什么东西</b>：<br>' +
+      '· 条件熵 → 求和里是 ' + MI('H(D_v)') + '，也就是<b>组内的标签</b>（关心标签）<br>' +
+      '· 划分熵 → 求和里是 ' + MI('\\log_2\\frac{|D_v|}{|D|}') + '，也就是<b>组有多大</b>（<b>完全不看标签</b>）<br>' +
+      '<b>抓住这一句，这两个量就再也不会搞反。</b><br>' +
+      '它回答的问题是：样本被分到这么多支，本身有多"零碎"？</div>' +
+
+      '<p style="margin:16px 0 4px;font-weight:600">④ 增益比 —— 用划分熵纠正信息增益的偏心</p>' +
+      MB('g_R \\;=\\; \\frac{g(D,A)}{HA(D)}') +
+      '<div class="why"><span class="lbl">信息增益偏心在哪</span>' +
+      '它<b>偏爱取值多的特征</b>。极端例子：按唯一学号把 15 人拆成 15 组，每组只剩 1 个人——' +
+      '这一组当然"纯"（就一个人，不是批就是拒）。' +
+      '于是每个 ' + MI('H(D_v)=0') + '，条件熵 = 0，信息增益 = ' + MI('H(D)') + ' − 0 = <b>最大值</b>。<br>' +
+      '<b>看起来完美，其实毫无意义</b>：你没学到任何规律，只是把每个人的答案原样记住了。<br>' +
+      '而这时划分熵很大（' + MI('\\log_2 15\\approx 3.9') + '），拿它当分母一除，增益比立刻被压下去。<br>' +
+      '<b>这就是增益比存在的全部理由：不是让分数更好看，是压制"分得太碎"这种作弊。</b></div>' +
+      '<div class="analogy"><span class="lbl">四个量的关系，一句话串起来</span>' +
+      '父节点熵 ' + MI('H(D)') + ' 是"分之前有多乱"。<br>' +
+      '条件熵 ' + MI('H(D\\mid A)') + ' 是"用 A 分完之后还剩多乱"。<br>' +
+      '信息增益 ' + MI('g') + ' 是"消灭了多少乱"。<br>' +
+      '划分熵 ' + MI('HA') + ' 是"分得多零碎"，拿它当惩罚项做分母，得到增益比 ' + MI('g_R') + '。<br>' +
+      'ID3 比 ' + MI('g') + '，C4.5 比 ' + MI('g_R') + '。</div>';
     root.appendChild(ex9b);
     var c2 = el("div", "card");
     c2.innerHTML = '<table class="tbl"><tr><th>量</th><th style="text-align:left">用哪些比例</th><th style="text-align:left">回答什么</th></tr>' +

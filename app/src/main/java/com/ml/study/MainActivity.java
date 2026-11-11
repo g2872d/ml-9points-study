@@ -60,6 +60,10 @@ public class MainActivity extends Activity {
         s.setDomStorageEnabled(true);            // localStorage：记住主题与阅读进度
         s.setDatabaseEnabled(true);
         s.setAllowFileAccess(true);              // 从 file:// 读 assets
+        // KaTeX 的数学字体和 js 也在 assets 里，必须允许 file:// 页面去读 file:// 资源，
+        // 否则公式会退化成缺字形的方块（视觉上像渲染失败，其实是字体没加载）
+        s.setAllowFileAccessFromFileURLs(true);
+        s.setAllowUniversalAccessFromFileURLs(true);
         s.setAllowContentAccess(false);
         s.setSupportZoom(false);                 // 缩放交给页面内的字号按钮，避免手势冲突
         s.setBuiltInZoomControls(false);
