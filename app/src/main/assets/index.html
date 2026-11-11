@@ -113,7 +113,7 @@ input[type=range]::-moz-range-thumb{width:20px; height:20px; border:2px solid va
 .formula{
   background:var(--panel2); border-radius:10px; padding:11px 13px; margin:9px 0;
   font-family:ui-monospace,Consolas,"DejaVu Sans Mono",monospace; font-size:13px;
-  line-height:1.9; overflow-x:auto; white-space:nowrap; color:var(--fg);
+  line-height:1.9; overflow-x:auto; white-space:pre-wrap; word-break:break-word; color:var(--fg);
 }
 /* ========== 提示条 ========== */
 .note{
@@ -174,6 +174,32 @@ canvas{display:block; width:100%; border-radius:10px; background:var(--panel2); 
 .kv .k{color:var(--muted)}
 .kv .v{font-family:ui-monospace,Consolas,monospace; font-weight:600; color:var(--accent)}
 .tag{display:inline-block; font-size:11px; padding:1px 7px; border-radius:6px; background:var(--chip); color:var(--chipfg); margin-right:5px}
+/* ========== 解释块（讲原理用） ========== */
+.explain{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; margin:12px 0; box-shadow:var(--shadow)}
+.explain h4{margin:0 0 10px; font-size:14.5px; color:var(--accent); display:flex; align-items:center; gap:7px;
+  border-left:0; padding-left:0}
+.explain h4::before{content:"?"; flex:0 0 auto; width:19px; height:19px; border-radius:50%;
+  background:var(--accent); color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center}
+.explain p{margin:9px 0; font-size:13.5px; line-height:1.7}
+.explain p:first-of-type{margin-top:0}
+.why{background:var(--panel2); border-radius:10px; padding:11px 13px; margin:9px 0; font-size:13px; line-height:1.7;
+  border-left:3px solid var(--accent2)}
+.why b{color:var(--fg)}
+.why .lbl{color:var(--accent2); font-weight:700; font-size:12px; display:block; margin-bottom:3px}
+.analogy{background:color-mix(in srgb, var(--warn) 12%, var(--panel)); border-left:3px solid var(--warn);
+  border-radius:0 10px 10px 0; padding:11px 13px; margin:9px 0; font-size:13px; line-height:1.7}
+.analogy .lbl{color:var(--warn); font-weight:700; font-size:12px; display:block; margin-bottom:3px}
+.steps{margin:10px 0}
+.steps .st{display:flex; gap:10px; margin:11px 0; align-items:flex-start}
+.steps .st .n{flex:0 0 auto; width:21px; height:21px; border-radius:50%; background:var(--accent); color:#fff;
+  font-size:11.5px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:3px}
+.steps .st .c{flex:1; font-size:13px; line-height:1.7}
+.steps .st .c b{color:var(--fg)}
+.term{color:var(--accent); font-weight:600}
+.deriv{background:var(--panel2); border-radius:10px; padding:11px 13px; margin:9px 0;
+  font-family:ui-monospace,Consolas,monospace; font-size:12.5px; line-height:2.1; overflow-x:auto;
+  white-space:pre-wrap; word-break:break-word; color:var(--fg)}
+.deriv .cm{color:var(--muted); font-style:normal}
 </style>
 </head>
 <body>
@@ -375,6 +401,25 @@ SECTIONS.push({
     root.appendChild(el("h2", null, "01 · 机器学习为什么不等于优化"));
     root.appendChild(el("p", "sub", "拖动滑块改变训练轮次，看两条曲线怎么分家。"));
 
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>先搞清楚「学习」到底指什么</h4>' +
+      '<p>你手上有过去几年的房价成交记录：面积、位置是输入，成交价是答案。你想要的是<b>一套还没卖过的房子值多少钱</b>。</p>' +
+      '<p>注意这句话的关键：你要预测的是<b>没见过的样本</b>，不是把已经知道的答案再背一遍。</p>' +
+      '<div class="analogy"><span class="lbl">打个比方</span>' +
+      '学生做题。老师给了 100 道练习题的答案（训练集）。<br>' +
+      '如果他只是把 100 道题的答案背下来，练习册上能考满分，但换一张卷子就完蛋。<br>' +
+      '如果他学会了「这类题该怎么想」，换卷子也能做——这叫<b>举一反三</b>，学术上叫<span class="term">泛化</span>。<br>' +
+      '机器学习要的是后者。</div>' +
+      '<p><b>所以「优化」为什么不够？</b></p>' +
+      '<p>优化是一门纯数学：给定一个函数，把它压到最小。它只回答一个问题——<b>怎样把这个已经写死的目标函数降下去</b>。</p>' +
+      '<p>但训练时你能算的只有「这 100 道练习题上的平均错误」，你真正想要的是「新卷子上的错误」。这两件事<b>不是一回事</b>。' +
+      '把练习题错误压到 0，可能只是把答案背下来了。这个差距就是泛化问题，它在优化的管辖范围之外。</p>' +
+      '<div class="why"><span class="lbl">一句话记住</span>' +
+      '<b>机器学习 = 优化 + 泛化。</b>优化负责把训练损失降下去，泛化负责让降下去的那个东西在新数据上也成立。' +
+      '只做前者，就是过拟合。</div>';
+    root.appendChild(ex);
+
     /* --- 曲线 --- */
     var card = el("div", "card");
     var capSeg = el("div", "seg");
@@ -486,6 +531,29 @@ SECTIONS.push({
 
     /* --- 两种风险 --- */
     root.appendChild(el("h3", null, "经验风险 vs 期望风险"));
+    var ex1b = el("div", "explain");
+    ex1b.innerHTML =
+      '<h4>这两个公式长得几乎一样，差在哪一个字</h4>' +
+      '<div class="deriv">经验风险  R_emp(θ) = (1/N) · Σᵢ ℓ(f_θ(xᵢ), yᵢ)\n' +
+      '期望风险  R(θ)     = E_{(x,y)~P}[ ℓ(f_θ(x), y) ]</div>' +
+      '<p>左边，两者都在算「预测有多错」（ℓ 就是损失）。真正的区别在<b>「对谁取平均」</b>：</p>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>经验风险对「手上的 N 条样本」取平均。</b><br>' +
+      '式子里的 (1/N)·Σ 就是「把这 N 条加起来除以 N」——<b>这是能真的算出来的数</b>，因为数据就在你手上。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>期望风险对「真实数据分布 P」取平均。</b><br>' +
+      'E 的意思是「把所有可能出现的样本，按它们出现的概率加权平均」。<br>' +
+      '<b>但 P 你不知道</b>——你不可能知道「未来全世界的房子长什么样、各占多少比例」。所以这个数是<b>算不出来的</b>，只能估。</div></div>' +
+      '</div>' +
+      '<div class="why"><span class="lbl">θ 出现在这两个式子里，说明什么</span>' +
+      'θ 是模型参数。两个式子都是 θ 的函数——<b>参数一变，两个风险都跟着变，但它们不是同一条曲线</b>。' +
+      '优化只在降低左边那条（经验风险），完全不管右边那条会怎么走。<br>' +
+      '训练损失降到 0，只意味着「左边到底了」，右边可能反而更高。这就是泛化间隙。</div>' +
+      '<div class="analogy"><span class="lbl">一句话区分</span>' +
+      '<b>经验风险 = 做过的题的错率；期望风险 = 未来所有考试的错率。</b><br>' +
+      '前者能算，后者只能猜。学习的目标永远是后者，但你能优化的只有前者——这个矛盾就是机器学习全部困难的根源。</div>' +
+      '<div class="note">例：三条训练样本损失 1、3、2，经验风险 = (1+3+2)/3 = <b>2</b>。' +
+      '但这个「2」不能告诉你未来房子的平均误差，因为未来房屋的分布不一样。</div>';
+    root.appendChild(ex1b);
     var c3 = el("div", "card");
     c3.innerHTML =
       '<div class="formula">经验风险  R<sub>emp</sub>(θ) = (1/N) · Σ<sub>i</sub> ℓ(f<sub>θ</sub>(x<sub>i</sub>), y<sub>i</sub>)</div>' +
@@ -512,6 +580,29 @@ SECTIONS.push({
   render: function(root){
     root.appendChild(el("h2", null, "02 · 训练集 / 验证集 / 测试集"));
     root.appendChild(el("p", "sub", "练习题、模拟卷、期末考卷——三份数据缺一不可。"));
+
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>为什么非要分成三份？不能只用两份吗</h4>' +
+      '<p>先说清楚三个角色各自在干什么：</p>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>训练集 = 平时的练习题</b><br>' +
+      '模型看这些题、算错在哪、改自己的参数。这就是「学」的过程。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>验证集 = 模拟卷</b><br>' +
+      '用来比较「哪种学习方案更好」：学习率取多少、网络几层、正则多强、练到第几轮停。<br>' +
+      '<span style="color:var(--muted)">注意：它不直接参与改参数，但它的成绩决定你选哪套方案。</span></div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c"><b>测试集 = 期末考卷</b><br>' +
+      '方案全部定死之后，<b>只考一次</b>，报出来的成绩才算数。</div></div>' +
+      '</div>' +
+      '<div class="why"><span class="lbl">为什么不能用验证集直接当测试集</span>' +
+      '因为你用验证集调了很多次方案——本质上你已经在「对着这份卷子」优化自己的选择了。' +
+      '它被你看过了，它的成绩就不再客观。测试集必须是你<b>一次都没看过的</b>，才能模拟「真正的新数据」。<br>' +
+      '用测试集选学习率、再用同一个测试集报成绩，等于开卷考试自己给自己判分。</div>' +
+      '<p><b>参数和超参数，差在哪？</b></p>' +
+      '<p><span class="term">参数</span>（权重 w、偏置 b）：由训练过程自己算出来，你不用管。</p>' +
+      '<p><span class="term">超参数</span>（学习率、批量大小、网络层数、正则系数）：训练之前你得先定好，模型自己不会调。' +
+      '既然定的时候还不知道好不好，就得拿验证集来试——这就是验证集存在的全部理由。</p>';
+    root.appendChild(ex);
 
     /* --- 划分沙盒 --- */
     var card = el("div", "card");
@@ -619,8 +710,53 @@ SECTIONS.push({
     root.appendChild(el("h2", null, "03 · 神经网络为什么非得有非线性"));
     root.appendChild(el("p", "sub", "没有非线性，堆多少层都等于一层。"));
 
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>先说清楚「神经元」在干什么</h4>' +
+      '<p>一个神经元做两件事，只做两件：</p>' +
+      '<div class="deriv">第一步  z = w₁x₁ + w₂x₂ + … + b     ← 加权求和（再偏一点）\n' +
+      '第二步  h = φ(z)                      ← 过一道非线性函数 φ</div>' +
+      '<p>第一步是「画一条线」（严格说叫<span class="term">仿射映射</span>，就是直线加偏移）。' +
+      '第二步是「把这条线掰弯」。</p>' +
+      '<div class="analogy"><span class="lbl">打个比方</span>' +
+      '只有第一步的神经元像一把<b>直尺</b>——不管你怎么摆，它只能画直线。<br>' +
+      '加上第二步，就像给直尺装了一个<b>折弯的关节</b>，它就能画折线、曲线。<br>' +
+      '一大堆直尺叠在一起，还是只能画一条直线（下面有证明）。但一堆会折弯的尺子叠起来，就能拼出任何形状。</div>' +
+      '<p><b>为什么「堆直尺」没用？</b>这是考试要写的证明，但直觉很简单：' +
+      '两层都只做「乘系数再加偏移」，合起来还是「乘系数再加偏移」。' +
+      '就像 <b>3×(2x+1)+4</b> 展开还是 <b>6x+7</b>，绕一圈还是直线。' +
+      '数学上：W₂(W₁x + b₁) + b₂ = (W₂W₁)x + (W₂b₁ + b₂)，右边仍然是一个矩阵乘 x 再加向量。</p>' +
+      '<div class="why"><span class="lbl">所以非线性的真正作用是什么</span>' +
+      '它让<b>不同的输入走不同的处理路线</b>。<br>' +
+      'ReLU(z) = max(0, z)：z 是正的时候原样放行，是负的时候直接归零。' +
+      '这一刀「切」下去，输入空间就被分成两半，两半走的路不一样了。<br>' +
+      '折的次数越多，能拼出的形状越复杂。这就是「深层网络能拟合任意函数」的直观来源。</div>';
+    root.appendChild(ex);
+
     /* --- 仿射合并 --- */
     root.appendChild(el("h3", null, "① 两层仿射串联 = 一层"));
+    var ex3b = el("div", "explain");
+    ex3b.innerHTML =
+      '<h4>这个合并是怎么一步步做出来的（照着抄就行）</h4>' +
+      '<p>先把两层的式子写开。假设第一层用 W₁、b₁，第二层用 W₂、b₂：</p>' +
+      '<div class="deriv">第一层输出：  h = W₁x + b₁\n' +
+      '第二层输入 h：  y = W₂h + b₂</div>' +
+      '<p>把 h 代进去（这一步就是把第一个式子塞进第二个式子的 h 位置）：</p>' +
+      '<div class="deriv">y = W₂(W₁x + b₁) + b₂</div>' +
+      '<p>然后展开括号。注意矩阵乘法的分配律（和普通乘法一样）：</p>' +
+      '<div class="deriv">y = W₂W₁x + W₂b₁ + b₂\n\n' +
+      '  前面那坨 W₂W₁   → 记成新的 W′\n' +
+      '  后面那坨 W₂b₁+b₂ → 记成新的 b′\n\n' +
+      '于是：y = W′x + b′   ← 和一层的形式一模一样</div>' +
+      '<p>把它俩分别记成 W′ = W₂W₁、b′ = W₂b₁ + b₂，就回到同一个形式：<b>y = W′x + b′</b>。</p>' +
+      '<div class="why"><span class="lbl">这一步证明了什么</span>' +
+      '证明了「两层仿射」和「一层仿射」是<b>同一类函数</b>——只是参数换了名字。<br>' +
+      '所以不管你叠 2 层、10 层、100 层，能表达的东西<b>一点都没变多</b>，始终是一条直线（高维里叫超平面）。<br>' +
+      '<b>这就是必须加非线性的全部理由。</b></div>' +
+      '<p>上面滑块区可以自己试：拖 W₁、b₁、W₂、b₂，看浅色的第一层线怎么变，' +
+      '但最终输出那条线（绿色）始终和「合并成一层」那条（蓝色虚线）<b>完全重合</b>。' +
+      '调来调去都是同一条直线。</p>';
+    root.appendChild(ex3b);
     var c1 = el("div", "card");
     c1.innerHTML = '<div class="formula">W₂(W₁x + b₁) + b₂ = (W₂W₁)x + (W₂b₁ + b₂)</div>' +
       '<p>右边仍然能写成 W′x + b′ 的形式，其中 W′ = W₂W₁、b′ = W₂b₁ + b₂。<b>绕一圈还是同一种函数。</b></p>' +
@@ -822,6 +958,33 @@ SECTIONS.push({
     root.appendChild(el("h2", null, "04 · 梯度下降与六种优化方法"));
     root.appendChild(el("p", "sub", "老师说「考其中一种」。六种都要认识，但要能挑一种手算到底。"));
 
+    /* ---- 先把概念讲明白，再让人动手 ---- */
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>先说清楚：什么叫「梯度」，为什么减掉它就下山了</h4>' +
+      '<p>想象你蒙着眼睛站在山坡上，要走到谷底。你只能做一件事：<b>用脚探一探哪个方向最陡，然后朝反方向迈一步。</b>' +
+      '然后再探、再迈。梯度下降就是这个动作，一个字的玄机都没有。</p>' +
+      '<div class="analogy"><span class="lbl">打个比方</span>' +
+      '<b>梯度</b> = 你脚下「最陡的上坡方向」<br>' +
+      '<b>负梯度</b> = 正相反，也就是最陡的下坡方向<br>' +
+      '<b>学习率 η</b> = 你一步迈多大<br>' +
+      '<b>迭代</b> = 每迈一步就重新探一次坡度（因为位置变了，坡度也变了）</div>' +
+      '<p><b>「梯度」这个词到底指什么？</b>只有一个参数 w 时，梯度就是<b>导数</b>，也就是曲线在该点的<b>斜率</b>：</p>' +
+      '<div class="deriv">R\'(w) &gt; 0   斜率朝上   →  往右走会升高  →  该往左走\n' +
+      'R\'(w) &lt; 0   斜率朝下   →  往右走会降低  →  该往右走\n' +
+      'R\'(w) = 0   平的       →  极值点（可能是谷底，也可能是山顶）</div>' +
+      '<p>这两种情况能不能合成一个式子？能。不管斜率正负，<b>往 −R\'(w) 的方向走，损失一定下降</b>：' +
+      '斜率 +2 就往左（−2 方向），斜率 −2 就往右（+2 方向）。</p>' +
+      '<p>参数有多个时，把每个参数的偏导排成一个向量，这个向量就叫<span class="term">梯度</span>。' +
+      '它指向<b>函数上升最快的方向</b>，所以前面加负号，就变成下降最快的方向。</p>' +
+      '<div class="why"><span class="lbl">为什么「减梯度」一定没错？一行数学说清</span>' +
+      '把损失用切线近似（泰勒一阶）：<b>R(w + Δ) ≈ R(w) + R\'(w)·Δ</b><br>' +
+      '想让新位置的损失更小，就要让 <b>R\'(w)·Δ &lt; 0</b>。<br>' +
+      '取 Δ = −η·R\'(w)（η 为正），代进去得 R\'(w)·Δ = −η·[R\'(w)]²。<br>' +
+      '平方一定 ≥ 0、η 一定 &gt; 0，所以这一项一定 ≤ 0 —— <b>只要步子不太大，走这步损失就不会变大。</b><br>' +
+      '这就是「为什么是减号」的全部答案。</div>';
+    root.appendChild(ex);
+
     var card = el("div", "card");
     /* 优化器选择 */
     var segO = el("div", "seg"); segO.style.flexWrap = "wrap";
@@ -983,6 +1146,93 @@ SECTIONS.push({
     b3.addEventListener("click", function(){ reset(); refresh(); });
     reset(); refresh();
 
+    /* ---- 交互之后：把每个公式拆开讲 ---- */
+    var ex2 = el("div", "explain");
+    ex2.innerHTML =
+      '<h4>公式 w ← w − η·g 里，每个符号在说什么</h4>' +
+      '<div class="deriv">w  ←  w  −  η · g\n\n' +
+      'w    当前参数（我现在站在哪）\n' +
+      'η    学习率，控制一步迈多远（正数）\n' +
+      'g    在当前 w 处算出来的梯度 R\'(w)\n' +
+      '−    方向：逆着梯度，也就是往低处走\n' +
+      '←    把右边算出的新值覆盖左边</div>' +
+      '<p><b>为什么每一轮都必须重新算梯度？</b>因为梯度是<b>局部</b>信息，只在当前位置附近有效。' +
+      '从 w=1 挪到 w=1.5 之后，脚下的坡度已经变了（离谷底更近、坡更缓），必须重新探一次。' +
+      '一直沿用第一步的梯度，等于闭着眼按原方向一路冲，很容易冲过头。</p>' +
+      '<div class="why"><span class="lbl">这也是手算题最常见的扣分点</span>' +
+      '第 2 步的梯度必须代入<b>更新后的 w</b> 重新算。题目说「梯度依次为…」时，指的是每一步在<b>当时那个位置</b>的梯度。</div>';
+    root.appendChild(ex2);
+
+    var ex3 = el("div", "explain");
+    ex3.innerHTML =
+      '<h4>学习率 η：为什么太大太小都不行</h4>' +
+      '<p>把损失想成一个碗：R(w) = ½(w−3)²，谷底在 w=3。你在 w=1。</p>' +
+      '<div class="deriv">η 太小   →  每步挪一点点，方向对但慢得要命\n' +
+      'η 合适   →  几步就到碗底附近\n' +
+      'η 太大   →  一步跨过碗底冲到对面更高处，再跨回来…来回震荡\n' +
+      'η 更大   →  越跳越远，损失越来越大，这叫发散</div>' +
+      '<p>用具体数字看震荡是怎么发生的。取 η=2，从 w=1 出发：</p>' +
+      '<div class="deriv">第1步：g = 1−3 = −2　w = 1 − 2×(−2) = <b>5</b>\n' +
+      '第2步：g = 5−3 = +2　w = 5 − 2×(+2) = <b>1</b>   ← 又回到原点\n' +
+      '第3步：回到 5 ……无限循环</div>' +
+      '<p>参数一直在「更新」，损失却一步都没降。这就是发散/震荡的真实画面。</p>' +
+      '<div class="why"><span class="lbl">一般判据（记不住可以跳过）</span>' +
+      '对形如 R(w)=½L(w−w*)² 的碗（L 是曲率），<b>η &lt; 2/L 才收敛</b>。本例 L=1，所以 η 必须小于 2；' +
+      '取 η=2 正好卡在临界点，于是一定震荡。这就是「学习率要调」背后的真实原因，不是玄学。</div>';
+    root.appendChild(ex3);
+
+    var ex4 = el("div", "explain");
+    ex4.innerHTML =
+      '<h4>六种方法：每一个都是为了补前一个的短板</h4>' +
+      '<p>别把这六个名字当成六个并列公式去死背。它们是一条线，每一步都在解决上一个的实际困难：</p>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>全批量 GD</b>：每步都用<b>全部</b>训练样本算梯度。<br>' +
+      '<span style="color:var(--muted)">痛点</span>：梯度最准，但十万条样本算一次梯度就要跑一遍全量前向+反向，一步都这么贵，根本训不完。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>小批量 SGD</b>：每步只抽一小批（比如 32 条）来估计梯度。<br>' +
+      '<span style="color:var(--muted)">解决了</span>：一步便宜几十倍，同样时间能走几千步。代价是方向有点抖——而抖其实还有好处，能帮模型跳出不好的局部。</div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c"><b>动量 Momentum</b>：<br>' +
+      '<span style="color:var(--muted)">痛点</span>：小批量的梯度方向抖，参数在山谷两侧来回横跳，走很多冤枉路。<br>' +
+      '<b>办法</b>：记一份「历史方向的平均」，像滚下山的球有惯性。同方向的分量越积越大，来回摇摆的分量互相抵消。</div></div>' +
+      '<div class="st"><div class="n">4</div><div class="c"><b>AdaGrad</b>：<br>' +
+      '<span style="color:var(--muted)">痛点</span>：不同参数该走多快完全不同（有的梯度一直很大，有的很小），大家共用一个 η 很别扭。<br>' +
+      '<b>办法</b>：给每个参数单独记「历史梯度平方和」，梯度大过的参数就把自己的步子调小。</div></div>' +
+      '<div class="st"><div class="n">5</div><div class="c"><b>RMSProp</b>：<br>' +
+      '<span style="color:var(--muted)">痛点</span>：AdaGrad 的历史量只增不减，走到后期分母越来越大，步子小到几乎不动，提前「走死」。<br>' +
+      '<b>办法</b>：把「累加」改成「移动平均」，让久远的梯度慢慢淡出，有效步子能恢复。</div></div>' +
+      '<div class="st"><div class="n">6</div><div class="c"><b>Adam = 动量 + RMSProp</b>：<br>' +
+      '既用移动平均记住<b>方向</b>（像动量），又用移动平均记住<b>尺度的平方</b>（像 RMSProp）。<br>' +
+      '<span style="color:var(--muted)">额外要处理</span>：两个量都从 0 开始，前几步会被这个 0 拖小，所以要「偏差修正」。</div></div>' +
+      '</div>';
+    root.appendChild(ex4);
+
+    var ex5 = el("div", "explain");
+    ex5.innerHTML =
+      '<h4>Adam 的三个式子，每一项为什么长这样</h4>' +
+      '<div class="deriv">mₜ = β₁·mₜ₋₁ + (1 − β₁)·gₜ      ← 方向的移动平均\n' +
+      'vₜ = β₂·vₜ₋₁ + (1 − β₂)·gₜ²     ← 平方的移动平均\n' +
+      'θ  = θ − η · m̂ / (√v̂ + ε)       ← 修正之后才用来更新</div>' +
+      '<p><b>问题一：为什么有个 (1 − β)？</b>因为它要保证「加权平均」的权重加起来等于 1。展开看最清楚（取 β=0.5）：</p>' +
+      '<div class="deriv">m₁ = 0.5·m₀ + 0.5·g₁\n' +
+      'm₂ = 0.5·m₁ + 0.5·g₂ = 0.25·g₁ + 0.5·g₂\n' +
+      '  注：若直接写 β·m + g（漏了 1−β），权重和会变成 1.5，越滚越大</div>' +
+      '<p>加了 (1−β) 之后：越近的梯度权重越大、越远越小，且总权重恒为 1。这就是<span class="term">指数移动平均</span>。</p>' +
+      '<p><b>问题二：为什么 m 和 v 要分开记两个量？</b>因为它们回答两个不同的问题：</p>' +
+      '<div class="deriv">m 记「往哪个方向」  ← 带正负号，来回摆动会互相抵消\n' +
+      'v 记「坡度有多大」  ← 平方过，只剩大小，不会抵消</div>' +
+      '<p>你既要知道往哪走（方向），又要知道该走多大步（尺度）。缺一个都不行。</p>' +
+      '<p><b>问题三：偏差修正为什么是除以 (1 − β<sup>t</sup>)？</b></p>' +
+      '<p>因为 m、v 的初值是 0，第一步就被这个 0 稀释了：</p>' +
+      '<div class="deriv">m₁ = β·0 + (1−β)·g₁ = (1−β)·g₁</div>' +
+      '<p>真实梯度是 g₁，但 m₁ 只有它的 (1−β) 倍。如果 β=0.9，m₁ 只剩真值的 10% —— <b>步子被压小 10 倍，前几步几乎原地不动。</b></p>' +
+      '<p>修正办法就是<b>除回去</b>。因为第 t 步零初值造成的稀释恰好是 (1−β<sup>t</sup>)：</p>' +
+      '<div class="deriv">m̂ₜ = mₜ / (1 − β₁ᵗ)\n\n' +
+      't=1：1 − 0.9¹ = 0.1    → m̂ = m/0.1，放大 10 倍，正好还原真值\n' +
+      't=2：1 − 0.9² = 0.19   → 修正系数随 t 增大趋近 1，影响越来越小</div>' +
+      '<div class="why"><span class="lbl">为什么手算题专门爱考这里</span>' +
+      '因为它考的是「你知不知道修正值<b>只用于当轮更新</b>」。m̂、v̂ 是为这一步临时算出来的，' +
+      '<b>不写回</b> m、v。下一步递推必须用原始的 mₜ、vₜ，否则后面全错。</div>';
+    root.appendChild(ex5);
+
     /* 公式与两种特例 */
     root.appendChild(el("h3", null, "六种方法一张辨认表"));
     var tb = el("div", "card");
@@ -1051,6 +1301,24 @@ SECTIONS.push({
     root.appendChild(el("h2", null, "05 · ResNet 的两种核心结构"));
     root.appendChild(el("p", "sub", "照片 7191 标了「RSNET要考」。两种核心结构，考其中一种。"));
 
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>先搞清楚：加层数为什么会变差</h4>' +
+      '<p>常识是「层数越多、模型越强」。但实际上，把网络加深到几十层后，<b>训练误差反而变大</b>了。' +
+      '注意：是训练误差，不是测试误差——所以<b>这不是过拟合</b>，是压根训不动。</p>' +
+      '<p>为什么训不动？因为加深网络等于让优化问题变得更难：梯度要穿过几十层连乘才能回到前面，越乘越小（甚至变成 0），前面的层几乎收不到「该往哪改」的信号。</p>' +
+      '<div class="analogy"><span class="lbl">残差的想法，一句话</span>' +
+      '与其让一段网络「学会变成某个 H(x)」，不如让它「学会 H(x) 比输入 x 多了什么」。<br>' +
+      '因为如果这一段其实什么都不用做（H(x) 就该等于 x），<b>学「多出来的部分是 0」比学「精确复刻一个恒等映射」容易太多了</b>。<br>' +
+      '学 0 只要把权重压到 0 就行；学恒等映射要让一堆矩阵乘起来恰好等于单位阵，极难。</div>' +
+      '<p><b>那条捷径为什么能救梯度？</b></p>' +
+      '<p>因为加法节点 <b>u = F(x) + x</b> 在反向时，会把同一份上游梯度<b>分给两条路</b>。' +
+      '其中「直接传 x」那条路上一个乘法都没有，梯度可以<b>原封不动地直达前面</b>，不需要连乘穿过多层。' +
+      '等于给梯度修了一条高速公路。</p>' +
+      '<div class="why"><span class="lbl">考试要点</span>' +
+      '加法节点<b>后面如果还有 ReLU，仍要乘上该 ReLU 的导数</b>——高速公路不是无限速，出口还有一道闸。</div>';
+    root.appendChild(ex);
+
     root.appendChild(el("h3", null, "① 残差在解决什么"));
     var c0 = el("div", "card");
     c0.innerHTML = '<p>深层网络的问题不是过拟合，是<b>优化不动</b>——层数加上去，训练误差反而不降。</p>' +
@@ -1060,6 +1328,27 @@ SECTIONS.push({
       '反传时加法节点把同一份上游梯度分给两条路，恒等捷径提供了一条直通路径，梯度不用连乘穿过多层就能回到前面。</div>' +
       '<div class="note warn">注意：加法后面如果还有激活，<b>仍要计入该激活的导数</b>。</div>';
     root.appendChild(c0);
+
+    var ex5b = el("div", "explain");
+    ex5b.innerHTML =
+      '<h4>BasicBlock 和 Bottleneck，到底在取舍什么</h4>' +
+      '<p>两者的区别就一句话：<b>Bottleneck 把 3×3 卷积放在「更窄的通道」上做。</b></p>' +
+      '<div class="deriv">BasicBlock    3×3 → 3×3\n' +
+      '              两个大核连着干，简单直接\n\n' +
+      'Bottleneck    1×1（降） → 3×3（干活） → 1×1（升）\n' +
+      '              先把通道压窄，在窄通道上做 3×3，事后再升回去</div>' +
+      '<p><b>为什么要绕这一圈？</b>因为 3×3 卷积的计算量跟<b>通道数的平方</b>成正比。' +
+      '256 通道直接做 3×3，要 9×256×256 ≈ 59 万个权重；先降到 64 再做，只要 9×64×64 ≈ 3.7 万。' +
+      '省下来的算力可以拿去堆更多层。这就是为什么 ResNet-50 能有 50 层还跑得动。</p>' +
+      '<div class="analogy"><span class="lbl">打个比方</span>' +
+      '你要加工一批很宽的钢板。直接上大机器加工，机器又贵又慢。<br>' +
+      'Bottleneck 的做法是：先把钢板切成窄条（1×1 降通道）→ 用便宜的小机器加工窄条（3×3）→ 再把窄条拼回宽板（1×1 升通道）。<br>' +
+      '总效果差不多，成本低一个数量级。</div>' +
+      '<div class="why"><span class="lbl">捷径那部分，判断规则只有一条</span>' +
+      '<b>输出的高、宽、通道，三者只要有一个跟输入不一样，就不能直接相加，必须用 1×1 卷积投影对齐。</b><br>' +
+      '最容易漏的情况：高宽没变、只有通道变了（比如 64→256），照样要投影。' +
+      'ResNet-50 第一阶段的首块就是这种情形。</div>';
+    root.appendChild(ex5b);
 
     /* 主结构切换 */
     root.appendChild(el("h3", null, "② 两种核心结构"));
@@ -1197,7 +1486,42 @@ SECTIONS.push({
     refresh3(); root.appendChild(c3);
 
     /* 结构表 */
-    root.appendChild(el("h3", null, "④ 结构表怎么读"));
+    root.appendChild(el("h3", null, "④ 参数量怎么数"));
+    var ex5c = el("div", "explain");
+    ex5c.innerHTML =
+      '<h4>params = (Kh × Kw × Cin + 1) × Cout，每一项从哪来</h4>' +
+      '<p>把一个卷积层拆成「一个核长什么样」和「有几个这样的核」两件事看：</p>' +
+      '<div class="deriv">params = ( Kh × Kw × Cin + 1 ) × Cout\n\n' +
+      '拆开读：\n' +
+      '  Kh × Kw   一个核在空间上的格子数\n' +
+      '  × Cin     它要覆盖全部输入通道，所以要再乘通道数\n' +
+      '  + 1       每个核配一个偏置\n' +
+      '  × Cout    有几个这样的核（就等于输出通道数）</div>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>Kh × Kw</b>：一个核在空间上是 Kh 行 Kw 列，所以有这么多格。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>× Cin</b>：这是最容易被漏的一项。<br>' +
+      '<b>一个核要同时和所有输入通道打交道</b>。RGB 图有 3 个通道，那这个核实际上不是一个 5×5 的薄片，' +
+      '而是 <b>5×5×3 的三层薄片</b>——每层负责一个输入通道。<br>' +
+      '<span style="color:var(--muted)">所以核的「通道数」永远等于输入通道数，这不是巧合，是定义。</span></div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c"><b>+1</b>：每个核配一个偏置 b，加一次。</div></div>' +
+      '<div class="st"><div class="n">4</div><div class="c"><b>× Cout</b>：输出有多少个通道，就意味着有<b>多少个不同的核</b>。<br>' +
+      '因为一个核只产生一张响应图，要得到 96 张响应图，就得有 96 个不同的核。<br>' +
+      '<b>「核的数量」和「输出通道数」是同一个数。</b></div></div>' +
+      '</div>' +
+      '<div class="why"><span class="lbl">用 AlexNet 首层走一遍</span>' +
+      '输入 227×227×<b>3</b>，96 个 <b>11×11</b> 的核：<br>' +
+      '· 一个核的空间大小：11×11 = 121<br>' +
+      '· 它要覆盖 3 个输入通道：121 × 3 = <b>363</b><br>' +
+      '· 加一个偏置：363 + 1 = <b>364</b>（这是一个完整核的参数量）<br>' +
+      '· 有 96 个这样的核：364 × 96 = <b>34,944</b></div>' +
+      '<div class="analogy"><span class="lbl">为什么卷积比全连接省这么多</span>' +
+      '同样输出 55×55×96 个值：<br>' +
+      '· 卷积：<b>3.5 万</b>个参数，因为所有位置<b>共用</b>同一组核权重（权值共享）<br>' +
+      '· 全连接：每个输出位置都要单独连 227×227×3 个输入 = 天文数字<br>' +
+      '差距来自「共享」这两个字，不是来自「核小」。</div>';
+    root.appendChild(ex5c);
+
+    root.appendChild(el("h3", null, "⑤ 结构表怎么读"));
     var c4 = el("div", "card");
     c4.innerHTML = '<table class="tbl"><tr><th>部位</th><th>高×宽</th><th>ResNet-18</th><th>ResNet-50</th></tr>' +
       '<tr><td>首层卷积后</td><td class="num">112×112</td><td>64 通道</td><td>64 通道</td></tr>' +
@@ -1251,6 +1575,30 @@ SECTIONS.push({
   render: function(root){
     root.appendChild(el("h2", null, "06 · 卷积运算"));
     root.appendChild(el("p", "sub", "照片 7209 标了「尤其重要」。要求会计算：正向、反向（dX / dK）、转置卷积。"));
+
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>卷积到底在干什么？先别管公式</h4>' +
+      '<p>卷积核是一个<b>很小的「图案探测器」</b>。你把它在图上滑来滑去，每到一处就问一句：</p>' +
+      '<p style="text-align:center; font-size:14px"><b>「这一小块地方，长得像不像我要找的这个图案？」</b></p>' +
+      '<p>怎么回答？把这一小块和核<b>对应位置的数乘起来再相加</b>。像的地方得分高，不像的地方得分低，甚至是负数。' +
+      '于是滑完一整张图，你就得到了一张「哪里像这个图案」的<b>响应图</b>——这就是输出的那 4 个数字在说的事。</p>' +
+      '<div class="analogy"><span class="lbl">打个比方</span>' +
+      '你把一张半透明的模板（卷积核）盖在照片上，一格一格挪。<br>' +
+      '每挪到一处，就看模板上的刻度和照片对应位置的明暗有多吻合，记一个分。<br>' +
+      '挪完全图，得到一张「吻合度地图」。<b>这一整套动作就叫一次卷积。</b></div>' +
+      '<p><b>为什么核要「共享」？</b>同一个核在一张图上滑了 4 次（或几千次），用的是<b>同一组权重</b>。原因有两条：</p>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>省参数。</b>一张 100×100 的图，如果全连接，要 1 万个输入各连一个权重；' +
+      '用 3×3 的核只要 9 个权重就能扫全图。这是卷积能处理图片的根本原因。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>平移不变。</b>猫在左上角和在右下角，都是猫。' +
+      '共享权重意味着「这个探测器不管图里哪个位置都同样有效」，正好符合这个需求。</div></div>' +
+      '</div>' +
+      '<div class="why"><span class="lbl">关于「翻转核」这件事，一句话讲清</span>' +
+      '数学课本里卷积的定义是「先把核翻过来，再乘加」。深度学习里<b>不翻</b>，直接乘加，' +
+      '这个动作严格叫<span class="term">互相关（cross-correlation）</span>，但习惯上还是叫卷积。<br>' +
+      '<b>所以：题面写「CNN 卷积」就用原核；明确写「按卷积定义」才翻核。</b>核若中心对称，翻不翻结果一样。</div>';
+    root.appendChild(ex);
 
     var CASES = {
       cls: { name: "课堂原题（10.19）", X: [[1,2,3],[4,5,6],[7,8,9]], K: [[1,0],[-1,2]], G: [[1,2],[3,4]] },
@@ -1491,6 +1839,56 @@ SECTIONS.push({
     bRst.addEventListener("click", reset);
     reset();
 
+    /* ---- 反向传播的原理（学生最容易糊的地方） ---- */
+    var ex6b = el("div", "explain");
+    ex6b.innerHTML =
+      '<h4>为什么求 dX 要「回填累加」，为什么 dX 用核、dK 用输入值</h4>' +
+      '<p>这两个问题其实是同一件事的两面。从一个中学生都懂的式子开始看：</p>' +
+      '<div class="deriv">y = x · k\n\n' +
+      '对 x 求导 → 得到 k      （局部导数是 k）\n' +
+      '对 k 求导 → 得到 x      （局部导数是 x）</div>' +
+      '<p>看到没？<b>相乘的两个数互相是对方的导数。</b>卷积就是一大堆相乘再相加，所以这条规则直接搬过来：</p>' +
+      '<div class="deriv">求 dX 时：局部导数 = 卷积核里的权重 K\n' +
+      '求 dK 时：局部导数 = 窗口里的输入值 X</div>' +
+      '<p>就这么简单。<b>dX 拿核权重乘梯度，dK 拿输入值乘梯度</b>——不是两条要背的规则，是同一句话。</p>' +
+      '<p><b>那「回填累加」又是怎么回事？</b></p>' +
+      '<p>因为前向时，<b>输入里的同一个格子被好几个输出格反复用到了</b>。看中间那个格子，它同时落在左上、右上、左下、右下四个窗口里。</p>' +
+      '<p>反向时，这四个输出格都想对「改它」这件事发表意见，各自送来一份梯度。' +
+      '按链式法则，影晌要<b>全部加起来</b>，不能只取最后一份：</p>' +
+      '<div class="deriv">dL/dX(中央) = 来自左上窗的贡献\n' +
+      '           + 来自右上窗的贡献\n' +
+      '           + 来自左下窗的贡献\n' +
+      '           + 来自右下窗的贡献</div>' +
+      '<div class="analogy"><span class="lbl">打个比方</span>' +
+      '四个人共同出资买了一件东西（输入的那个格子被四次用到）。' +
+      '现在要算「这件东西总共花了多少」，得把四份出资<b>加在一起</b>，不能只看最后一个掏钱的人。<br>' +
+      '角上的格子只被用到一次，所以它的梯度就只有一份，简单。中间的格子被用到四次，所以要收四份。</div>' +
+      '<div class="why"><span class="lbl">自查方法：看形状</span>' +
+      '<b>dX 一定和输入 X 同形；dK 一定和卷积核 K 同形。</b>写完先看形状对不对，能挡掉一大半错误。<br>' +
+      '如果 dX 算成了输出的大小，说明你把「回填」做成了「直接赋值」，累加那一步漏了。</div>';
+    root.appendChild(ex6b);
+
+    /* ---- 尺寸公式的由来 ---- */
+    var ex6c = el("div", "explain");
+    ex6c.innerHTML =
+      '<h4>输出尺寸那个公式，为什么要向下取整</h4>' +
+      '<div class="deriv">Lout = ⌊(Lin + 2P − K) / S⌋ + 1</div>' +
+      '<p>一项一项读：</p>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>Lin + 2P</b>：先在左右各补 P 圈（通常是补 0）。' +
+      '补边是为了让边缘的像素也有机会被「完整窗口」覆盖到，同时保住尺寸。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>减 K</b>：第一个窗口要占掉 K 格，所以核最多还能往后挪 (Lin+2P−K) 格。</div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c"><b>除以 S，再取整</b>：每次挪 S 格，所以能挪几次是「距离 ÷ 步长」。' +
+      '<b>取整是因为不许半个窗口</b>——剩下不够一个窗口的部分直接丢掉。</div></div>' +
+      '<div class="st"><div class="n">4</div><div class="c"><b>+1</b>：不要忘了起点本身也算一个位置。挪 0 次也是 1 个窗口。</div></div>' +
+      '</div>' +
+      '<div class="why"><span class="lbl">举例验证</span>' +
+      '7×7 输入、3×3 核、步长 2、不补边：<br>' +
+      '(7 + 0 − 3) / 2 = 2，取整得 2，再 +1 = <b>3</b>。<br>' +
+      '起点分别落在第 1、3、5 格，共 3 个窗口，正好把 7 格用完还剩 1 格。<b>那条剩的边就丢掉了。</b></div>' +
+      '<div class="note warn">高度和宽度要<b>分别算</b>。输入不是正方形时，两个方向的答案不一样。</div>';
+    root.appendChild(ex6c);
+
     /* ---------- 尺寸计算器 ---------- */
     root.appendChild(el("h3", null, "尺寸与参数量计算器"));
     var cc = el("div", "card");
@@ -1557,6 +1955,37 @@ SECTIONS.push({
   render: function(root){
     root.appendChild(el("h2", null, "07 · 计算图与反向传播"));
     root.appendChild(el("p", "sub", "前向从左往右记数值，反向从损失往回乘局部导数。"));
+
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>先讲清「链式法则」——反向传播全靠这一条</h4>' +
+      '<p>假设你开车，油耗取决于车速，车速又取决于油门。</p>' +
+      '<p>你踩深一点油门，油耗会变多少？答案是<b>两段相乘</b>：</p>' +
+      '<div class="deriv">(d油耗/d车速) × (d车速/d油门)\n\n' +
+      '  第一段：车速变一点，油耗变多少\n' +
+      '  第二段：油门变一点，车速变多少\n' +
+      '  乘起来：油门变一点，油耗变多少</div>' +
+      '<p>这就是<span class="term">链式法则</span>，写成公式：</p>' +
+      '<div class="deriv">y = f(g(x))  →  dy/dx = f\'(g(x)) · g\'(x)\n\n' +
+      '一句话：外层导数 × 内层导数，一路乘下去。</div>' +
+      '<p><b>那「计算图」是干什么的？</b></p>' +
+      '<p>一个复杂公式（比如 ŷ = ReLU(w·x+b) + w）没法一步求导。但如果把它<b>拆成一个个只做一件事的小节点</b>' +
+      '（乘、加、减、ReLU、平方），每个小节点的导数都简单到可以心算，' +
+      '那么整条链路的导数就是把沿途所有小导数<b>连乘起来</b>。</p>' +
+      '<div class="analogy"><span class="lbl">打个比方</span>' +
+      '计算图就是一张「工序流程图」。前向是照着图从原料走到成品，每一步都记下当时的数值；' +
+      '反向是从成品往回走，每退一步就问「这步工序会把这个误差放大还是缩小几倍」，' +
+      '把倍数一路乘回去。<b>最后得到的数，就是「原料改一点，成品会变多少」。</b></div>' +
+      '<div class="why"><span class="lbl">为什么分支一定要「相加」</span>' +
+      '如果同一个变量（比如 w）在公式里出现了两次，说明图上有<b>两条路</b>都能从 w 走到损失。<br>' +
+      '两条路各自都算出一个「w 改一点、损失变多少」，那就得<b>把两个影响力加起来</b>——' +
+      '因为它们同时、独立地起作用。<br>' +
+      '<b>漏掉一条，梯度就少算一部分。</b>这是本章最容易失分的地方。</div>' +
+      '<div class="why"><span class="lbl">为什么 ReLU 一关，梯度就断了</span>' +
+      'ReLU 在 z &lt; 0 时输出恒为 0，斜率也是 0。链式法则是连乘，<b>乘一个 0，整条链就归零了</b>。<br>' +
+      '所以那一路的梯度传不回去。但注意：如果这个参数还有<b>别的路</b>（比如 w 的直接支路），' +
+      '那条路仍然照常给梯度。所以「某条路断了」≠「这个参数没梯度」。</div>';
+    root.appendChild(ex);
 
     var P = { x: 2, w: 1, b: 1, y: 2 };
     var card = el("div", "card");
@@ -1684,6 +2113,34 @@ SECTIONS.push({
     root.appendChild(el("h2", null, "08 · 损失函数与交叉熵"));
     root.appendChild(el("p", "sub", "拖着 logit 滑块，看概率、损失、梯度一起变。"));
 
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>先搞清三个东西各自在干什么</h4>' +
+      '<p>模型最后吐出的是三个原始分数（叫 <span class="term">logit</span>），比如 (0, 1.2, 0.2)。' +
+      '它们可正可负、加起来也不等于 1，<b>不是概率，不能直接比大小当概率用</b>。</p>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>Softmax：把分数变成概率</b><br>' +
+      '先取 exp（保证变正），再除以总和（保证加起来等于 1）。<br>' +
+      '<span style="color:var(--muted)">为什么用 exp 而不是别的？</span>因为 exp 能保留大小顺序、把差距放大、且永远为正，' +
+      '再配上「除以和」就得到一组干净的概率分布。而且它求导特别漂亮（见下面梯度那节）。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>交叉熵：给「预测概率」打分</b><br>' +
+      'ℓ = −ln(模型给正确答案的概率)。<br>' +
+      '<span style="color:var(--muted)">为什么取负对数？</span>因为概率越接近 1，−ln 越接近 0（答得越好分越低，符合「损失」的含义）；' +
+      '概率越接近 0，−ln 冲得越大（答得越离谱罚得越狠）。<b>这个「罚得狠」是关键</b>——它逼模型别乱自信。</div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c"><b>求梯度：告诉模型该往哪改</b><br>' +
+      '∂ℓ/∂z = q − p，也就是「预测概率 − 真实标签」。<br>' +
+      '真类那一项是负数（q &lt; 1），所以下降时<b>真类分数会被推高</b>，其他类被压低。</div></div>' +
+      '</div>' +
+      '<p><b>为什么分类不用平方损失？</b></p>' +
+      '<p>因为平方损失配 Softmax 会「学得慢」。当模型错得很离谱时（真类概率接近 0），' +
+      '交叉熵的梯度仍然很大，会狠狠纠正；而平方损失的梯度会因为 Sigmoid/Softmax 饱和而变得极小，' +
+      '错得越狠反而学得越慢——这显然不对。交叉熵没有这个毛病。</p>' +
+      '<div class="analogy"><span class="lbl">一句话记住交叉熵在惩罚什么</span>' +
+      '它在惩罚「<b>模型给正确答案的把握太小</b>」。<br>' +
+      '答对了但只有 51% 把握 → 轻罚；答对了有 99% 把握 → 几乎不罚；' +
+      '答错且很自信 → 重罚。这正是我们想要的打分方式。</div>';
+    root.appendChild(ex);
+
     var card = el("div", "card");
     var L = { z: [0, 1.2, 0.2], cls: 1 };
     var segT = el("div", "seg");
@@ -1750,6 +2207,35 @@ SECTIONS.push({
     refresh();
 
     root.appendChild(el("h3", null, "老师视频里那段推导（PDF 漏掉的部分）"));
+
+    var ex8b = el("div", "explain");
+    ex8b.innerHTML =
+      '<h4>交叉熵公式 H(p,q) = −Σ p log q，每个字母是谁</h4>' +
+      '<p>这个式子最容易搞混的地方是：<b>为什么求和外面乘的是 p，而 log 里却是 q？</b></p>' +
+      '<div class="deriv">H(p,q) = − Σ p(x) · log q(x)\n\n' +
+      '拆开读：\n' +
+      '  p(x)      这件事在现实中发生的概率 → 当权重用，是固定的\n' +
+      '  log q(x)  模型给出的概率 → 被评价的对象，是要改的\n' +
+      '  −         加负号，把「多离谱」变成正数的「罚」\n' +
+      '  Σ         按现实情况加权求和</div>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>p(x) 是权重</b>，代表「这件事在现实中发生的概率有多大」。' +
+      '现实里发生了什么，是客观事实，不随模型变化。所以 p 是<b>固定的</b>。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>log q(x) 是被评价的对象</b>。q 是模型自己猜的概率分布，是<b>要改的东西</b>。<br>' +
+      '模型给某个结果的概率越离谱（q 很小），log q 越负，前面加上负号就越大 → 罚得越狠。</div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c"><b>Σ 加权求和</b>的意思是：按现实情况，把各种结果被罚的程度平均起来。<br>' +
+      '不太可能发生的错误（p 小），罚一点；经常发生的错误（p 大），重罚。</div></div>' +
+      '</div>' +
+      '<div class="analogy"><span class="lbl">用编码打比方（老师视频里的讲法）</span>' +
+      '把分布想成一套「密码本」。<br>' +
+      '<b>熵 H(p)</b> = 你完全了解真实情况 p，为它设计最省字的编码，平均每条消息要花多少字。<br>' +
+      '<b>交叉熵 H(p,q)</b> = 真实情况还是 p，但<b>你拿了一套按 q 设计的密码本</b>去编它，平均要多花多少字。<br>' +
+      '<b>多花的那部分</b>，就是 KL 散度。<br>' +
+      '所以：<b>交叉熵 = 熵 + 多花的冤枉字</b>。</div>' +
+      '<div class="why"><span class="lbl">为什么分类任务可以直接拿交叉熵当损失</span>' +
+      '因为真实标签是 one-hot（百分百确定是第 k 类），这种情况下最省字的编码一个字都不用花，<b>熵 = 0</b>。<br>' +
+      '于是「多花的冤枉字」就等于交叉熵本身。最小化交叉熵 ≡ 让预测分布贴近真实标签分布。这就是老师的结论。</div>';
+    root.appendChild(ex8b);
     var c2 = el("div", "card");
     c2.innerHTML =
       '<p>那页 PPT 只有四行：</p>' +
@@ -1800,6 +2286,42 @@ SECTIONS.push({
     root.appendChild(el("h2", null, "09 · 熵与决策树"));
     root.appendChild(el("p", "sub", "先搞懂「惊讶程度」，再算四种熵，最后把贷款题走一遍。"));
 
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>信息量 −log p 是怎么来的？不能随便定个公式吗</h4>' +
+      '<p>能推出来一点，不用硬背。我们希望「信息量」这个东西满足三条常识：</p>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>必然发生的事，信息量为 0。</b>「太阳明天会升起」这句话没有任何信息。' +
+      '所以 p=1 时，信息量应该是 0。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>越罕见的事，信息量越大。</b>「明天下雪」比「明天晴天」信息量大。</div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c"><b>两件独立的事同时发生，信息量应该相加。</b>' +
+      '「抛硬币正面」+「掷骰子出 6」，两条消息一起收到的信息量 = 各自之和。</div></div>' +
+      '</div>' +
+      '<p>满足「p=1 时为 0」「单调递减」「可加」这三个要求的函数，对数恰好是唯一自然的选择。' +
+      '因为独立事件的概率是<b>相乘</b>的（p₁×p₂），而对数能把相乘变成<b>相加</b>：</p>' +
+      '<div class="deriv">log(p₁ · p₂) = log p₁ + log p₂</div>' +
+      '<p>再配上负号让结果为正，就得到 <b>信息量 = −log p</b>。</p>' +
+      '<div class="why"><span class="lbl">底数为什么常用 2</span>' +
+      '用 2 为底时，单位叫 <b>bit</b>，含义很实在：<b>「用最优编码方案编这条消息，平均要几位二进制」</b>。<br>' +
+      '例：概率 1/8 的事件，−log₂(1/8) = 3，意思是「8 种等可能里挑 1 个，需要 3 位二进制」（2³=8）。</div>' +
+      '<p><b>那「熵」又是什么？</b></p>' +
+      '<p>信息量说的是「某一个结果」有多意外。但抽之前我们面对的是<b>一整个分布</b>。' +
+      '熵 = 把每种结果的信息量，<b>按它出现的概率加权平均</b>：</p>' +
+      '<div class="deriv">H(p) = − Σ pₖ · log pₖ\n\n' +
+      '拆开读：\n' +
+      '  pₖ        这个结果出现的概率（当权重用）\n' +
+      '  −log pₖ   这个结果一旦出现，能带来多少信息量\n' +
+      '  Σ         按概率加权平均\n\n' +
+      '所以熵 = 「平均每个结果带来多少信息量」\n' +
+      '       = 「抽之前，平均有多不确定」</div>' +
+      '<p>所以熵的含义是：<b>抽之前，平均有多不确定。</b>或者说「平均每次要接收多少信息量才能确定结果」。</p>' +
+      '<div class="analogy"><span class="lbl">决策树为什么盯上熵</span>' +
+      '决策树每一步都在问「用哪个特征把样本分开，能让每组里的人尽量一致」。<br>' +
+      '「一致」＝「不确定度低」＝「熵小」。<br>' +
+      '所以：<b>分完之后，各组的加权平均熵（条件熵）比原来的熵小了多少 → 这就是信息增益。</b><br>' +
+      '减少得越多，说明这个问题越有诊断价值，就越该拿它当根节点。</div>';
+    root.appendChild(ex);
+
     /* --- 熵曲线 --- */
     root.appendChild(el("h3", null, "① 熵是什么：惊讶程度的平均"));
     var c1 = el("div", "card");
@@ -1842,6 +2364,43 @@ SECTIONS.push({
 
     /* --- 四种熵 --- */
     root.appendChild(el("h3", null, "② 决策树要算的四个量（别混）"));
+    var ex9b = el("div", "explain");
+    ex9b.innerHTML =
+      '<h4>四个公式，逐个符号拆开看它到底在算谁</h4>' +
+      '<p><b>① 条件熵 H(D|A) = Σ (|Dᵥ|/|D|) · H(Dᵥ)</b></p>' +
+      '<div class="deriv">H(D|A) = Σ (|Dᵥ| / |D|) · H(Dᵥ)\n\n' +
+      '拆开读：\n' +
+      '  Σ            把各组的贡献加起来\n' +
+      '  |Dᵥ| / |D|   这一组样本数 ÷ 总样本数 = 这组占多大比例（权重）\n' +
+      '  H(Dᵥ)        这一组内部的乱度\n\n' +
+      '一句话：按「每组占多大比例」，把「各组的乱度」加权平均。\n' +
+      '直观：分完之后，整体还有多乱？</div>' +
+      '<p><b>② 信息增益 g = H(D) − H(D|A)</b></p>' +
+      '<div class="deriv">分之前多乱  −  分之后还有多乱  =  乱度减少了多少\n' +
+      '减少得多 → 这个问题问得好 → 值得拿它来分</div>' +
+      '<p><b>③ 划分熵 HA(D) = −Σ (|Dᵥ|/|D|) log₂(|Dᵥ|/|D|)</b></p>' +
+      '<div class="deriv">注意：式子里只有「组有多大」——\n' +
+      '      完全没有出现标签！\n\n' +
+      '它算的是「样本被分到哪一支有多不确定」，\n' +
+      '和标签是什么、纯不纯，一点关系都没有。</div>' +
+      '<p><b>④ 增益比 gR = g / HA</b></p>' +
+      '<div class="deriv">信息增益 ÷ 划分熵\n' +
+      '= 「乱度减少量」÷「分得多零碎」\n\n' +
+      '分得越零碎（支数越多），HA 越大，除下来越小\n' +
+      '→ 这就是压制「偏爱多取值特征」的机制</div>' +
+      '<div class="why"><span class="lbl">最容易混的一处，说到底就是「求和里面放什么」</span>' +
+      '两个公式的<b>加权权重完全一样</b>，都是 |Dᵥ|/|D|。<br>' +
+      '区别只在<b>求和的是什么东西</b>：<br>' +
+      '· 条件熵 → 求和里面是 <b>H(Dᵥ)，组内标签的乱度</b>（关心标签）<br>' +
+      '· 划分熵 → 求和里面是 <b>log₂(组占比)</b>（只关心组有多大，不看标签）<br>' +
+      '抓住这一句，这两个量就再也不会搞反。</div>' +
+      '<div class="analogy"><span class="lbl">为什么「按学号拆」是经典反例</span>' +
+      '假设你按唯一学号把 15 人拆成 15 组，每组只有 1 个人。<br>' +
+      '每组内部标签必然「纯」（就一个人，不是批就是拒），所以每个 H(Dᵥ) = 0，条件熵 = 0，' +
+      '信息增益 = H(D) − 0 = 最大值。<b>看起来很完美。</b><br>' +
+      '但这毫无意义——你没学到任何规律，只是把每个人的答案原样记住了。<br>' +
+      '<b>划分熵此时是 log₂15 ≈ 3.9，很大</b>，增益比 = 大数/大数，一下就被压下去。这就是它存在的理由。</div>';
+    root.appendChild(ex9b);
     var c2 = el("div", "card");
     c2.innerHTML = '<table class="tbl"><tr><th>量</th><th style="text-align:left">用哪些比例</th><th style="text-align:left">回答什么</th></tr>' +
       '<tr><td>父节点熵 H(D)</td><td style="text-align:left">父节点内各类别占比</td><td style="text-align:left">分组前有多混杂</td></tr>' +
