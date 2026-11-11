@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 不用 AppCompat，直接用系统主题；只要没有 ActionBar（WebView 铺满）
+         背景色引用 bg_launch：values/ 下是浅色，values-night/ 下是深色，
+         系统深色模式切换时自动跟着变，启动瞬间不会闪白/闪黑 -->
+    <style name="AppTheme" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar">
+        <item name="android:windowBackground">@color/bg_launch</item>
+        <item name="android:statusBarColor">@color/bg_launch</item>
+        <item name="android:navigationBarColor">@color/bg_launch</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>

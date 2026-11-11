@@ -1,0 +1,3048 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>机器学习 9 考点</title>
+<link rel="stylesheet" href="katex/katex.min.css">
+<style>
+/* ========== 主题变量 ========== */
+html[data-theme="light"]{
+  --bg:#f5f7fa; --panel:#ffffff; --panel2:#eef2f7; --fg:#141a21; --fg2:#3d4a58;
+  --muted:#6b7885; --line:#dfe5ec; --accent:#2563eb; --accent2:#0e9f6e;
+  --warn:#d97706; --danger:#dc2626; --grid:#c9d3dd; --shadow:0 1px 3px rgba(16,24,40,.08),0 1px 2px rgba(16,24,40,.04);
+  --chip:#e8eef8; --chipfg:#1d4ed8;
+}
+html[data-theme="dark"]{
+  --bg:#0e1318; --panel:#161d24; --panel2:#1d262e; --fg:#e7edf3; --fg2:#c2cdd8;
+  --muted:#8fa0b0; --line:#26313b; --accent:#6aa5ff; --accent2:#34d399;
+  --warn:#fbbf24; --danger:#f87171; --grid:#33414d; --shadow:0 1px 3px rgba(0,0,0,.5);
+  --chip:#1c2b3f; --chipfg:#9ec5ff;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--fg);
+  font-family:-apple-system,"PingFang SC","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;
+  font-size:15px; line-height:1.65;
+  -webkit-text-size-adjust:100%;
+  padding-bottom:calc(64px + env(safe-area-inset-bottom));
+  transition:background .18s,color .18s;
+}
+/* ========== 顶栏 ========== */
+#topbar{
+  position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:8px;
+  padding:calc(6px + env(safe-area-inset-top)) 12px 6px;
+  background:var(--panel); border-bottom:1px solid var(--line);
+}
+#topbar h1{font-size:15px; margin:0; flex:1; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.iconbtn{
+  border:1px solid var(--line); background:var(--panel2); color:var(--fg);
+  width:38px; height:38px; border-radius:10px; font-size:17px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+}
+.iconbtn:active{transform:scale(.94)}
+/* ========== 主区 ========== */
+main{padding:12px 12px 20px; max-width:760px; margin:0 auto}
+h2{font-size:19px; margin:4px 0 2px; line-height:1.35}
+.sub{color:var(--muted); font-size:12.5px; margin:0 0 14px}
+h3{font-size:15px; margin:20px 0 8px; color:var(--fg); border-left:3px solid var(--accent); padding-left:8px}
+h4{font-size:13.5px; margin:14px 0 6px; color:var(--fg2)}
+p{margin:8px 0}
+small{color:var(--muted); font-size:12px}
+code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace}
+code{background:var(--panel2); padding:1px 5px; border-radius:5px; font-size:12.5px}
+/* ========== 卡片 ========== */
+.card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; margin:12px 0; box-shadow:var(--shadow)}
+.grid{display:grid; gap:10px}
+@media(min-width:520px){ .grid.two{grid-template-columns:1fr 1fr} }
+/* 首页考点卡 */
+.tile{
+  background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:13px 14px;
+  display:flex; gap:12px; align-items:flex-start; cursor:pointer; box-shadow:var(--shadow);
+  transition:transform .12s,border-color .12s;
+}
+.tile:active{transform:scale(.985); border-color:var(--accent)}
+.tile .n{
+  flex:0 0 auto; width:30px; height:30px; border-radius:9px; background:var(--chip); color:var(--chipfg);
+  font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center;
+}
+.tile .t{font-weight:600; font-size:14.5px; margin-bottom:2px}
+.tile .d{color:var(--muted); font-size:12px; line-height:1.5}
+.tile .badge{font-size:10.5px; padding:1px 6px; border-radius:6px; background:var(--warn); color:#fff; margin-left:6px; vertical-align:2px}
+/* ========== 控件 ========== */
+.row{display:flex; align-items:center; gap:10px; margin:10px 0; flex-wrap:wrap}
+.row label{font-size:12.5px; color:var(--muted); flex:0 0 auto; min-width:64px}
+input[type=range]{
+  -webkit-appearance:none; appearance:none; flex:1; height:34px; background:transparent; min-width:120px;
+}
+input[type=range]::-webkit-slider-runnable-track{height:5px; background:var(--panel2); border-radius:3px; border:1px solid var(--line)}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:22px; height:22px; border-radius:50%; background:var(--accent);
+  margin-top:-9px; border:2px solid var(--panel); box-shadow:0 1px 4px rgba(0,0,0,.3);
+}
+input[type=range]::-moz-range-track{height:5px; background:var(--panel2); border-radius:3px}
+input[type=range]::-moz-range-thumb{width:20px; height:20px; border:2px solid var(--panel); border-radius:50%; background:var(--accent)}
+.val{font-family:ui-monospace,Consolas,monospace; font-size:13px; color:var(--accent); min-width:52px; text-align:right; font-weight:600}
+.btn{
+  border:1px solid var(--line); background:var(--panel2); color:var(--fg);
+  padding:9px 14px; border-radius:10px; font-size:13.5px; cursor:pointer; font-weight:500;
+  min-height:40px; display:inline-flex; align-items:center; justify-content:center; gap:6px;
+}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--accent); color:#fff; border-color:var(--accent)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:6px 10px; min-height:32px; font-size:12.5px}
+.btn.on{background:var(--accent); color:#fff; border-color:var(--accent)}
+.btn:disabled{opacity:.45}
+.seg{display:inline-flex; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--panel2)}
+.seg button{
+  border:0; background:transparent; color:var(--fg2); padding:8px 12px; font-size:12.5px;
+  cursor:pointer; min-height:36px; border-right:1px solid var(--line);
+}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--accent); color:#fff; font-weight:600}
+/* ========== 表格 ========== */
+.tbl{width:100%; border-collapse:collapse; font-size:12.5px; margin:8px 0}
+.tbl th,.tbl td{border:1px solid var(--line); padding:6px 7px; text-align:right}
+.tbl th{background:var(--panel2); font-weight:600; color:var(--fg2); text-align:center}
+.tbl td:first-child,.tbl th:first-child{text-align:left}
+.tbl tr.hi td{background:var(--chip); font-weight:600}
+.tbl td.num{font-family:ui-monospace,Consolas,monospace}
+/* ========== 公式块 ========== */
+.formula{
+  background:var(--panel2); border-radius:10px; padding:11px 13px; margin:9px 0;
+  font-family:ui-monospace,Consolas,"DejaVu Sans Mono",monospace; font-size:13px;
+  line-height:1.9; overflow-x:auto; white-space:pre-wrap; word-break:break-word; color:var(--fg);
+}
+/* ========== 提示条 ========== */
+.note{
+  border-left:3px solid var(--accent); background:var(--panel2); border-radius:0 9px 9px 0;
+  padding:9px 12px; margin:10px 0; font-size:13px; color:var(--fg2);
+}
+.note.warn{border-left-color:var(--warn)}
+.note.danger{border-left-color:var(--danger)}
+.note.ok{border-left-color:var(--accent2)}
+.note b{color:var(--fg)}
+/* ========== canvas ========== */
+canvas{display:block; width:100%; border-radius:10px; background:var(--panel2); touch-action:pan-y}
+/* ========== 矩阵 ========== */
+.mat{display:inline-grid; gap:3px; vertical-align:middle}
+.mat span{
+  min-width:38px; height:34px; display:flex; align-items:center; justify-content:center;
+  background:var(--panel2); border:1px solid var(--line); border-radius:6px;
+  font-family:ui-monospace,Consolas,monospace; font-size:12.5px; transition:all .22s;
+}
+.mat span.act{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700; transform:scale(1.06)}
+.mat span.out{background:var(--accent2); color:#fff; border-color:var(--accent2); font-weight:700}
+.mat span.zero{color:var(--muted)}
+.matwrap{display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:center; margin:10px 0}
+.matlabel{font-size:11px; color:var(--muted); text-align:center; margin-top:4px}
+/* ========== 底栏 ========== */
+#tabbar{
+  position:fixed; left:0; right:0; bottom:0; z-index:50; display:flex;
+  background:var(--panel); border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#tabbar button{
+  flex:1; border:0; background:transparent; color:var(--muted); padding:9px 4px 8px;
+  font-size:10.5px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px;
+}
+#tabbar button .ic{font-size:17px; line-height:1}
+#tabbar button.on{color:var(--accent); font-weight:600}
+/* ========== 进度条 ========== */
+.pbar{height:5px; background:var(--panel2); border-radius:3px; overflow:hidden; margin:6px 0}
+.pbar>i{display:block; height:100%; background:var(--accent); border-radius:3px; transition:width .25s}
+/* ========== 单选题 ========== */
+.q{margin:14px 0; padding-bottom:12px; border-bottom:1px dashed var(--line)}
+.q:last-child{border-bottom:0}
+.q .qt{font-size:13.5px; font-weight:600; margin-bottom:8px}
+.opt{
+  display:block; width:100%; text-align:left; border:1px solid var(--line); background:var(--panel2);
+  color:var(--fg); padding:10px 12px; border-radius:9px; margin:6px 0; font-size:13px; cursor:pointer;
+  line-height:1.5;
+}
+.opt:active{transform:scale(.99)}
+.opt.right{border-color:var(--accent2); background:color-mix(in srgb,var(--accent2) 16%,var(--panel)); font-weight:600}
+.opt.wrong{border-color:var(--danger); background:color-mix(in srgb,var(--danger) 16%,var(--panel))}
+.opt .mk{float:right; font-weight:700}
+.expl{font-size:12.5px; color:var(--fg2); background:var(--panel2); border-radius:8px; padding:9px 11px; margin-top:7px; display:none}
+.expl.show{display:block}
+.hidden{display:none !important}
+.kv{display:flex; justify-content:space-between; gap:8px; padding:4px 0; font-size:13px; border-bottom:1px dotted var(--line)}
+.kv:last-child{border-bottom:0}
+.kv .k{color:var(--muted)}
+.kv .v{font-family:ui-monospace,Consolas,monospace; font-weight:600; color:var(--accent)}
+.tag{display:inline-block; font-size:11px; padding:1px 7px; border-radius:6px; background:var(--chip); color:var(--chipfg); margin-right:5px}
+/* ========== 数学公式（KaTeX） ========== */
+.math{background:var(--panel2); border-radius:10px; padding:12px 14px; margin:9px 0; overflow-x:auto; overflow-y:hidden}
+.math .katex{font-size:1.06em}
+.math .katex-display{margin:0}
+.math-inline .katex{font-size:1.02em}
+.mathblock{
+  background:var(--panel2); border-radius:10px; padding:12px 14px; margin:9px 0;
+  overflow-x:auto; overflow-y:hidden;
+}
+.mathblock .katex-display{margin:.2em 0}
+.mathblock .katex{font-size:1.05em}
+/* 逐步演算的旁注 */
+.calc{background:var(--panel); border:1px solid var(--line); border-radius:12px; margin:12px 0; overflow:hidden}
+.calc .ch{background:var(--chip); color:var(--chipfg); padding:9px 13px; font-size:13px; font-weight:600}
+.calc .cb{padding:4px 13px 12px}
+.cstep{margin:12px 0; padding-left:11px; border-left:2px solid var(--line)}
+.cstep .lbl{font-size:12px; color:var(--accent); font-weight:700; margin-bottom:5px}
+.cstep .eq{overflow-x:auto; padding:2px 0}
+.cstep .eq .katex{font-size:1.02em}
+.cstep .note{font-size:12.5px; color:var(--fg2); line-height:1.65; margin-top:6px;
+  background:var(--panel2); border-radius:8px; padding:8px 10px}
+.cstep .note b{color:var(--fg)}
+.cstep .res{font-size:13px; color:var(--accent2); font-weight:600; margin-top:5px}
+/* ========== 解释块（讲原理用） ========== */
+.explain{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; margin:12px 0; box-shadow:var(--shadow)}
+.explain h4{margin:0 0 10px; font-size:14.5px; color:var(--accent); display:flex; align-items:center; gap:7px;
+  border-left:0; padding-left:0}
+.explain h4::before{content:"?"; flex:0 0 auto; width:19px; height:19px; border-radius:50%;
+  background:var(--accent); color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center}
+.explain p{margin:9px 0; font-size:13.5px; line-height:1.7}
+.explain p:first-of-type{margin-top:0}
+.why{background:var(--panel2); border-radius:10px; padding:11px 13px; margin:9px 0; font-size:13px; line-height:1.7;
+  border-left:3px solid var(--accent2)}
+.why b{color:var(--fg)}
+.why .lbl{color:var(--accent2); font-weight:700; font-size:12px; display:block; margin-bottom:3px}
+.analogy{background:color-mix(in srgb, var(--warn) 12%, var(--panel)); border-left:3px solid var(--warn);
+  border-radius:0 10px 10px 0; padding:11px 13px; margin:9px 0; font-size:13px; line-height:1.7}
+.analogy .lbl{color:var(--warn); font-weight:700; font-size:12px; display:block; margin-bottom:3px}
+.steps{margin:10px 0}
+.steps .st{display:flex; gap:10px; margin:11px 0; align-items:flex-start}
+.steps .st .n{flex:0 0 auto; width:21px; height:21px; border-radius:50%; background:var(--accent); color:#fff;
+  font-size:11.5px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:3px}
+.steps .st .c{flex:1; font-size:13px; line-height:1.7}
+.steps .st .c b{color:var(--fg)}
+.term{color:var(--accent); font-weight:600}
+.deriv{background:var(--panel2); border-radius:10px; padding:11px 13px; margin:9px 0;
+  font-family:ui-monospace,Consolas,monospace; font-size:12.5px; line-height:2.1; overflow-x:auto;
+  white-space:pre-wrap; word-break:break-word; color:var(--fg)}
+.deriv .cm{color:var(--muted); font-style:normal}
+</style>
+</head>
+<body>
+
+<header id="topbar">
+  <button class="iconbtn" id="btnBack" title="返回">‹</button>
+  <h1 id="crumb">机器学习 9 考点</h1>
+  <button class="iconbtn" id="btnTheme" title="切换主题">◐</button>
+</header>
+
+<main id="view"></main>
+
+<nav id="tabbar">
+  <button data-tab="home" class="on"><span class="ic">▦</span>考点</button>
+  <button data-tab="test"><span class="ic">✓</span>自测</button>
+  <button data-tab="cheat"><span class="ic">⚡</span>速查</button>
+  <button data-tab="about"><span class="ic">ⓘ</span>关于</button>
+</nav>
+
+<script src="katex/katex.min.js"></script>
+<script>
+"use strict";
+/* =========================================================
+   KaTeX 数学公式
+   ========================================================= */
+function K(t, block){
+  try{
+    return katex.renderToString(t, { displayMode: !!block, throwOnError: false, strict: false });
+  }catch(e){
+    return '<span style="color:#dc2626">[公式错误] ' + t + '</span>';
+  }
+}
+/** 块级公式 */
+function MB(t){ return '<div class="mathblock">' + K(t, true) + '</div>'; }
+/** 行内公式 */
+function MI(t){ return '<span class="math-inline">' + K(t, false) + '</span>'; }
+/** 一步演算：标签 + 公式 + 旁注 */
+function STEP(label, tex, note, res){
+  return '<div class="cstep"><div class="lbl">' + label + '</div>' +
+    '<div class="eq">' + K(tex, true) + '</div>' +
+    (note ? '<div class="note">' + note + '</div>' : '') +
+    (res ? '<div class="res">' + res + '</div>' : '') + '</div>';
+}
+/* =========================================================
+   0. 主题
+   ========================================================= */
+var THEME_KEY = "ml9.theme";
+function systemDark(){ return window.matchMedia && matchMedia("(prefers-color-scheme:dark)").matches; }
+function resolveTheme(){
+  var t = localStorage.getItem(THEME_KEY) || "auto";
+  if (t === "auto") return systemDark() ? "dark" : "light";
+  return t;
+}
+function cssVar(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function applyTheme(){
+  var t = resolveTheme();
+  document.documentElement.setAttribute("data-theme", t);
+  var bg = cssVar("--bg");
+  // 同步原生状态栏；light=深色图标
+  try{
+    if (window.AndroidHost && AndroidHost.applyChrome){
+      AndroidHost.applyChrome(bg, t === "light");
+    }
+  }catch(e){}
+  redrawAll();
+}
+function cycleTheme(){
+  var cur = localStorage.getItem(THEME_KEY) || "auto";
+  var next = cur === "auto" ? "light" : (cur === "light" ? "dark" : "auto");
+  localStorage.setItem(THEME_KEY, next);
+  applyTheme();
+  toast(next === "auto" ? "主题：跟随系统" : (next === "light" ? "主题：浅色" : "主题：深色"));
+}
+
+/* =========================================================
+   1. 工具
+   ========================================================= */
+function el(tag, cls, html){
+  var d = document.createElement(tag);
+  if (cls) d.className = cls;
+  if (html != null) d.innerHTML = html;
+  return d;
+}
+function fmt(x, n){ n = (n === undefined) ? 3 : n; return (Math.abs(x) < 1e-12 ? 0 : x).toFixed(n); }
+function toast(msg){
+  var t = document.getElementById("__toast");
+  if (!t){
+    t = el("div", ""); t.id = "__toast";
+    t.style.cssText = "position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));"+
+      "background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:20px;font-size:13px;z-index:999;"+
+      "opacity:0;transition:opacity .22s;pointer-events:none;max-width:80%;text-align:center";
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = "1";
+  clearTimeout(t._tm);
+  t._tm = setTimeout(function(){ t.style.opacity = "0"; }, 1500);
+}
+/* canvas 高清绘制 + 主题切换自动重绘 */
+var CANVASES = [];
+function mkCanvas(h){
+  var c = document.createElement("canvas");
+  c.style.height = h + "px";
+  CANVASES.push(c);
+  return c;
+}
+function draw(c, fn){
+  c._fn = fn;
+  paint(c);
+}
+function paint(c){
+  if (!c.isConnected || !c._fn) return;
+  var dpr = window.devicePixelRatio || 1;
+  var w = c.clientWidth || 300, h = c.clientHeight || 150;
+  c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+  var ctx = c.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  c._fn(ctx, w, h);
+}
+function redrawAll(){
+  for (var i = 0; i < CANVASES.length; i++) paint(CANVASES[i]);
+}
+window.addEventListener("resize", function(){ setTimeout(redrawAll, 60); });
+if (window.matchMedia){
+  try{
+    matchMedia("(prefers-color-scheme:dark)").addEventListener("change", function(){
+      if ((localStorage.getItem(THEME_KEY) || "auto") === "auto") applyTheme();
+    });
+  }catch(e){}
+}
+
+/* 圆角矩形路径。
+   canvas 原生 ctx.roundRect 在 Android WebView 较旧版本上不存在，
+   自己用二次曲线画一遍，任何版本都能用。 */
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+/* 画坐标系 */
+function axes(ctx, w, h, pad, xmin, xmax, ymin, ymax){  var X = function(v){ return pad.l + (v - xmin) / (xmax - xmin) * (w - pad.l - pad.r); };
+  var Y = function(v){ return h - pad.b - (v - ymin) / (ymax - ymin) * (h - pad.t - pad.b); };
+  ctx.strokeStyle = cssVar("--grid"); ctx.lineWidth = 1;
+  ctx.beginPath();
+  if (ymin <= 0 && ymax >= 0){ ctx.moveTo(X(xmin), Y(0)); ctx.lineTo(X(xmax), Y(0)); }
+  if (xmin <= 0 && xmax >= 0){ ctx.moveTo(X(0), Y(ymin)); ctx.lineTo(X(0), Y(ymax)); }
+  ctx.stroke();
+  return { X: X, Y: Y };
+}
+
+/* 从 CSS 变量取色 */
+function col(n){ return cssVar("--" + n); }
+
+/* =========================================================
+   2. 路由
+   ========================================================= */
+var VIEW = document.getElementById("view");
+var CRUMB = document.getElementById("crumb");
+var BACK = document.getElementById("btnBack");
+var CURRENT = "home";
+var SECTIONS = [];
+
+function go(route){
+  CANVASES.length = 0;
+  VIEW.innerHTML = "";
+  CURRENT = route;
+  window.scrollTo(0, 0);
+  if (route === "home"){ renderHome(); setTab("home"); BACK.style.visibility = "hidden"; CRUMB.textContent = "机器学习 9 考点"; }
+  else if (route === "test"){ renderTest(); setTab("test"); BACK.style.visibility = "hidden"; CRUMB.textContent = "自测"; }
+  else if (route === "cheat"){ renderCheat(); setTab("cheat"); BACK.style.visibility = "hidden"; CRUMB.textContent = "速查"; }
+  else if (route === "about"){ renderAbout(); setTab("about"); BACK.style.visibility = "hidden"; CRUMB.textContent = "关于"; }
+  else {
+    var s = null;
+    for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].id === route) s = SECTIONS[i];
+    if (!s){ renderHome(); return; }
+    setTab("");
+    BACK.style.visibility = "visible";
+    CRUMB.textContent = "考点 " + s.no;
+    s.render(VIEW);
+  }
+  setTimeout(redrawAll, 30);
+}
+function setTab(t){
+  var bs = document.querySelectorAll("#tabbar button");
+  for (var i = 0; i < bs.length; i++) bs[i].classList.toggle("on", bs[i].getAttribute("data-tab") === t);
+}
+BACK.addEventListener("click", function(){ go("home"); });
+document.getElementById("btnTheme").addEventListener("click", cycleTheme);
+(function(){
+  var bs = document.querySelectorAll("#tabbar button");
+  for (var i = 0; i < bs.length; i++){
+    bs[i].addEventListener("click", function(){ go(this.getAttribute("data-tab")); });
+  }
+})();
+
+/* =========================================================
+   3. 首页
+   ========================================================= */
+function renderHome(){
+  var wrap = el("div");
+  wrap.appendChild(el("h2", null, "机器学习 · 9 个考点"));
+  wrap.appendChild(el("p", "sub", "每个考点都能动手玩。算例与课堂课件一致，数字都核过。"));
+  var g = el("div", "grid");
+  for (var i = 0; i < SECTIONS.length; i++){
+    (function(s){
+      var t = el("div", "tile");
+      t.innerHTML = '<div class="n">' + s.no + '</div><div style="flex:1"><div class="t">' + s.title +
+        (s.hot ? '<span class="badge">必考计算</span>' : '') + '</div><div class="d">' + s.desc + '</div></div>';
+      t.addEventListener("click", function(){ go(s.id); });
+      g.appendChild(t);
+    })(SECTIONS[i]);
+  }
+  wrap.appendChild(g);
+  wrap.appendChild(el("p", "sub", "提示：右上角 ◐ 切换 跟随系统 / 浅色 / 深色。"));
+  VIEW.appendChild(wrap);
+}
+
+/* =========================================================
+   考点 1 机器学习 ≠ 优化
+   ========================================================= */
+SECTIONS.push({
+  id: "p1", no: "01", title: "机器学习为什么不等于优化",
+  desc: "训练损失最低的那个模型，为什么常常不能选",
+  render: function(root){
+    root.appendChild(el("h2", null, "01 · 机器学习为什么不等于优化"));
+    root.appendChild(el("p", "sub", "拖动滑块改变训练轮次，看两条曲线怎么分家。"));
+
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>先搞清楚「学习」到底指什么</h4>' +
+      '<p>你手上有过去几年的房价成交记录：面积、位置是输入，成交价是答案。你想要的是<b>一套还没卖过的房子值多少钱</b>。</p>' +
+      '<p>注意这句话的关键：你要预测的是<b>没见过的样本</b>，不是把已经知道的答案再背一遍。</p>' +
+      '<div class="analogy"><span class="lbl">打个比方</span>' +
+      '学生做题。老师给了 100 道练习题的答案（训练集）。<br>' +
+      '如果他只是把 100 道题的答案背下来，练习册上能考满分，但换一张卷子就完蛋。<br>' +
+      '如果他学会了「这类题该怎么想」，换卷子也能做——这叫<b>举一反三</b>，学术上叫<span class="term">泛化</span>。<br>' +
+      '机器学习要的是后者。</div>' +
+      '<p><b>所以「优化」为什么不够？</b></p>' +
+      '<p>优化是一门纯数学：给定一个函数，把它压到最小。它只回答一个问题——<b>怎样把这个已经写死的目标函数降下去</b>。</p>' +
+      '<p>但训练时你能算的只有「这 100 道练习题上的平均错误」，你真正想要的是「新卷子上的错误」。这两件事<b>不是一回事</b>。' +
+      '把练习题错误压到 0，可能只是把答案背下来了。这个差距就是泛化问题，它在优化的管辖范围之外。</p>' +
+      '<div class="why"><span class="lbl">一句话记住</span>' +
+      '<b>机器学习 = 优化 + 泛化。</b>优化负责把训练损失降下去，泛化负责让降下去的那个东西在新数据上也成立。' +
+      '只做前者，就是过拟合。</div>';
+    root.appendChild(ex);
+
+    /* --- 曲线 --- */
+    var card = el("div", "card");
+    var capSeg = el("div", "seg");
+    var CAPS = [["小容量", 0], ["中容量", 1], ["大容量", 2]];
+    CAPS.forEach(function(c, i){
+      var b = el("button", i === 1 ? "on" : null, c[0]);
+      b.addEventListener("click", function(){
+        cap = c[1];
+        [].forEach.call(capSeg.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on"); refresh();
+      });
+      capSeg.appendChild(b);
+    });
+    card.appendChild(el("div", "row")).appendChild(capSeg);
+    var cvs = mkCanvas(180); card.appendChild(cvs);
+    var info = el("div"); card.appendChild(info);
+    var rw = el("div", "row"), rl = el("label", null, "训练轮次"), rg = el("input"), rv = el("span", "val");
+    rg.type = "range"; rg.min = 0; rg.max = 40; rg.value = 12; rg.step = 1;
+    rw.appendChild(rl); rw.appendChild(rg); rw.appendChild(rv); card.appendChild(rw);
+    root.appendChild(card);
+
+    var cap = 1, epoch = 12;
+    function curves(c, k){
+      // 训练损失：容量越大降得越快越低
+      var tau = [7, 4.5, 2.6][c];
+      var base = [0.95, 0.72, 0.42][c];
+      var tr = base * Math.exp(-k / tau) + 0.012;
+      // 验证损失：先跟着降，容量越大越早抬头
+      var up = [0.00012, 0.00075, 0.0026][c];
+      var va = [0.98, 0.80, 0.58][c] * Math.exp(-k / (tau * 1.25)) + 0.06 + up * k * k;
+      return [tr, va];
+    }
+    function bestEpoch(c){
+      var best = 1e9, bi = 0;
+      for (var k = 0; k <= 40; k++){ var v = curves(c, k)[1]; if (v < best){ best = v; bi = k; } }
+      return bi;
+    }
+    function refresh(){
+      rv.textContent = epoch;
+      var be = bestEpoch(cap);
+      draw(cvs, function(ctx, w, h){
+        var pts = [], i;
+        for (i = 0; i <= 40; i++) pts.push(curves(cap, i));
+        var ymax = 0.02;
+        for (i = 0; i < pts.length; i++) ymax = Math.max(ymax, pts[i][0], pts[i][1]);
+        ymax = Math.ceil(ymax * 10) / 10 + 0.05;
+        var ax = axes(ctx, w, h, { l: 34, r: 10, t: 12, b: 24 }, 0, 40, 0, ymax);
+        // 网格标
+        ctx.fillStyle = col("muted"); ctx.font = "10px ui-monospace,monospace"; ctx.textAlign = "right";
+        for (var t = 0; t <= 4; t++){
+          var yv = ymax * t / 4;
+          ctx.fillText(yv.toFixed(2), 30, ax.Y(yv) + 3);
+          ctx.strokeStyle = col("line"); ctx.beginPath(); ctx.moveTo(34, ax.Y(yv)); ctx.lineTo(w - 10, ax.Y(yv)); ctx.stroke();
+        }
+        ctx.textAlign = "center";
+        for (var e = 0; e <= 40; e += 10) ctx.fillText(e, ax.X(e), h - 8);
+        // 最佳轮次虚线
+        ctx.strokeStyle = col("accent2"); ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(ax.X(be), 12); ctx.lineTo(ax.X(be), h - 24); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = col("accent2"); ctx.textAlign = "left";
+        ctx.fillText("验证最低 @" + be, Math.min(ax.X(be) + 4, w - 78), 22);
+        // 两条线
+        function line(idx, color){
+          ctx.strokeStyle = color; ctx.lineWidth = 2.2; ctx.beginPath();
+          for (var k = 0; k <= 40; k++){
+            var p = curves(cap, k)[idx];
+            if (k === 0) ctx.moveTo(ax.X(k), ax.Y(p)); else ctx.lineTo(ax.X(k), ax.Y(p));
+          }
+          ctx.stroke();
+        }
+        line(0, col("accent")); line(1, col("warn"));
+        // 当前点
+        var cp = curves(cap, epoch);
+        ctx.fillStyle = col("accent"); ctx.beginPath(); ctx.arc(ax.X(epoch), ax.Y(cp[0]), 4, 0, 7); ctx.fill();
+        ctx.fillStyle = col("warn"); ctx.beginPath(); ctx.arc(ax.X(epoch), ax.Y(cp[1]), 4, 0, 7); ctx.fill();
+        // 图例
+        ctx.fillStyle = col("accent"); ctx.fillRect(w - 96, 10, 10, 3);
+        ctx.fillStyle = col("fg2"); ctx.textAlign = "left"; ctx.font = "11px sans-serif";
+        ctx.fillText("训练", w - 82, 15);
+        ctx.fillStyle = col("warn"); ctx.fillRect(w - 96, 24, 10, 3);
+        ctx.fillStyle = col("fg2"); ctx.fillText("验证", w - 82, 29);
+      });
+      var tr = curves(cap, epoch)[0], va = curves(cap, epoch)[1];
+      info.innerHTML =
+        '<div class="kv"><span class="k">第 ' + epoch + ' 轮 训练损失</span><span class="v">' + fmt(tr) + '</span></div>' +
+        '<div class="kv"><span class="k">第 ' + epoch + ' 轮 验证损失</span><span class="v">' + fmt(va) + '</span></div>' +
+        '<div class="kv"><span class="k">两者差距（泛化间隙）</span><span class="v">' + fmt(va - tr) + '</span></div>' +
+        (epoch > be
+          ? '<div class="note warn">已经越过验证最低点（第 ' + be + ' 轮）。训练损失还在降，但验证在升——这就是过拟合开始的地方。<b>该保留的是第 ' + be + ' 轮，不是第 ' + epoch + ' 轮。</b></div>'
+          : (epoch === be
+            ? '<div class="note ok">正好踩在验证最低点上，这一轮的权重该被留下来。</div>'
+            : '<div class="note">还没到验证最低点，继续训练通常还有收益。</div>'));
+    }
+    rg.addEventListener("input", function(){ epoch = +rg.value; refresh(); });
+    refresh();
+
+    /* --- 三要素 --- */
+    root.appendChild(el("h3", null, "机器学习三要素：三个词要能分开说"));
+    var c2 = el("div", "card");
+    c2.innerHTML =
+      '<table class="tbl"><tr><th>要素</th><th style="text-align:left">回答什么问题</th><th style="text-align:left">房价例子</th></tr>' +
+      '<tr><td>模型</td><td style="text-align:left">用什么样的函数预测</td><td style="text-align:left">ŷ = wx + b，或更复杂的曲线</td></tr>' +
+      '<tr><td>学习准则</td><td style="text-align:left">怎样比较两个候选模型</td><td style="text-align:left">平均平方损失，可再加正则项</td></tr>' +
+      '<tr><td>优化算法</td><td style="text-align:left">参数怎么找出来</td><td style="text-align:left">梯度下降反复更新 w、b</td></tr></table>' +
+      '<div class="note"><b>区分口诀：</b>换优化算法（SGD→Adam）→ 能表达的规律没变；换模型（直线→曲线）→ 能力上限变了；' +
+      '换学习准则（平方损失→交叉熵）→ 打分规则变了。</div>' +
+      '<div class="note danger">判断题常挖坑：「用了 Adam 所以模型更强了」——错。Adam 只影响能不能更快更好地找到同一族函数里的参数。</div>';
+    root.appendChild(c2);
+
+    /* --- 两种风险 --- */
+    root.appendChild(el("h3", null, "经验风险 vs 期望风险"));
+    var ex1b = el("div", "explain");
+    ex1b.innerHTML =
+      '<h4>这两个公式长得几乎一样，差在哪一个字</h4>' +
+      '<div class="deriv">经验风险  R_emp(θ) = (1/N) · Σᵢ ℓ(f_θ(xᵢ), yᵢ)\n' +
+      '期望风险  R(θ)     = E_{(x,y)~P}[ ℓ(f_θ(x), y) ]</div>' +
+      '<p>左边，两者都在算「预测有多错」（ℓ 就是损失）。真正的区别在<b>「对谁取平均」</b>：</p>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>经验风险对「手上的 N 条样本」取平均。</b><br>' +
+      '式子里的 (1/N)·Σ 就是「把这 N 条加起来除以 N」——<b>这是能真的算出来的数</b>，因为数据就在你手上。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>期望风险对「真实数据分布 P」取平均。</b><br>' +
+      'E 的意思是「把所有可能出现的样本，按它们出现的概率加权平均」。<br>' +
+      '<b>但 P 你不知道</b>——你不可能知道「未来全世界的房子长什么样、各占多少比例」。所以这个数是<b>算不出来的</b>，只能估。</div></div>' +
+      '</div>' +
+      '<div class="why"><span class="lbl">θ 出现在这两个式子里，说明什么</span>' +
+      'θ 是模型参数。两个式子都是 θ 的函数——<b>参数一变，两个风险都跟着变，但它们不是同一条曲线</b>。' +
+      '优化只在降低左边那条（经验风险），完全不管右边那条会怎么走。<br>' +
+      '训练损失降到 0，只意味着「左边到底了」，右边可能反而更高。这就是泛化间隙。</div>' +
+      '<div class="analogy"><span class="lbl">一句话区分</span>' +
+      '<b>经验风险 = 做过的题的错率；期望风险 = 未来所有考试的错率。</b><br>' +
+      '前者能算，后者只能猜。学习的目标永远是后者，但你能优化的只有前者——这个矛盾就是机器学习全部困难的根源。</div>' +
+      '<div class="note">例：三条训练样本损失 1、3、2，经验风险 = (1+3+2)/3 = <b>2</b>。' +
+      '但这个「2」不能告诉你未来房子的平均误差，因为未来房屋的分布不一样。</div>';
+    root.appendChild(ex1b);
+    var c3 = el("div", "card");
+    c3.innerHTML =
+      MB('R_{\\text{emp}}(\\theta) = \\frac{1}{N}\\sum_{i=1}^{N}\\ell\\big(f_\\theta(x_i),\\, y_i\\big)') +
+      MB('R(\\theta) = \\mathbb{E}_{(x,y)\\sim P}\\big[\\,\\ell\\big(f_\\theta(x),\\, y\\big)\\,\\big]') +
+      '<p>前者是<b>能算出来的</b>（训练集上 N 个损失取平均）；后者是<b>真实分布上的平均</b>，P 你不知道，只能估。</p>' +
+      '<div class="note">例：三条训练样本损失 1、3、2 → 经验风险 = (1+3+2)/3 = <b>2</b>。『2』这个数不能告诉你未来房子的平均误差。</div>';
+    root.appendChild(c3);
+
+    root.appendChild(el("h3", null, "加正则项：把「简单」写进目标函数"));
+    var c4 = el("div", "card");
+    c4.innerHTML =
+      '<div class="formula">训练时最小化： R<sub>emp</sub>(θ) + λ·Ω(θ)　　例如 Ω(θ)=‖θ‖²</div>' +
+      '<div class="note warn"><b>重要区分：</b>降低这个训练目标是<b>优化</b>动作；它到底有没有改善新样本的表现，<b>要看验证集</b>，不能想当然。</div>';
+    root.appendChild(c4);
+  }
+});
+
+/* =========================================================
+   考点 2 训练集 / 验证集 / 测试集
+   ========================================================= */
+SECTIONS.push({
+  id: "p2", no: "02", title: "训练集、验证集、测试集",
+  desc: "三份数据各干什么，提前停止看哪个数，泄漏发生在哪",
+  render: function(root){
+    root.appendChild(el("h2", null, "02 · 训练集 / 验证集 / 测试集"));
+    root.appendChild(el("p", "sub", "练习题、模拟卷、期末考卷——三份数据缺一不可。"));
+
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>为什么非要分成三份？不能只用两份吗</h4>' +
+      '<p>先说清楚三个角色各自在干什么：</p>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>训练集 = 平时的练习题</b><br>' +
+      '模型看这些题、算错在哪、改自己的参数。这就是「学」的过程。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>验证集 = 模拟卷</b><br>' +
+      '用来比较「哪种学习方案更好」：学习率取多少、网络几层、正则多强、练到第几轮停。<br>' +
+      '<span style="color:var(--muted)">注意：它不直接参与改参数，但它的成绩决定你选哪套方案。</span></div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c"><b>测试集 = 期末考卷</b><br>' +
+      '方案全部定死之后，<b>只考一次</b>，报出来的成绩才算数。</div></div>' +
+      '</div>' +
+      '<div class="why"><span class="lbl">为什么不能用验证集直接当测试集</span>' +
+      '因为你用验证集调了很多次方案——本质上你已经在「对着这份卷子」优化自己的选择了。' +
+      '它被你看过了，它的成绩就不再客观。测试集必须是你<b>一次都没看过的</b>，才能模拟「真正的新数据」。<br>' +
+      '用测试集选学习率、再用同一个测试集报成绩，等于开卷考试自己给自己判分。</div>' +
+      '<p><b>参数和超参数，差在哪？</b></p>' +
+      '<p><span class="term">参数</span>（权重 w、偏置 b）：由训练过程自己算出来，你不用管。</p>' +
+      '<p><span class="term">超参数</span>（学习率、批量大小、网络层数、正则系数）：训练之前你得先定好，模型自己不会调。' +
+      '既然定的时候还不知道好不好，就得拿验证集来试——这就是验证集存在的全部理由。</p>';
+    root.appendChild(ex);
+
+    /* --- 划分沙盒 --- */
+    var card = el("div", "card");
+    card.appendChild(el("h4", null, "拖动滑块分数据（自动归一化）"));
+    var st = { tr: 70, va: 15, te: 15 };
+    var cvs = mkCanvas(110); card.appendChild(cvs);
+    var labels = el("div"); card.appendChild(labels);
+    ["tr", "va", "te"].forEach(function(k){
+      var nm = { tr: "训练集", va: "验证集", te: "测试集" }[k];
+      var rw = el("div", "row"), rl = el("label", null, nm), rg = el("input"), rv = el("span", "val");
+      rg.type = "range"; rg.min = 5; rg.max = 90; rg.value = st[k];
+      rw.appendChild(rl); rw.appendChild(rg); rw.appendChild(rv); card.appendChild(rw);
+      rg.addEventListener("input", function(){ st[k] = +rg.value; refresh(); });
+    });
+    root.appendChild(card);
+    function refresh(){
+      var sum = st.tr + st.va + st.te;
+      var p = [st.tr / sum, st.va / sum, st.te / sum];
+      var cols = [col("accent"), col("accent2"), col("warn")];
+      draw(cvs, function(ctx, w, h){
+        var y = 26, hh = 44, x = 0;
+        ctx.font = "12px sans-serif";
+        for (var i = 0; i < 3; i++){
+          var ww = p[i] * w;
+          ctx.fillStyle = cols[i]; ctx.fillRect(x, y, Math.max(ww - 2, 1), hh);
+          if (ww > 44){
+            ctx.fillStyle = "#fff"; ctx.textAlign = "center";
+            ctx.fillText(Math.round(p[i] * 100) + "%", x + ww / 2, y + hh / 2 + 4);
+          }
+          x += ww;
+        }
+        ctx.fillStyle = col("muted"); ctx.textAlign = "left"; ctx.font = "11px sans-serif";
+        ctx.fillText("训练 " + Math.round(p[0] * 100) + "%　验证 " + Math.round(p[1] * 100) + "%　测试 " + Math.round(p[2] * 100) + "%", 0, 16);
+        ctx.fillText("训练：学权重与偏置", 0, 92);
+      });
+      labels.innerHTML =
+        '<div class="kv"><span class="k">训练集（' + Math.round(p[0] * 100) + "%）</span><span class=\"v\">学权重与偏置</span></div>" +
+        '<div class="kv"><span class="k">验证集（' + Math.round(p[1] * 100) + "%）</span><span class=\"v\">选配置与轮次</span></div>" +
+        '<div class="kv"><span class="k">测试集（' + Math.round(p[2] * 100) + "%）</span><span class=\"v\">只报告成绩</span></div>";
+    }
+    refresh();
+
+    /* --- 提前停止 --- */
+    root.appendChild(el("h3", null, "提前停止：看哪个数，保留哪一轮"));
+    var c2 = el("div", "card");
+    var DATA = [
+      { e: 1, tr: 0.70, va: 0.74 },
+      { e: 2, tr: 0.48, va: 0.53 },
+      { e: 3, tr: 0.35, va: 0.45 },
+      { e: 4, tr: 0.26, va: 0.52 }
+    ];
+    var tb = el("table", "tbl");
+    tb.innerHTML = '<tr><th>轮次</th><th>第1轮</th><th>第2轮</th><th>第3轮</th><th>第4轮</th></tr>' +
+      '<tr><td>训练损失</td>' + DATA.map(function(d){ return '<td class="num">' + d.tr.toFixed(2) + '</td>'; }).join("") + '</tr>' +
+      '<tr><td>验证损失</td>' + DATA.map(function(d){ return '<td class="num">' + d.va.toFixed(2) + '</td>'; }).join("") + '</tr>';
+    c2.appendChild(tb);
+    var pick = el("div", "row"); c2.appendChild(pick);
+    var res = el("div"); c2.appendChild(res);
+    DATA.forEach(function(d, i){
+      var b = el("button", "btn sm", "保留第 " + d.e + " 轮");
+      b.addEventListener("click", function(){
+        [].forEach.call(pick.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on");
+        var ok = (d.e === 3);
+        res.innerHTML = ok
+          ? '<div class="note ok">对。第 3 轮验证损失 0.45 是观察到的最低值。第 4 轮训练损失更低（0.26），但验证回升到 0.52——继续训就过拟合了。</div>'
+          : '<div class="note danger">不对。请找「验证损失」这一行的最小值。第 ' + d.e + ' 轮验证损失是 ' + d.va.toFixed(2) + '。<b>训练损失最低不等于该留这一轮。</b></div>';
+      });
+      pick.appendChild(b);
+    });
+    res.innerHTML = '<div class="note">点上面任意一轮试试。判据是<b>验证损失最小</b>，不是训练损失最小。</div>';
+    c2.appendChild(el("div", "note warn", "若评价指标是<b>准确率</b>（越大越好），比较方向反过来——要保存准确率<b>最高</b>的那一轮。"));
+    root.appendChild(c2);
+
+    /* --- 数据泄漏 --- */
+    root.appendChild(el("h3", null, "数据泄漏：三种最常见的错法"));
+    var c3 = el("div", "card");
+    var leakBox = el("div");
+    var LEAKS = [
+      { t: "① 先增强再随机拆分", bad: "同一张图的原图与翻转版被分到训练和测试两边，测试集就『见过』近似答案了。", good: "先切分数据，再只对训练部分做增强。" },
+      { t: "② 用全部样本估计预处理参数", bad: "标准化用的均值 μ 与标准差 σ 如果拿全部数据算，验证集和测试集的信息就漏进训练流程了。", good: "μ、σ 只用训练集估计；验证集和测试集拿这两个数做变换，不许重新统计。" },
+      { t: "③ 把相关记录拆到两边", bad: "同一位受试者常有多条测量记录，被分到训练和测试两边等于泄题。", good: "预测新受试者就按人分组划分；预测未来就检查划分是否符合时间顺序。" }
+    ];
+    LEAKS.forEach(function(L){
+      var d = el("div", "card"); d.style.margin = "8px 0"; d.style.background = "var(--panel2)";
+      d.innerHTML = '<h4 style="margin-top:0">' + L.t + '</h4>' +
+        '<div class="note danger" style="margin:6px 0"><b>错：</b>' + L.bad + '</div>' +
+        '<div class="note ok" style="margin:6px 0"><b>对：</b>' + L.good + '</div>';
+      leakBox.appendChild(d);
+    });
+    c3.appendChild(leakBox);
+    c3.appendChild(el("div", "note", "<b>自检：</b>用验证集选训练轮次，然后用测试集报告结果——可以。用测试集选轮次，再用同一个测试集报告——不行，评估独立性被破坏了。"));
+    c3.appendChild(el("div", "note warn", "训练:验证:测试 = 8:1:1 只是常见说法，<b>不是必须背死的常数</b>。取决于任务和规模。"));
+    root.appendChild(c3);
+  }
+});
+
+/* =========================================================
+   考点 3 非线性
+   ========================================================= */
+SECTIONS.push({
+  id: "p3", no: "03", title: "神经网络为什么非得有非线性",
+  desc: "两层仿射等于一层、XOR 分不开、激活函数怎么处理数字",
+  render: function(root){
+    root.appendChild(el("h2", null, "03 · 神经网络为什么非得有非线性"));
+    root.appendChild(el("p", "sub", "没有非线性，堆多少层都等于一层。"));
+
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>先说清楚「神经元」在干什么</h4>' +
+      '<p>一个神经元做两件事，只做两件：</p>' +
+      '<p><b>第一步</b>：加权求和（再偏一点），也就是画一条直线。</p>' +
+      MB('z = w_1x_1 + w_2x_2 + \\cdots + b') +
+      '<p><b>第二步</b>：过一道非线性函数，也就是把这条线掰弯。</p>' +
+      MB('h = \\varphi(z)') +
+      '<p>第一步是「画一条线」（严格说叫<span class="term">仿射映射</span>，就是直线加偏移）。' +
+      '第二步是「把这条线掰弯」。</p>' +
+      '<div class="analogy"><span class="lbl">打个比方</span>' +
+      '只有第一步的神经元像一把<b>直尺</b>——不管你怎么摆，它只能画直线。<br>' +
+      '加上第二步，就像给直尺装了一个<b>折弯的关节</b>，它就能画折线、曲线。<br>' +
+      '一大堆直尺叠在一起，还是只能画一条直线（下面有证明）。但一堆会折弯的尺子叠起来，就能拼出任何形状。</div>' +
+      '<p><b>为什么「堆直尺」没用？</b>这是考试要写的证明，但直觉很简单：' +
+      '两层都只做「乘系数再加偏移」，合起来还是「乘系数再加偏移」。' +
+      '就像 <b>3×(2x+1)+4</b> 展开还是 <b>6x+7</b>，绕一圈还是直线。' +
+      '数学上：W₂(W₁x + b₁) + b₂ = (W₂W₁)x + (W₂b₁ + b₂)，右边仍然是一个矩阵乘 x 再加向量。</p>' +
+      '<div class="why"><span class="lbl">所以非线性的真正作用是什么</span>' +
+      '它让<b>不同的输入走不同的处理路线</b>。<br>' +
+      'ReLU(z) = max(0, z)：z 是正的时候原样放行，是负的时候直接归零。' +
+      '这一刀「切」下去，输入空间就被分成两半，两半走的路不一样了。<br>' +
+      '折的次数越多，能拼出的形状越复杂。这就是「深层网络能拟合任意函数」的直观来源。</div>';
+    root.appendChild(ex);
+
+    /* --- 仿射合并 --- */
+    root.appendChild(el("h3", null, "① 两层仿射串联 = 一层"));
+    var ex3b = el("div", "explain");
+    ex3b.innerHTML =
+      '<h4>这个合并是怎么一步步做出来的（照着抄就行）</h4>' +
+      '<p>先把两层的式子写开。假设第一层用 W₁、b₁，第二层用 W₂、b₂：</p>' +
+      '<div class="deriv">第一层输出：  h = W₁x + b₁\n' +
+      '第二层输入 h：  y = W₂h + b₂</div>' +
+      '<p>把 h 代进去（这一步就是把第一个式子塞进第二个式子的 h 位置）：</p>' +
+      MB('y = W_2(W_1x + b_1) + b_2') +
+      '<p>然后展开括号。注意矩阵乘法的分配律（和普通乘法一样）：</p>' +
+      '<div class="deriv">y = W₂W₁x + W₂b₁ + b₂\n\n' +
+      '  前面那坨 W₂W₁   → 记成新的 W′\n' +
+      '  后面那坨 W₂b₁+b₂ → 记成新的 b′\n\n' +
+      '于是：y = W′x + b′   ← 和一层的形式一模一样</div>' +
+      '<p>把它俩分别记成 W′ = W₂W₁、b′ = W₂b₁ + b₂，就回到同一个形式：<b>y = W′x + b′</b>。</p>' +
+      '<div class="why"><span class="lbl">这一步证明了什么</span>' +
+      '证明了「两层仿射」和「一层仿射」是<b>同一类函数</b>——只是参数换了名字。<br>' +
+      '所以不管你叠 2 层、10 层、100 层，能表达的东西<b>一点都没变多</b>，始终是一条直线（高维里叫超平面）。<br>' +
+      '<b>这就是必须加非线性的全部理由。</b></div>' +
+      '<p>上面滑块区可以自己试：拖 W₁、b₁、W₂、b₂，看浅色的第一层线怎么变，' +
+      '但最终输出那条线（绿色）始终和「合并成一层」那条（蓝色虚线）<b>完全重合</b>。' +
+      '调来调去都是同一条直线。</p>';
+    root.appendChild(ex3b);
+    var c1 = el("div", "card");
+    c1.innerHTML = MB('W_2(W_1x + b_1) + b_2 \\;=\\; (W_2W_1)\\,x \\;+\\; (W_2b_1 + b_2)') +
+      '<p>右边仍然能写成 W′x + b′ 的形式，其中 W′ = W₂W₁、b′ = W₂b₁ + b₂。<b>绕一圈还是同一种函数。</b></p>' +
+      '<div class="note">一维例子：先算 2x+1，再乘 3 加 4 → 3(2x+1)+4 = <b>6x+7</b>，还是一条直线。</div>';
+    var st = { W1: 2, b1: 1, W2: 3, b2: 4 };
+    var out = el("div"); c1.appendChild(out);
+    [["W1", -4, 4, .5], ["b1", -4, 4, .5], ["W2", -4, 4, .5], ["b2", -4, 4, .5]].forEach(function(p){
+      var rw = el("div", "row"), rl = el("label", null, p[0]), rg = el("input"), rv = el("span", "val");
+      rg.type = "range"; rg.min = p[1]; rg.max = p[2]; rg.step = p[3]; rg.value = st[p[0]];
+      rw.appendChild(rl); rw.appendChild(rg); rw.appendChild(rv); c1.appendChild(rw);
+      rg.addEventListener("input", function(){ st[p[0]] = +rg.value; refresh(); });
+    });
+    var cvs1 = mkCanvas(150); c1.appendChild(cvs1);
+    function refresh(){
+      var W = st.W2 * st.W1, bb = st.W2 * st.b1 + st.b2;
+      out.innerHTML = '<div class="kv"><span class="k">合并后 W′ = W₂·W₁</span><span class="v">' + fmt(W, 2) + '</span></div>' +
+        '<div class="kv"><span class="k">合并后 b′ = W₂·b₁ + b₂</span><span class="v">' + fmt(bb, 2) + '</span></div>';
+      draw(cvs1, function(ctx, w, h){
+        var ax = axes(ctx, w, h, { l: 30, r: 12, t: 12, b: 22 }, -5, 5, -10, 10);
+        // 原两层：先 y1=W1x+b1，再 y2=W2y1+b2
+        function plot(f, color, dash, lw){
+          ctx.strokeStyle = color; ctx.lineWidth = lw || 2; ctx.setLineDash(dash || []);
+          ctx.beginPath();
+          for (var i = 0; i <= 100; i++){
+            var x = -5 + i / 100 * 10, y = f(x);
+            if (y < -10 || y > 10) continue;
+            var px = ax.X(x), py = ax.Y(y);
+            if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+          }
+          ctx.stroke(); ctx.setLineDash([]);
+        }
+        plot(function(x){ return st.W1 * x + st.b1; }, col("warn"), [5, 4], 1.6);
+        plot(function(x){ return st.W2 * (st.W1 * x + st.b1) + st.b2; }, col("accent"), null, 2.4);
+        plot(function(x){ return W * x + bb; }, col("accent2"), [3, 3], 2.4);
+        ctx.font = "11px sans-serif"; ctx.textAlign = "left";
+        ctx.fillStyle = col("warn"); ctx.fillText("第一层 y₁", 36, 20);
+        ctx.fillStyle = col("accent"); ctx.fillText("两层串联 y₂", 36, 36);
+        ctx.fillStyle = col("accent2"); ctx.fillText("合并成一层（与 y₂ 完全重合）", 36, 52);
+      });
+    }
+    refresh(); root.appendChild(c1);
+
+    /* --- XOR --- */
+    root.appendChild(el("h3", null, "② 异或为什么线性分不开"));
+    var c2 = el("div", "card");
+    var modeSeg = el("div", "seg");
+    var MODES = [["线性模型", "lin"], ["加 ReLU 隐藏层", "relu"]];
+    MODES.forEach(function(m, i){
+      var b = el("button", i === 0 ? "on" : null, m[0]);
+      b.addEventListener("click", function(){
+        [].forEach.call(modeSeg.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on"); mode = m[1]; refresh2();
+      });
+      modeSeg.appendChild(b);
+    });
+    c2.appendChild(el("div", "row")).appendChild(modeSeg);
+    var cvs2 = mkCanvas(230); c2.appendChild(cvs2);
+    var note2 = el("div"); c2.appendChild(note2);
+    var mode = "lin";
+    function f_lin(x1, x2){ return x1 + x2 - 1; }              // 线性打分
+    function f_relu(x1, x2){                                   // h1=ReLU(s), h2=ReLU(s-1), out=h1-2h2，s=x1+x2
+      var s = x1 + x2;
+      var h1 = Math.max(0, s), h2 = Math.max(0, s - 1);
+      return h1 - 2 * h2 - 0.5;
+    }
+    function refresh2(){
+      draw(cvs2, function(ctx, w, h){
+        var pad = 24, n = 68;
+        var img = ctx.createImageData(1, 1); // 占位
+        var f = mode === "lin" ? f_lin : f_relu;
+        // 逐格上色（正类淡蓝，负类淡橙）
+        var cellW = (w - pad * 2) / n, cellH = (h - pad * 2) / n;
+        for (var i = 0; i < n; i++){
+          for (var j = 0; j < n; j++){
+            var x1 = i / (n - 1), x2 = 1 - j / (n - 1);
+            var v = f(x1, x2);
+            var a = Math.min(Math.abs(v) / 1.6, 1) * 0.42;
+            if (v > 0) ctx.fillStyle = "rgba(37,99,235," + a.toFixed(3) + ")";
+            else ctx.fillStyle = "rgba(217,119,6," + a.toFixed(3) + ")";
+            ctx.fillRect(pad + i * cellW, pad + j * cellH, cellW + 1, cellH + 1);
+          }
+        }
+        // 边框
+        ctx.strokeStyle = col("grid"); ctx.lineWidth = 1;
+        ctx.strokeRect(pad, pad, w - pad * 2, h - pad * 2);
+        // 四个点
+        var PTS = [[0, 0, 0], [0, 1, 1], [1, 0, 1], [1, 1, 0]];
+        PTS.forEach(function(p){
+          var px = pad + p[0] * (w - pad * 2), py = pad + (1 - p[1]) * (h - pad * 2);
+          ctx.beginPath(); ctx.arc(px, py, 7, 0, 7);
+          ctx.fillStyle = p[2] ? col("accent") : col("warn"); ctx.fill();
+          ctx.strokeStyle = col("panel"); ctx.lineWidth = 2; ctx.stroke();
+          ctx.fillStyle = "#fff"; ctx.font = "bold 10px sans-serif"; ctx.textAlign = "center";
+          ctx.fillText(p[2] ? "1" : "0", px, py + 3.5);
+        });
+        ctx.fillStyle = col("muted"); ctx.font = "10px sans-serif"; ctx.textAlign = "center";
+        ctx.fillText("x₁ →", w / 2, h - 6);
+        ctx.save(); ctx.translate(11, h / 2); ctx.rotate(-Math.PI / 2); ctx.fillText("x₂ →", 0, 0); ctx.restore();
+      });
+      if (mode === "lin"){
+        note2.innerHTML = '<div class="note danger">线性打分是 x₁+x₂−1，分界线是一条<b>直线</b> x₁+x₂=1。' +
+          '无论怎么调 w、b，都分不开对角的两类点——这就是线性模型的死穴。</div>';
+      } else {
+        note2.innerHTML = '<div class="note ok">s = x₁+x₂，构造 h₁=ReLU(s)、h₂=ReLU(s−1)，输出 h₁−2h₂。' +
+          '代入 s=0、1、2，输出分别是 <b>0、1、0</b>，XOR 解出来了。</div>' +
+          '<table class="tbl"><tr><th>输入</th><th>s</th><th>h₁</th><th>h₂</th><th>输出 h₁−2h₂</th><th>答案</th></tr>' +
+          '<tr><td>(0,0)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td>类0 ✓</td></tr>' +
+          '<tr><td>(0,1)/(1,0)</td><td class="num">1</td><td class="num">1</td><td class="num">0</td><td class="num">1</td><td>类1 ✓</td></tr>' +
+          '<tr><td>(1,1)</td><td class="num">2</td><td class="num">2</td><td class="num">1</td><td class="num">0</td><td>类0 ✓</td></tr></table>' +
+          '<div class="note">ReLU 是「折角」函数：在 s=0 折一次，在 s=1 处（通过 s−1）再折一次。每折一次斜率就变一次，' +
+          '两条直线拼成折线，折线才能分开对角点。</div>';
+      }
+    }
+    refresh2(); root.appendChild(c2);
+
+    /* --- 激活函数 --- */
+    root.appendChild(el("h3", null, "③ 激活函数：前向算什么，反向算什么"));
+    var c3 = el("div", "card");
+    var seg3 = el("div", "seg");
+    var ACTS = ["ReLU", "Leaky ReLU", "Sigmoid", "tanh"];
+    var act = "ReLU";
+    ACTS.forEach(function(a, i){
+      var b = el("button", i === 0 ? "on" : null, a);
+      b.addEventListener("click", function(){
+        [].forEach.call(seg3.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on"); act = a; refresh3();
+      });
+      seg3.appendChild(b);
+    });
+    c3.appendChild(el("div", "row")).appendChild(seg3);
+    var cvs3 = mkCanvas(190); c3.appendChild(cvs3);
+    var zr = el("div", "row"), zl = el("label", null, "输入 z"), zg = el("input"), zv = el("span", "val");
+    zg.type = "range"; zg.min = -4; zg.max = 4; zg.step = .1; zg.value = 1.5;
+    zr.appendChild(zl); zr.appendChild(zg); zr.appendChild(zv); c3.appendChild(zr);
+    var out3 = el("div"); c3.appendChild(out3);
+
+    function actF(a, z){
+      if (a === "ReLU") return Math.max(0, z);
+      if (a === "Leaky ReLU") return z < 0 ? 0.01 * z : z;
+      if (a === "Sigmoid") return 1 / (1 + Math.exp(-z));
+      return Math.tanh(z);
+    }
+    function actD(a, z){
+      if (a === "ReLU") return z > 0 ? 1 : 0;
+      if (a === "Leaky ReLU") return z >= 0 ? 1 : 0.01;
+      if (a === "Sigmoid"){ var s = 1 / (1 + Math.exp(-z)); return s * (1 - s); }
+      var t = Math.tanh(z); return 1 - t * t;
+    }
+    function refresh3(){
+      var z = +zg.value; zv.textContent = z.toFixed(1);
+      draw(cvs3, function(ctx, w, h){
+        var ax = axes(ctx, w, h, { l: 32, r: 12, t: 12, b: 22 }, -4, 4, -1.3, 1.6);
+        // 网格
+        ctx.strokeStyle = col("line"); ctx.lineWidth = 1;
+        [-1, 0, 1].forEach(function(v){ ctx.beginPath(); ctx.moveTo(32, ax.Y(v)); ctx.lineTo(w - 12, ax.Y(v)); ctx.stroke(); });
+        // 函数曲线
+        ctx.strokeStyle = col("accent"); ctx.lineWidth = 2.4; ctx.beginPath();
+        for (var i = 0; i <= 160; i++){
+          var zz = -4 + i / 160 * 8, yy = actF(act, zz);
+          if (i === 0) ctx.moveTo(ax.X(zz), ax.Y(yy)); else ctx.lineTo(ax.X(zz), ax.Y(yy));
+        }
+        ctx.stroke();
+        // 导数曲线
+        ctx.strokeStyle = col("accent2"); ctx.lineWidth = 1.8; ctx.setLineDash([4, 3]); ctx.beginPath();
+        for (var j = 0; j <= 160; j++){
+          var z2 = -4 + j / 160 * 8, d2 = actD(act, z2);
+          if (j === 0) ctx.moveTo(ax.X(z2), ax.Y(d2)); else ctx.lineTo(ax.X(z2), ax.Y(d2));
+        }
+        ctx.stroke(); ctx.setLineDash([]);
+        // 当前点
+        var y = actF(act, z), dy = actD(act, z);
+        ctx.strokeStyle = col("warn"); ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
+        ctx.beginPath(); ctx.moveTo(ax.X(z), 12); ctx.lineTo(ax.X(z), h - 22); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = col("accent"); ctx.beginPath(); ctx.arc(ax.X(z), ax.Y(y), 5, 0, 7); ctx.fill();
+        ctx.fillStyle = col("accent2"); ctx.beginPath(); ctx.arc(ax.X(z), ax.Y(dy), 4, 0, 7); ctx.fill();
+        ctx.font = "11px sans-serif"; ctx.textAlign = "left";
+        ctx.fillStyle = col("accent"); ctx.fillText("函数 φ(z)  实线", 36, 20);
+        ctx.fillStyle = col("accent2"); ctx.fillText("导数 φ′(z)  虚线", 36, 35);
+      });
+      out3.innerHTML = '<div class="kv"><span class="k">前向输出 φ(' + z.toFixed(1) + ')</span><span class="v">' + fmt(actF(act, z), 4) + '</span></div>' +
+        '<div class="kv"><span class="k">反向局部导数 φ′(' + z.toFixed(1) + ')</span><span class="v">' + fmt(actD(act, z), 4) + '</span></div>';
+    }
+    zg.addEventListener("input", refresh3);
+    refresh3();
+    c3.appendChild(el("div", "note warn", "<b>Sigmoid / tanh 为什么会梯度消失：</b>两端接近水平，斜率接近 0。反传是连乘，穿过 k 个 Sigmoid 就乘了 k 个不超过 0.25 的数，乘几次就趋近 0。<br>" +
+      "<b>ReLU 为什么不会：</b>正半轴斜率恒为 1，这一段传播不会因它本身缩小梯度。但负半轴梯度为 0，神经元可能『死掉』——Leaky ReLU 就是给负半轴留一个 α 小斜率。"));
+    root.appendChild(c3);
+  }
+});
+
+/* =========================================================
+   考点 4 梯度下降
+   ========================================================= */
+SECTIONS.push({
+  id: "p4", no: "04", title: "梯度下降与六种优化方法",
+  desc: "六种都会认，挑一种能算到出结果；Adam 最常考",
+  hot: true,
+  render: function(root){
+    root.appendChild(el("h2", null, "04 · 梯度下降与六种优化方法"));
+    root.appendChild(el("p", "sub", "老师说「考其中一种」。六种都要认识，但要能挑一种手算到底。"));
+
+    /* ---- 先把概念讲明白，再让人动手 ---- */
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>先别管公式。你被扔进一座大雾的山里，要下山</h4>' +
+      '<p>能见度只有一米。你看不见山脚在哪，也不知道自己离山脚还有多远。你能做的只有一个动作：</p>' +
+      '<p style="text-align:center;font-size:14.5px"><b>抬起脚往旁边探一下，感觉地面是变高了还是变低了。</b></p>' +
+      '<p>比如你往右探，发现地面变高了——右边是上坡，那你该往左走。你往左挪一步，站定，<b>再探一次</b>。' +
+      '这一次的坡度和刚才不一样了，因为你换了位置。然后再挪、再探。</p>' +
+      '<p>就这么重复下去，你最后会停在一个"四面都不比这里低"的地方，那就是谷底。</p>' +
+      '<div class="analogy"><span class="lbl">这个动作，就是梯度下降，一个字都不差</span>' +
+      '训练模型时做的事和它完全一样：<br>' +
+      '· 你站的位置　=　模型当前的参数值<br>' +
+      '· 山的高度　　=　模型答错的程度（叫「损失」）<br>' +
+      '· 探脚感觉坡度 =　算一次梯度<br>' +
+      '· 往下坡挪一步 =　更新一次参数<br>' +
+      '训练跑一百万轮，就是挪一百万步。就这么朴素的重复。</div>' +
+      '<p><b>「梯度」这个词，说的就是你探脚的那个感觉。</b>它的准确定义是：' +
+      '在当前位置，函数<b>上升最快</b>的那个方向。</p>' +
+      '<p>所以想"下降"，自然就<b>朝它的反方向</b>走。这就是公式里那个减号的来历——' +
+      '它不是谁规定的，就是"上坡的反面是下坡"这么一句话。</p>' +
+      '<p>写成数学，是这样一行：</p>' +
+      MB('\\theta_{t+1} \\;=\\; \\theta_t \\;-\\; \\eta\\cdot g_t') +
+      '<div class="why"><span class="lbl">这四个符号，一个一个认</span>' +
+      '· <b>θ</b>（读 theta）：模型的参数，也就是"你站在哪"。下标 t 表示第 t 步。<br>' +
+      '· <b>g</b>：梯度，也就是"你探到的坡度"。<b>正数表示往右是上坡，负数表示往右是下坡。</b><br>' +
+      '· <b>η</b>（读 eta）：学习率，也就是"你一步迈多大"。<br>' +
+      '· <b>负号</b>：方向反过来，上坡变下坡。</div>' +
+      '<p><b>为什么不用正号？</b>用正号就是顺着上坡走，那是爬山，损失会越来越大。' +
+      '看个具体数字就明白：如果 g = +2（往右是上坡），<b>加</b>上去会变成 w+2η，位置变大、往右、更高了；' +
+      '<b>减</b>掉则是 w−2η，往左、更低。显然要减。</p>' +
+      '<p><b>为什么每一步都要重新算梯度？</b>因为坡度只在"当前位置"附近才算数。' +
+      '你从山腰挪到山腰下面，路已经不是原来那条路了。' +
+      '一直用第一步的坡度往同一个方向冲，等于闭着眼睛蒙头走，很容易冲过头冲到对面山坡上。</p>' +
+      '<div class="why"><span class="lbl">为什么"减梯度"一定不会让损失变大（一行数学）</span>' +
+      '把损失用切线近似（相当于假设路是直的）：' + MI('R(w+\\Delta) \\approx R(w) + R\'(w)\\cdot\\Delta') + '<br>' +
+      '我们想让走完之后变小，就要让 ' + MI('R\'(w)\\cdot\\Delta &lt; 0') + '。<br>' +
+      '取 ' + MI('\\Delta = -\\eta R\'(w)') + ' 代进去：' + MI('R\'(w)\\cdot\\Delta = -\\eta [R\'(w)]^2') + '<br>' +
+      '平方一定 ≥ 0、η 一定 &gt; 0，所以这一坨一定 ≤ 0。' +
+      '<b>只要步子别太大，走这一步损失就不会变大。</b>这就是降号的数学保证。</div>';
+    root.appendChild(ex);
+
+    var card = el("div", "card");
+    /* 优化器选择 */
+    var segO = el("div", "seg"); segO.style.flexWrap = "wrap";
+    var OPTS = ["GD", "Momentum", "AdaGrad", "RMSProp", "Adam"];
+    var opt = "GD";
+    OPTS.forEach(function(o, i){
+      var b = el("button", i === 0 ? "on" : null, o);
+      b.addEventListener("click", function(){
+        [].forEach.call(segO.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on"); opt = o; reset(); refresh();
+      });
+      segO.appendChild(b);
+    });
+    card.appendChild(el("div", "row")).appendChild(segO);
+
+    /* 损失函数选择 */
+    var segL = el("div", "seg");
+    var LOSSES = [["单谷", 0], ["多谷（看动量）", 1]];
+    var lossK = 0;
+    LOSSES.forEach(function(o, i){
+      var b = el("button", i === 0 ? "on" : null, o[0]);
+      b.addEventListener("click", function(){
+        [].forEach.call(segL.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on"); lossK = o[1]; reset(); refresh();
+      });
+      segL.appendChild(b);
+    });
+    card.appendChild(el("div", "row")).appendChild(segL);
+
+    var cvs = mkCanvas(190); card.appendChild(cvs);
+
+    /* 参数滑块 */
+    var P = { eta: 0.25, beta: 0.9, rho: 0.9, b1: 0.9, b2: 0.999 };
+    var SL = [
+      { k: "eta", label: "学习率 η", min: 0.01, max: 1.5, step: 0.01 },
+      { k: "beta", label: "动量 β", min: 0.1, max: 0.99, step: 0.01 },
+      { k: "rho", label: "RMSProp ρ", min: 0.1, max: 0.99, step: 0.01 },
+      { k: "b1", label: "Adam β₁", min: 0.1, max: 0.99, step: 0.01 },
+      { k: "b2", label: "Adam β₂", min: 0.5, max: 0.999, step: 0.001 }
+    ];
+    var slBox = el("div"); card.appendChild(slBox);
+    SL.forEach(function(s){
+      var rw = el("div", "row"), rl = el("label", null, s.label), rg = el("input"), rv = el("span", "val");
+      rg.type = "range"; rg.min = s.min; rg.max = s.max; rg.step = s.step; rg.value = P[s.k];
+      rg.setAttribute("data-k", s.k);
+      rw.appendChild(rl); rw.appendChild(rg); rw.appendChild(rv); slBox.appendChild(rw);
+      rg.addEventListener("input", function(){ P[s.k] = +rg.value; rv.textContent = (+rg.value).toFixed(s.step < 0.01 ? 3 : 2); });
+    });
+    function syncSliders(){
+      var rgs = slBox.querySelectorAll("input");
+      for (var i = 0; i < rgs.length; i++){
+        var k = rgs[i].getAttribute("data-k");
+        rgs[i].value = P[k];
+        rgs[i].parentNode.querySelector(".val").textContent = P[k].toFixed(rgs[i].step < 0.01 ? 3 : 2);
+        // 只显示当前优化器用得到的
+        var need = k === "eta" || (opt === "Momentum" && k === "beta") ||
+          (opt === "RMSProp" && k === "rho") || (opt === "Adam" && (k === "b1" || k === "b2"));
+        rgs[i].parentNode.style.display = need ? "" : "none";
+      }
+    }
+
+    /* 按钮 */
+    var bRow = el("div", "row"); card.appendChild(bRow);
+    var b1 = el("button", "btn primary", "单步"), b2 = el("button", "btn", "连续跑"), b3 = el("button", "btn ghost", "重置");
+    bRow.appendChild(b1); bRow.appendChild(b2); bRow.appendChild(b3);
+
+    var tblBox = el("div"); card.appendChild(tblBox);
+    root.appendChild(card);
+
+    /* 状态 */
+    var S = null, timer = null;
+    function L(w){ return lossK === 0 ? 0.5 * (w - 3) * (w - 3) : 0.5 * (w - 3) * (w - 3) + 1.2 * Math.cos(2 * w) + 1.2; }
+    function dL(w){ return lossK === 0 ? (w - 3) : (w - 3) - 2.4 * Math.sin(2 * w); }
+    function reset(){
+      S = { t: 0, w: 0.2, m: 0, r: 0, v: 0, hist: [{ w: 0.2 }] };
+      if (timer){ clearInterval(timer); timer = null; b2.textContent = "连续跑"; b2.classList.remove("on"); }
+    }
+    function stepOnce(){
+      if (S.t >= 60) return false;
+      var w = S.w, g = dL(w), eta = P.eta, eps = 1e-8;
+      var rec = { t: S.t + 1, w0: w, g: g, L: L(w) };
+      if (opt === "GD"){
+        w = w - eta * g; rec.memo = "g";
+      } else if (opt === "Momentum"){
+        S.m = P.beta * S.m + (1 - P.beta) * g;
+        w = w - eta * S.m; rec.memo = "m=" + fmt(S.m, 4);
+      } else if (opt === "AdaGrad"){
+        S.r = S.r + g * g;
+        w = w - eta * g / (Math.sqrt(S.r) + eps); rec.memo = "r=" + fmt(S.r, 4);
+      } else if (opt === "RMSProp"){
+        S.r = P.rho * S.r + (1 - P.rho) * g * g;
+        w = w - eta * g / (Math.sqrt(S.r) + eps); rec.memo = "r=" + fmt(S.r, 4);
+      } else {
+        S.m = P.b1 * S.m + (1 - P.b1) * g;
+        S.v = P.b2 * S.v + (1 - P.b2) * g * g;
+        var mh = S.m / (1 - Math.pow(P.b1, S.t + 1));
+        var vh = S.v / (1 - Math.pow(P.b2, S.t + 1));
+        w = w - eta * mh / (Math.sqrt(vh) + eps);
+        rec.memo = "m=" + fmt(S.m, 4) + " v=" + fmt(S.v, 5);
+      }
+      S.t++; S.w = w; rec.w1 = w; rec.L1 = L(w);
+      S.hist.push(rec);
+      return true;
+    }
+    function refresh(){
+      syncSliders();
+      draw(cvs, function(ctx, w, h){
+        var ax = axes(ctx, w, h, { l: 34, r: 12, t: 12, b: 22 }, -1.5, 7, -0.3, 8);
+        // 曲线
+        ctx.strokeStyle = col("accent"); ctx.lineWidth = 2.2; ctx.beginPath();
+        var started = false;
+        for (var i = 0; i <= 200; i++){
+          var xx = -1.5 + i / 200 * 8.5, yy = L(xx);
+          if (yy < -0.3 || yy > 8){ continue; }
+          if (!started){ ctx.moveTo(ax.X(xx), ax.Y(yy)); started = true; } else ctx.lineTo(ax.X(xx), ax.Y(yy));
+        }
+        ctx.stroke();
+        // 轨迹
+        for (var k = 1; k < S.hist.length; k++){
+          var hh = S.hist[k];
+          ctx.strokeStyle = "rgba(14,159,110,.45)"; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(ax.X(hh.w0), ax.Y(hh.L)); ctx.lineTo(ax.X(hh.w1), ax.Y(hh.L1)); ctx.stroke();
+        }
+        // 当前点
+        var cur = S.hist[S.hist.length - 1];
+        var cw = cur.w1 !== undefined ? cur.w1 : cur.w;
+        var cl = L(cw);
+        ctx.fillStyle = col("accent2"); ctx.beginPath(); ctx.arc(ax.X(cw), ax.Y(cl), 6, 0, 7); ctx.fill();
+        ctx.strokeStyle = col("panel"); ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = col("muted"); ctx.font = "11px ui-monospace,monospace"; ctx.textAlign = "left";
+        ctx.fillText("w = " + fmt(cw, 4) + "   L = " + fmt(cl, 4), 38, h - 6);
+        ctx.fillStyle = col("accent2"); ctx.textAlign = "right";
+        ctx.fillText(lossK === 0 ? "谷底 w=3" : "多谷：动量能翻过去", w - 12, h - 6);
+      });
+      // 表格
+      var rows = S.hist.slice(-9);
+      var html = '<table class="tbl"><tr><th>步</th><th>w(前)</th><th>梯度 g</th><th>' +
+        (opt === "GD" ? "更新量" : (opt === "Momentum" ? "动量 m" : (opt === "Adam" ? "m / v" : "r"))) +
+        '</th><th>w(后)</th><th>损失</th></tr>';
+      rows.forEach(function(r, i){
+        if (r.t === undefined) return;
+        html += '<tr><td class="num">' + r.t + '</td><td class="num">' + fmt(r.w0, 4) + '</td><td class="num">' + fmt(r.g, 4) +
+          '</td><td class="num" style="font-size:11px">' + (r.memo || "-") + '</td><td class="num">' + fmt(r.w1, 4) +
+          '</td><td class="num">' + fmt(r.L1, 4) + '</td></tr>';
+      });
+      html += '</table>';
+      tblBox.innerHTML = html;
+      if (S.t === 0) tblBox.innerHTML = '<div class="note">从 w₀ = 0.2 出发。点「单步」看每一步怎么走，点「连续跑」看整条轨迹。</div>' + html;
+    }
+    b1.addEventListener("click", function(){ if (stepOnce()) refresh(); });
+    b2.addEventListener("click", function(){
+      if (timer){ clearInterval(timer); timer = null; b2.textContent = "连续跑"; b2.classList.remove("on"); return; }
+      b2.textContent = "暂停"; b2.classList.add("on");
+      timer = setInterval(function(){
+        if (!stepOnce()){ clearInterval(timer); timer = null; b2.textContent = "连续跑"; b2.classList.remove("on"); return; }
+        refresh();
+      }, 420);
+    });
+    b3.addEventListener("click", function(){ reset(); refresh(); });
+    reset(); refresh();
+
+    /* ---- 交互之后：把每个公式拆开讲 ---- */
+    var ex2 = el("div", "explain");
+    ex2.innerHTML =
+      '<h4>学习率 η：一步迈多大，这件事为什么这么要命</h4>' +
+      '<p>回到下山那个画面。你已经知道该往哪边走（方向由梯度定），但<b>迈多大一步，梯度管不了</b>，' +
+      '这是你自己定的。这个"步子大小"就是学习率 η。</p>' +
+      '<p>损失函数是个碗，最低点在 w = 3，你从 w = 1 出发：' + MB('R(w)=\\tfrac12 (w-3)^2') +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">·</div><div class="c"><b>η 太小</b>：每步只挪一丁点。方向完全正确，但要走几百步才到碗底。' +
+      '算力全浪费在挪步上。</div></div>' +
+      '<div class="st"><div class="n">·</div><div class="c"><b>η 正好</b>：几步就到碗底附近，然后停下。</div></div>' +
+      '<div class="st"><div class="n">·</div><div class="c"><b>η 太大</b>：一步跨过碗底，冲到对面<b>更高的地方</b>去了。' +
+      '下一步又从那边冲回来，越冲越高。</div></div>' +
+      '</div>' +
+      '<p>把 η = 2 代进去，一步一步看它怎么疯的（每步都重新算梯度）：</p>' +
+      STEP('第 1 步　从 w=1 出发',
+           'g = 1-3 = -2 \\quad\\Rightarrow\\quad w = 1 - 2\\times(-2) = 5',
+           '梯度是 <b>−2</b>，负的，说明往右是下坡。η=2，所以往右迈 2×2=4 格，从 1 冲到了 <b>5</b>。<br>' +
+           '注意：<b>碗底在 3，你一下冲过头冲到了 5</b>，跑到另一边去了。',
+           'w = 5　损失 R(5)=½(5−3)² = 2　（和出发时一样，一点没降）') +
+      STEP('第 2 步　现在在 w=5，重新探坡度',
+           'g = 5-3 = +2 \\quad\\Rightarrow\\quad w = 5 - 2\\times(+2) = 1',
+           '位置跑到碗底右边了，坡度变成<b>正的</b>，所以这回该往左走。<br>' +
+           '又是迈 4 格，从 5 冲回 <b>1</b>——正好是你出发的地方。',
+           'w = 1　损失又是 2') +
+      STEP('第 3 步　回到 w=1，和第 1 步完全一样',
+           'w = 1 - 2\\times(-2) = 5',
+           '你看，它开始循环了：1 → 5 → 1 → 5 ……<br>' +
+           '<b>参数每一轮都在变（所以"在训练"），但损失一次都没降（所以"没学到东西"）。</b>',
+           '永远在 1 和 5 之间来回，永远无法收敛') +
+      '<div class="why"><span class="lbl">为什么恰好是 η=2 出问题？有个简单判据</span>' +
+      '对这种碗形函数，可以证明：<b>η 必须小于 ' + MI('2/L') + ' 才收敛</b>，其中 L 是碗的"陡峭程度"（曲率）。<br>' +
+      '本例 ' + MI('R(w)=\\tfrac12(w-3)^2') + ' 的 L = 1，所以 η 必须 &lt; 2。<br>' +
+      '取 η = 2 正好卡在临界点 → 永远震荡（不掉下去也不飞出去）；取 η &gt; 2 → 越跳越远，直接发散。<br>' +
+      '<b>这就是"学习率要调"背后的真实机制，不是玄学。</b></div>' +
+      '<div class="why"><span class="lbl">手算题一定会踩的坑</span>' +
+      '第 2 步的梯度必须代入<b>更新后的 w</b> 重算，不能沿用第 1 步那个 −2。<br>' +
+      '上面这个例子里，正是因为在 w=5 处重算出了 +2（而不是继续用 −2），才会往左冲回去。' +
+      '如果一直用 −2，它会一路向右跑到无穷远，那是另一种错法。</div>';
+    root.appendChild(ex2);
+
+    var ex3 = el("div", "explain");
+    ex3.innerHTML =
+      '<h4>六种方法不是六个要背的公式，是一条"打补丁"的路</h4>' +
+      '<p>很多人背这六个名字背得很痛苦，因为把它们当成了六个并列的知识点。' +
+      '其实它们是<b>依次解决前一个暴露出来的毛病</b>，串起来看一遍就忘不掉：</p>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>全批量 GD（最朴素的想法）</b><br>' +
+      '要探坡度，最准的办法是把<b>全部训练样本</b>都算一遍再取平均。<br>' +
+      '<span style="color:var(--muted)">它坏在哪：</span>假如你有十万条样本，探一次坡度就要把十万条全跑一遍。' +
+      '你才挪了一步。训练要几百万步，这根本跑不完。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>小批量 SGD（省时间的让步）</b><br>' +
+      '那我随便抓 32 条来估一下坡度行不行？行。抓的样本少，探出来的方向会有点抖，但<b>大方向是对的</b>。<br>' +
+      '<span style="color:var(--accent2)">换来了什么：</span>探一次坡度的成本降到几千分之一，' +
+      '同样的时间你能挪几千步。而且"抖"还有个意外好处——能帮模型跳出那些不太好的坑。</div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c"><b>动量 Momentum（治"抖"）</b><br>' +
+      '但每次方向都抖，参数就会在谷底两侧来回横跳，走大量冤枉路。<br>' +
+      '<b>办法</b>：别只看这一步的坡度，而是把过去所有坡度<b>加权平均</b>。' +
+      '就像滚下山的球有惯性——同一个方向的坡度越积越猛，左右摇摆的部分自己就抵消了。</div></div>' +
+      '<div class="st"><div class="n">4</div><div class="c"><b>AdaGrad（治"所有参数共用同一个步子"）</b><br>' +
+      '模型中有的参数一直很活跃（梯度大），有的一直很安静（梯度小）。让它们迈一样大的步很别扭：' +
+      '活跃的参数会走过头，安静的参数几乎不动。<br>' +
+      '<b>办法</b>：给每个参数<b>单独记账</b>——把它历史上所有梯度的平方加起来。' +
+      '平方和越大的参数，说明它"一贯很陡"，就把它的步子按比例调小。</div></div>' +
+      '<div class="st"><div class="n">5</div><div class="c"><b>RMSProp（治 AdaGrad 的"走死"）</b><br>' +
+      'AdaGrad 那个平方和只增不减，越训练越大，于是步子被压得越来越小。' +
+      '走到后期几乎所有参数都挪不动了——明明离谷底还差很远，却提前"走死"了。<br>' +
+      '<b>办法</b>：把"累加"改成"移动平均"。久远的历史会让它慢慢淡出，' +
+      '这样有效步子不会单调衰减，还能回升。</div></div>' +
+      '<div class="st"><div class="n">6</div><div class="c"><b>Adam（把 3 和 5 合起来用）</b><br>' +
+      '动量治"方向抖"，RMSProp 治"步子僵"。它们是治两个不同病症的，<b>完全可以一起吃</b>。<br>' +
+      'Adam 就是：用一套移动平均记住<b>方向</b>（带正负号），用另一套移动平均记住<b>坡度大小</b>（平方过，没有正负号），' +
+      '两个一起用。<br>' +
+      '<span style="color:var(--muted)">代价：</span>两个量都从 0 起步，前几步会被这个 0 拖得偏小，' +
+      '所以要额外打一个补丁叫「偏差修正」。这一步就是下面要单独讲的。</div></div>' +
+      '</div>' +
+      '<div class="analogy"><span class="lbl">一句话把六个串起来</span>' +
+      '"全量太慢 → 抽小批 → 但小批抖 → 加惯性 → 但步子不分参数 → 按参数各自调 → 但会调死 → 让它能恢复 → 两个合起来用"' +
+      '<br>沿着这条线读一遍，比单独背六个公式牢得多。</div>';
+    root.appendChild(ex3);
+
+    var ex4 = el("div", "explain");
+    ex4.innerHTML =
+      '<h4>Adam：三个式子，每一块砖为什么这么摆</h4>' +
+      '<p>Adam 干的事，一句话说完：<b>一边记住"往哪个方向走"，一边记住"该走多大步"，两个都用滑动平均来算。</b></p>' +
+      '<p>它的三个式子长这样（先看整体，下面逐个拆）：</p>' +
+      MB('m_t = \\beta_1 m_{t-1} + (1-\\beta_1)\\,g_t') +
+      MB('v_t = \\beta_2 v_{t-1} + (1-\\beta_2)\\,g_t^{2}') +
+      MB('\\theta_t = \\theta_{t-1} - \\eta\\,\\frac{\\hat m_t}{\\sqrt{\\hat v_t}+\\epsilon}') +
+      '<p>其中带帽子的两个是"修正后"的值：' +
+      MI('\\hat m_t=\\dfrac{m_t}{1-\\beta_1^{\\,t}}') + '、' +
+      MI('\\hat v_t=\\dfrac{v_t}{1-\\beta_2^{\\,t}}') + '</p>' +
+
+      '<p style="margin-top:16px"><b>第一问：第一行里那个 (1 − β) 是干嘛的？</b></p>' +
+      '<p>它保证"权重加起来正好等于 1"。取 β = 0.5 展开两行就看见了：</p>' +
+      MB('m_1 = 0.5\\,m_0 + 0.5\\,g_1 \\\\[2pt] m_2 = 0.5\\,m_1 + 0.5\\,g_2 = 0.25\\,g_1 + 0.5\\,g_2 + 0.25\\,m_0') +
+      '<p>三个权重 0.25 + 0.5 + 0.25 = 1，正好。而且<b>越近的梯度权重越大</b>（g₂ 占 0.5，g₁ 只占 0.25）。</p>' +
+      '<div class="why"><span class="lbl">如果偷懒写成 m = β·m + g 会怎样</span>' +
+      '每一步都把完整的 g 加进去，权重和会变成 ' + MI('\\beta + 1') + '（β=0.5 时是 1.5）。' +
+      '下一年再套一次就是 1.5 倍再 1.5 倍……<b>m 会指数级膨胀</b>，几步之后就变成天文数字，训练直接崩。<br>' +
+      '所以这个 (1−β) 不是装饰，它是"平均"和"累加"的分界线。</div>' +
+
+      '<p style="margin-top:16px"><b>第二问：为什么要用 m 和 v 两个量，不能只用一个吗？</b></p>' +
+      '<p>因为<b>方向和大小是两件不同的事</b>，一个数表达不了两件事：</p>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">m</div><div class="c"><b>记方向</b>。它保留正负号。<br>' +
+      '如果梯度一会儿 +3 一会儿 −3 地来回摆，负号会把它们<b>互相抵消</b>，m 就接近 0 —— ' +
+      '意思是"这里在反复横跳，别急着往哪边走"。这正是动量想要的效果。</div></div>' +
+      '<div class="st"><div class="n">v</div><div class="c"><b>记大小</b>。它先把梯度<b>平方</b>再平均，' +
+      '所以正负号被抹掉了，只剩"这里陡不陡"。<br>' +
+      '平方的另一个作用是<b>放大差异</b>：梯度 10 和梯度 1，平方后是 100 和 1，' +
+      '陡的地方会被记住得更明显，于是步子会被压得更狠。</div></div>' +
+      '</div>' +
+      '<p>最后更新时 <b>m 当分子（方向）、' + MI('\\sqrt{v}') + ' 当分母（放大步子的倒数）</b>：' +
+      '陡的地方步子自动变小，平的地方步子自动变大。这就是 Adam 的"自适应"。</p>' +
+
+      '<p style="margin-top:16px"><b>第三问：偏差修正那个 ' + MI('1-\\beta^t') + ' 是怎么来的？</b></p>' +
+      '<p>这是三个问题里最难想通、也最爱考的一个。根源就一句话：<b>m 和 v 的初值都是 0。</b></p>' +
+      '<p>第一步的时候，m 还没攒下任何历史，只有那半个新梯度：</p>' +
+      MB('m_1 = \\beta\\cdot \\underbrace{m_0}_{=0} + (1-\\beta)\\,g_1 = (1-\\beta)\\,g_1') +
+      '<p>真实的梯度是 g₁，但 m₁ 只有它的 (1−β) 倍。如果 β = 0.9，' +
+      '<b>m₁ 只剩真值的 10%</b>——步子会被压小整整 10 倍，头几步几乎原地踏步。</p>' +
+      '<p>修法很直接：<b>既然被缩小了 10 倍，那就除回去 10 倍。</b>' +
+      '而第 t 步被缩小的倍率恰好是 ' + MI('1-\\beta^{\\,t}') + '，这个数可以推出来（把 m 展开成加权和就能看到），考试直接用就行：</p>' +
+      MB('\\hat m_t = \\frac{m_t}{1-\\beta_1^{\\,t}} \\qquad \\hat v_t = \\frac{v_t}{1-\\beta_2^{\\,t}}') +
+      '<p>代入 t = 1、β₁ = 0.9：分母 ' + MI('1-0.9=0.1') + '，所以 m̂ = m/0.1 = 放大 10 倍，正好还原成真值。<br>' +
+      't = 2 时分母 ' + MI('1-0.9^2=0.19') + '；t 越大，分母越接近 1，修正的影响就自动消失了。</p>' +
+      '<div class="why"><span class="lbl">手算题最容易被扣分的一点</span>' +
+      'm̂ 和 v̂ 是<b>为了这一步更新临时算出来的</b>，算完就丢。<br>' +
+      '<b>下一步递推时要用原始的 m、v，不能用修正后的 m̂、v̂。</b><br>' +
+      '如果你把修正值写回变量，第 2 步就会把已经放大过的数再放大一次，后面全崩。' +
+      '这也是为什么手算题要求你把"原始状态"和"修正状态"两列都写出来。</div>';
+    root.appendChild(ex4);
+
+    /* 公式与两种特例 */
+    root.appendChild(el("h3", null, "六种方法一张辨认表"));
+    var tb = el("div", "card");
+    tb.innerHTML = '<table class="tbl"><tr><th>方法</th><th>保存什么</th><th style="text-align:left">关键更新式</th></tr>' +
+      '<tr><td>全批量 GD</td><td>无</td><td style="text-align:left;font-size:11.5px">θ ← θ − η·mean(全部样本梯度)</td></tr>' +
+      '<tr><td>小批量 SGD</td><td>无</td><td style="text-align:left;font-size:11.5px">θ ← θ − η·mean(一个 batch)</td></tr>' +
+      '<tr><td>动量</td><td>方向 m</td><td style="text-align:left;font-size:11.5px">m = βm + (1−β)g；θ ← θ − η·m</td></tr>' +
+      '<tr><td>AdaGrad</td><td>平方累加 r</td><td style="text-align:left;font-size:11.5px">r += g²；θ ← θ − η·g/(√r+ε)</td></tr>' +
+      '<tr><td>RMSProp</td><td>平方的移动平均 r</td><td style="text-align:left;font-size:11.5px">r = ρr + (1−ρ)g²；θ ← θ − η·g/(√r+ε)</td></tr>' +
+      '<tr><td>Adam</td><td>方向 m + 平方 v</td><td style="text-align:left;font-size:11.5px">m、v 都做移动平均，再偏差修正</td></tr></table>' +
+      '<div class="note"><b>三步辨认：</b>只累计 g² → AdaGrad；对 g² 做指数移动平均 → RMSProp；同时平滑 g 和 g² 并做初值修正 → Adam。</div>';
+    root.appendChild(tb);
+
+    root.appendChild(el("h3", null, "例题 · Adam 两步更新（模拟卷第 4 题）"));
+    var cA = el("div", "card");
+    cA.innerHTML =
+      '<div class="note">题目：' + MI('w_0=1') + '、' + MI('m_0=v_0=0') + '、' + MI('\\eta=0.1') +
+      '、' + MI('\\beta_1=\\beta_2=0.5') + '，两步梯度分别是 ' + MI('g_1=-2') + ' 和 ' + MI('g_2=4') +
+      '，忽略 ' + MI('\\epsilon') + '。求两步之后 w 是多少。<br>' +
+      '<b>下面每一步都是：先摆公式 → 代数字 → 说清这一步到底在干嘛。</b></div>' +
+      STEP('第 1 步　算方向的平均量 m₁',
+        'm_1 = \\beta_1 m_0 + (1-\\beta_1)\\,g_1 = 0.5\\times 0 + 0.5\\times(-2) = -1',
+        'm 是"方向的滑动平均"。m₀ = 0（还没开始，没有历史），所以这一步只有新梯度 g₁ = −2 的一半进来。<br>' +
+        '结果 <b>−1 是负数</b>，负号的意思是：往右是下坡，参数该往右走。',
+        'm₁ = −1') +
+      STEP('第 2 步　算坡度大小的平均量 v₁',
+        'v_1 = \\beta_2 v_0 + (1-\\beta_2)\\,g_1^{2} = 0.5\\times 0 + 0.5\\times 4 = 2',
+        '注意这里用的是 g 的<b>平方</b>。g₁ = −2，平方是 4，<b>负号没了</b>。<br>' +
+        '因为 v 只回答"这里陡不陡"，不关心往哪边陡。方向交给 m 去管。',
+        'v₁ = 2') +
+      STEP('第 3 步　修正 m₁ → m̂₁',
+        '\\hat m_1 = \\frac{m_1}{1-\\beta_1^{\\,1}} = \\frac{-1}{1-0.5} = \\frac{-1}{0.5} = -2',
+        '分母 1 − 0.5¹ = 0.5。为什么除？因为 m₁ 被"零初值"稀释掉了一半，除回去正好还原。<br>' +
+        '<b>自查：修正后 m̂₁ = −2，恰好等于真实梯度 g₁ = −2 —— 说明修正对了。</b>' +
+        '这就是判断偏差修正有没有算错的最快办法。',
+        'm̂₁ = −2') +
+      STEP('第 4 步　修正 v₁ → v̂₁',
+        '\\hat v_1 = \\frac{v_1}{1-\\beta_2^{\\,1}} = \\frac{2}{0.5} = 4',
+        '同样的道理。而且也可以自查：v̂₁ = 4 恰好等于 ' + MI('g_1^2=(-2)^2=4') + '，还原成功。',
+        'v̂₁ = 4') +
+      STEP('第 5 步　第一次更新 w',
+        'w_1 = w_0 - \\eta\\,\\frac{\\hat m_1}{\\sqrt{\\hat v_1}} = 1 - 0.1\\times\\frac{-2}{\\sqrt{4}} = 1 - 0.1\\times(-1) = 1.1',
+        '顺着算：' + MI('\\sqrt 4 = 2') + '，所以 ' + MI('-2/2=-1') + '；再乘 η：' + MI('0.1\\times(-1)=-0.1') + '。<br>' +
+        '公式前面是<b>减号</b>，减一个负数等于加：' + MI('1-(-0.1)=1.1') + '。<br>' +
+        'w 变大了（往右走了），和"负梯度意味着往右下坡"完全一致。',
+        'w₁ = 1.1') +
+      STEP('第 6 步　算第二步的 m₂（关键陷阱在这）',
+        'm_2 = \\beta_1 m_1 + (1-\\beta_1)\\,g_2 = 0.5\\times(-1) + 0.5\\times 4 = 1.5',
+        '【最容易错的一步】这里的 ' + MI('m_1') + ' 必须用<b>原始值 −1</b>，<b>不能用修正后的 −2</b>。<br>' +
+        '假如用了 −2，就会算出 ' + MI('0.5\\times(-2)+0.5\\times 4 = 1') + '，和正确答案 1.5 差很远，后面全崩。<br>' +
+        '<b>记住：修正值只服务于当轮更新，不进下一次递推。</b>',
+        'm₂ = 1.5') +
+      STEP('第 7 步　算第二步的 v₂',
+        'v_2 = \\beta_2 v_1 + (1-\\beta_2)\\,g_2^{2} = 0.5\\times 2 + 0.5\\times 16 = 9',
+        '同样用原始 ' + MI('v_1=2') + '，不用修正后的 4。<br>' +
+        '这一项 ' + MI('g_2^2=16') + ' 明显比上一步的 4 大，说明这个方向的坡度变陡了，' +
+        '于是 v 涨得很快（2 → 9），后面步长就会被压小。<b>这就是自适应的来源。</b>',
+        'v₂ = 9') +
+      STEP('第 8 步　修正 m₂、v₂',
+        '\\hat m_2 = \\frac{1.5}{1-0.5^{2}} = \\frac{1.5}{0.75} = 2,\\qquad \\hat v_2 = \\frac{9}{0.75} = 12',
+        '第 2 步的分母变成 ' + MI('1-0.5^2 = 0.75') + '。<br>' +
+        '对比第 1 步的分母 0.5，可以看到<b>分母在变大、趋近于 1</b>，' +
+        '说明修正的力度在自动减弱——因为零初值的影响本来就只在前几步明显。',
+        'm̂₂ = 2，v̂₂ = 12') +
+      STEP('第 9 步　第二次更新 w',
+        'w_2 = 1.1 - 0.1\\times\\frac{2}{\\sqrt{12}} \\approx 1.1 - 0.0577 \\approx 1.0423',
+        '顺着算：' + MI('\\sqrt{12}\\approx 3.464') + '，' + MI('2/3.464\\approx 0.577') + '，乘 0.1 得 0.0577。<br>' +
+        '这次梯度是<b>正的</b>，所以 w 变小了（往左退了一点）。<br>' +
+        '注意这一步的步长（0.0577）比第 1 步（0.1）小——因为坡度变陡，Adam 自动收小了步子。',
+        'w₂ ≈ 1.0423') +
+      '<div class="note ok"><b>给分要点：</b>这道题一定要写出<b>两组数</b>——原始状态（m、v）和修正状态（m̂、v̂）。' +
+      '只写一组会被认为没掌握偏差修正。</div>';
+    root.appendChild(cA);
+
+    root.appendChild(el("h3", null, "例题 · 动量为什么「记得住方向」"));
+    var cM = el("div", "card");
+    cM.innerHTML =
+      '<div class="note">题目：' + MI('w_0=1') + '、' + MI('m_0=0') + '、' + MI('\\beta=0.5') + '、' + MI('\\eta=0.1') +
+      '，梯度依次是 <b>−2</b> 和 <b>+2</b>（注意第二步梯度反向了）。</div>' +
+      STEP('第 1 步　累积动量并更新',
+        'm_1 = \\beta m_0 + (1-\\beta)g_1 = 0.5\\times 0 + 0.5\\times(-2) = -1',
+        '和 Adam 的 m 是一回事：方向的滑动平均。m₀=0，所以第一步就是 g₁ 的一半。',
+        '') +
+      STEP('　接着用 m 走一步',
+        'w_1 = w_0 - \\eta\\, m_1 = 1 - 0.1\\times(-1) = 1.1',
+        '注意动量法更新时用的是 ' + MI('m') + '，<b>不是原始的 g</b>。这是它和普通 GD 的唯一区别。',
+        'w₁ = 1.1') +
+      STEP('第 2 步　梯度反向了，动量会怎么反应',
+        'm_2 = 0.5\\times(-1) + 0.5\\times(+2) = 0.5',
+        '这一步是理解动量的关键。' +
+        '当前梯度 g₂ = +2 是<b>正的</b>（按理该往左走），上一步攒下的 m₁ = −1 是<b>负的</b>（惯性推着往右）。<br>' +
+        '两者相加：' + MI('(-0.5) + (+1) = +0.5') + ' —— <b>合力还是正的，但被惯性抵掉了大半。</b>',
+        'm₂ = +0.5（只剩原来一半的力度）') +
+      STEP('　继续更新',
+        'w_2 = 1.1 - 0.1\\times 0.5 = 1.05',
+        '结果是 w 从 1.1 变成 1.05，<b>继续往右移了一点点</b>。<br>' +
+        '为什么？因为惯性还没被消耗完。如果换成普通 GD，第 2 步会直接 ' + MI('1.1-0.1\\times 2 = 0.9') +
+        '，一下退回去很多。<br>' +
+        '<b>动量干的事就是：不轻易被一次反向的梯度带跑，方向更平滑。</b>',
+        'w₂ = 1.05') +
+      '<div class="analogy"><span class="lbl">把这两步连起来看</span>' +
+      '普通 GD 在两次反向梯度下会 1 → 1.1 → 0.9，来回折腾；' +
+      '动量则是 1 → 1.1 → 1.05，<b>稳步往前走</b>。<br>' +
+      '这就是"滚下山的球有惯性"这句话在数字上的样子。</div>';
+    root.appendChild(cM);
+
+    root.appendChild(el("h3", null, "例题 · AdaGrad 与 RMSProp 的分母对比"));
+    var cG = el("div", "card");
+    cG.innerHTML =
+      '<div class="note">题目：' + MI('r_0=0') + '、' + MI('w_0=1') + '、' + MI('\\eta=0.1') +
+      '，两次梯度依次是 <b>4</b> 和 <b>1</b>（第二次明显变小），忽略 ' + MI('\\epsilon') + '。</div>' +
+      '<p style="margin:14px 0 6px;font-weight:600">先看 AdaGrad：分母一路变大</p>' +
+      STEP('第 1 步　把这次的梯度平方累加进 r',
+        'r_1 = r_0 + g_1^{2} = 0 + 16 = 16',
+        'AdaGrad 的记忆方式是"全部加起来"，来多少记多少。',
+        'r₁ = 16') +
+      STEP('　用 r₁ 更新 w',
+        'w_1 = 1 - 0.1\\times\\frac{4}{\\sqrt{16}} = 1 - 0.1\\times 1 = 0.9',
+        '分母是 ' + MI('\\sqrt{16}=4') + '，所以 ' + MI('4/4=1') + ' —— 梯度被分母<b>正好抵消成 1</b>。' +
+        '这就是"自适应"：梯度大，分母也大，步子就被标准化了。',
+        'w₁ = 0.9') +
+      STEP('第 2 步　继续累加',
+        'r_2 = r_1 + g_2^{2} = 16 + 1 = 17',
+        '这次梯度只有 1，平方也是 1。<b>但 r 只能往上走，17 回不到 16。</b>',
+        'r₂ = 17') +
+      STEP('　用 r₂ 更新 w',
+        'w_2 = 0.9 - 0.1\\times\\frac{1}{\\sqrt{17}} \\approx 0.9 - 0.0243 \\approx 0.8757',
+        '分母 ' + MI('\\sqrt{17}\\approx 4.123') + '。<br>' +
+        '<b>注意问题来了</b>：这次梯度已经小到 1 了，理论上应该走得很轻松，' +
+        '但分母还被上一步那个 16 撑着，所以步子只有 0.0243，非常小。<br>' +
+        '<b>这就是 AdaGrad 的病：历史包袱永远甩不掉，越训练步子越小。</b>',
+        'w₂ ≈ 0.8757') +
+      '<p style="margin:18px 0 6px;font-weight:600">再看 RMSProp：分母能缩回去</p>' +
+      STEP('第 1 步　用"移动平均"记梯度平方',
+        'r_1 = \\rho r_0 + (1-\\rho)g_1^{2} = 0.5\\times 0 + 0.5\\times 16 = 8',
+        '骨架和 AdaGrad 一模一样，只把"直接加"换成"按 ρ 掺着加"。<br>' +
+        '取 ρ=0.5，意思是一半看历史、一半看现在。<b>r₁ 只有 8，比 AdaGrad 的 16 小一半</b>——' +
+        '因为它把"历史是 0"这件事也掺进去了。',
+        'r₁ = 8') +
+      STEP('　用 r₁ 更新 w',
+        'w_1 = 1 - 0.1\\times\\frac{4}{\\sqrt{8}} \\approx 1 - 0.1414 \\approx 0.8586',
+        '分母 ' + MI('\\sqrt 8\\approx 2.828') + '，比 AdaGrad 的 4 小，所以这一步迈得更大（0.141 vs 0.1）。',
+        'w₁ ≈ 0.8586') +
+      STEP('第 2 步　关键看 r 能不能降下来',
+        'r_2 = 0.5\\times 8 + 0.5\\times 1 = 4 + 0.5 = 4.5',
+        '<b>这里是和 AdaGrad 的核心区别</b>：r 从 8 <b>降到了 4.5</b>。<br>' +
+        '因为老的历史（8）被打了对折，新的（1）也只占一半，加权平均下来就小了。<br>' +
+        '<b>于是有效步子能够回升，不会像 AdaGrad 那样越走越僵。</b>',
+        'r₂ = 4.5（比 r₁ 小了）') +
+      STEP('　用 r₂ 更新 w',
+        'w_2 = 0.8586 - 0.1\\times\\frac{1}{\\sqrt{4.5}} \\approx 0.8586 - 0.0471 \\approx 0.8114',
+        '分母 ' + MI('\\sqrt{4.5}\\approx 2.121') + '。尽管梯度更小了（1），但步子（0.0471）反而比 AdaGrad 的 0.0243 大，' +
+        '因为分母也跟着降下来了。',
+        'w₂ ≈ 0.8114') +
+      '<div class="why"><span class="lbl">两种方法结果对比 + 必踩的坑</span>' +
+      '同样走两步：<br>' +
+      '· AdaGrad：w = 1 → <b>0.9</b> → <b>0.8757</b>（第二步几乎挪不动）<br>' +
+      '· RMSProp：w = 1 → <b>0.8586</b> → <b>0.8114</b>（两步都走得开）<br><br>' +
+      '<b>手算时最容易错的地方：</b>分母必须用<b>该步刚刚更新过的 r</b>，不能沿用上一步的 r。<br>' +
+      '比如第 2 步要先用新的 r₂ 算分母，再代进更新式。用错 r，整道题的数字全不对。</div>';
+    root.appendChild(cG);
+  }
+});
+
+/* =========================================================
+   考点 5 ResNet
+   ========================================================= */
+SECTIONS.push({
+  id: "p5", no: "05", title: "ResNet 的两种核心结构",
+  desc: "BasicBlock 与 Bottleneck，捷径怎么对齐，参数省多少",
+  hot: true,
+  render: function(root){
+    root.appendChild(el("h2", null, "05 · ResNet 的两种核心结构"));
+    root.appendChild(el("p", "sub", "照片 7191 标了「RSNET要考」。两种核心结构，考其中一种。"));
+
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>先搞清楚：加层数为什么会变差</h4>' +
+      '<p>常识是「层数越多、模型越强」。但实际上，把网络加深到几十层后，<b>训练误差反而变大</b>了。' +
+      '注意：是训练误差，不是测试误差——所以<b>这不是过拟合</b>，是压根训不动。</p>' +
+      '<p>为什么训不动？因为加深网络等于让优化问题变得更难：梯度要穿过几十层连乘才能回到前面，越乘越小（甚至变成 0），前面的层几乎收不到「该往哪改」的信号。</p>' +
+      '<div class="analogy"><span class="lbl">残差的想法，一句话</span>' +
+      '与其让一段网络「学会变成某个 H(x)」，不如让它「学会 H(x) 比输入 x 多了什么」。<br>' +
+      '因为如果这一段其实什么都不用做（H(x) 就该等于 x），<b>学「多出来的部分是 0」比学「精确复刻一个恒等映射」容易太多了</b>。<br>' +
+      '学 0 只要把权重压到 0 就行；学恒等映射要让一堆矩阵乘起来恰好等于单位阵，极难。</div>' +
+      '<p><b>那条捷径为什么能救梯度？</b></p>' +
+      '<p>因为加法节点 <b>u = F(x) + x</b> 在反向时，会把同一份上游梯度<b>分给两条路</b>。' +
+      '其中「直接传 x」那条路上一个乘法都没有，梯度可以<b>原封不动地直达前面</b>，不需要连乘穿过多层。' +
+      '等于给梯度修了一条高速公路。</p>' +
+      '<div class="why"><span class="lbl">考试要点</span>' +
+      '加法节点<b>后面如果还有 ReLU，仍要乘上该 ReLU 的导数</b>——高速公路不是无限速，出口还有一道闸。</div>';
+    root.appendChild(ex);
+
+    root.appendChild(el("h3", null, "① 残差在解决什么"));
+    var c0 = el("div", "card");
+    c0.innerHTML = '<p>深层网络的问题不是过拟合，是<b>优化不动</b>——层数加上去，训练误差反而不降。</p>' +
+      '<p>残差块把「学 H(x)」改成「学 H(x) − x」：</p>' +
+      '<div class="formula">u = F(x) + S(x)　输出 = ReLU(u)\n空间形状不变时 S(x) = x（恒等捷径）</div>' +
+      '<div class="note">如果这一段其实只需要「把输入原样传下去」（H(x)=x），让 F(x) 逼近 0 比让一堆非线性层去拟合恒等映射容易得多。' +
+      '反传时加法节点把同一份上游梯度分给两条路，恒等捷径提供了一条直通路径，梯度不用连乘穿过多层就能回到前面。</div>' +
+      '<div class="note warn">注意：加法后面如果还有激活，<b>仍要计入该激活的导数</b>。</div>';
+    root.appendChild(c0);
+
+    var ex5b = el("div", "explain");
+    ex5b.innerHTML =
+      '<h4>BasicBlock 和 Bottleneck，到底在取舍什么</h4>' +
+      '<p>两者的区别就一句话：<b>Bottleneck 把 3×3 卷积放在「更窄的通道」上做。</b></p>' +
+      '<div class="deriv">BasicBlock    3×3 → 3×3\n' +
+      '              两个大核连着干，简单直接\n\n' +
+      'Bottleneck    1×1（降） → 3×3（干活） → 1×1（升）\n' +
+      '              先把通道压窄，在窄通道上做 3×3，事后再升回去</div>' +
+      '<p><b>为什么要绕这一圈？</b>因为 3×3 卷积的计算量跟<b>通道数的平方</b>成正比。' +
+      '256 通道直接做 3×3，要 9×256×256 ≈ 59 万个权重；先降到 64 再做，只要 9×64×64 ≈ 3.7 万。' +
+      '省下来的算力可以拿去堆更多层。这就是为什么 ResNet-50 能有 50 层还跑得动。</p>' +
+      '<div class="analogy"><span class="lbl">打个比方</span>' +
+      '你要加工一批很宽的钢板。直接上大机器加工，机器又贵又慢。<br>' +
+      'Bottleneck 的做法是：先把钢板切成窄条（1×1 降通道）→ 用便宜的小机器加工窄条（3×3）→ 再把窄条拼回宽板（1×1 升通道）。<br>' +
+      '总效果差不多，成本低一个数量级。</div>' +
+      '<div class="why"><span class="lbl">捷径那部分，判断规则只有一条</span>' +
+      '<b>输出的高、宽、通道，三者只要有一个跟输入不一样，就不能直接相加，必须用 1×1 卷积投影对齐。</b><br>' +
+      '最容易漏的情况：高宽没变、只有通道变了（比如 64→256），照样要投影。' +
+      'ResNet-50 第一阶段的首块就是这种情形。</div>';
+    root.appendChild(ex5b);
+
+    /* 主结构切换 */
+    root.appendChild(el("h3", null, "② 两种核心结构"));
+    var card = el("div", "card");
+    var segK = el("div", "seg");
+    var KINDS = [["BasicBlock（18/34）", "basic"], ["Bottleneck（50/101/152）", "bottle"]];
+    var kind = "basic";
+    KINDS.forEach(function(k, i){
+      var b = el("button", i === 0 ? "on" : null, k[0]);
+      b.addEventListener("click", function(){
+        [].forEach.call(segK.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on"); kind = k[1]; refresh();
+      });
+      segK.appendChild(b);
+    });
+    card.appendChild(el("div", "row")).appendChild(segK);
+
+    var cvs = mkCanvas(300); card.appendChild(cvs);
+    var detail = el("div"); card.appendChild(detail);
+    root.appendChild(card);
+
+    function refresh(){
+      draw(cvs, function(ctx, w, h){
+        var cx = w / 2, top = 26, bw = Math.min(w - 90, 200), bh = 34, gap = 22;
+        function box(y, txt, sub, color){
+          ctx.fillStyle = color || col("panel2");
+          ctx.strokeStyle = col("line"); ctx.lineWidth = 1.2;
+          var x = cx - bw / 2;
+          roundRect(ctx, x, y, bw, bh, 8); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = color ? "#fff" : col("fg"); ctx.font = "600 12.5px sans-serif"; ctx.textAlign = "center";
+          ctx.fillText(txt, cx, y + (sub ? 15 : bh / 2 + 4));
+          if (sub){ ctx.font = "10px sans-serif"; ctx.fillStyle = color ? "rgba(255,255,255,.85)" : col("muted"); ctx.fillText(sub, cx, y + 28); }
+        }
+        function arrow(y1, y2){
+          ctx.strokeStyle = col("grid"); ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.moveTo(cx, y1); ctx.lineTo(cx, y2); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(cx - 4, y2 - 6); ctx.lineTo(cx, y2); ctx.lineTo(cx + 4, y2 - 6); ctx.stroke();
+        }
+        var y = top;
+        box(y, "输入 x", null, col("accent")); var yIn = y; y += bh + gap;
+        if (kind === "basic"){
+          arrow(yIn + bh, y);
+          box(y, "3×3 卷积 → BN → ReLU", "第 1 层"); y += bh + gap;
+          arrow(y - gap, y);
+          box(y, "3×3 卷积 → BN", "第 2 层（这里不加 ReLU）"); y += bh + gap;
+        } else {
+          arrow(yIn + bh, y);
+          box(y, "1×1 卷积 → BN → ReLU", "降通道"); y += bh + gap;
+          arrow(y - gap, y);
+          box(y, "3×3 卷积 → BN → ReLU", "在窄通道上提特征"); y += bh + gap;
+          arrow(y - gap, y);
+          box(y, "1×1 卷积 → BN", "升通道（这里不加 ReLU）"); y += bh + gap;
+        }
+        // 加法节点
+        arrow(y - gap, y + 6);
+        var addY = y;
+        ctx.beginPath(); ctx.arc(cx, addY + 13, 13, 0, 7);
+        ctx.fillStyle = col("accent2"); ctx.fill();
+        ctx.fillStyle = "#fff"; ctx.font = "bold 15px sans-serif"; ctx.textAlign = "center"; ctx.fillText("+", cx, addY + 19);
+        // 捷径：从输入右侧绕到加法
+        ctx.strokeStyle = col("warn"); ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
+        var rx = cx + bw / 2 + 16;
+        ctx.beginPath();
+        ctx.moveTo(cx + bw / 2, yIn + bh / 2);
+        ctx.lineTo(rx, yIn + bh / 2);
+        ctx.lineTo(rx, addY + 13);
+        ctx.lineTo(cx + 13, addY + 13);
+        ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = col("warn"); ctx.font = "10.5px sans-serif"; ctx.textAlign = "left";
+        ctx.fillText("捷径 S(x)", rx + 4, yIn + bh / 2 - 6);
+        // 输出
+        arrow(addY + 26, addY + 44);
+        box(addY + 44, "ReLU", null, col("accent"));
+        ctx.fillStyle = col("muted"); ctx.font = "10.5px sans-serif"; ctx.textAlign = "center";
+        ctx.fillText("输出", cx, addY + 44 + bh + 16);
+      });
+      if (kind === "basic"){
+        detail.innerHTML =
+          '<div class="kv"><span class="k">用在</span><span class="v">ResNet-18 / 34</span></div>' +
+          '<div class="kv"><span class="k">核尺寸顺序</span><span class="v">3×3 → 3×3</span></div>' +
+          '<div class="kv"><span class="k">层数怎么数</span><span class="v">1 + 8×2 + 1 = 18</span></div>' +
+          '<div class="note"><b>顺序别画错：</b>第一层 3×3 后接 BN 和 ReLU，第二层 3×3 后<b>只接 BN</b>，' +
+          '然后才相加，<b>相加之后才做 ReLU</b>。把 ReLU 画在加法前面是常见错误。</div>' +
+          '<div class="note">BN 考试只画核心结构时，可以用文字标注代替方块。</div>';
+      } else {
+        detail.innerHTML =
+          '<div class="kv"><span class="k">用在</span><span class="v">ResNet-50 / 101 / 152</span></div>' +
+          '<div class="kv"><span class="k">核尺寸顺序</span><span class="v">1×1 → 3×3 → 1×1</span></div>' +
+          '<div class="kv"><span class="k">层数怎么数</span><span class="v">1 + 16×3 + 1 = 50</span></div>' +
+          '<div class="note ok"><b>为什么省参数（以 256→64→64→256 为例）：</b><br>' +
+          '第一层 1×1：256×64 = 16384<br>' +
+          '第二层 3×3：9×64×64 = 36864<br>' +
+          '第三层 1×1：64×256 = 16384<br>' +
+          '合计 <b>69632</b><br>' +
+          '对照一个 256→256 的 3×3：9×256² = <b>589824</b><br>' +
+          '69632 / 589824 ≈ <b>11.8%</b>。这就是「让 3×3 在较窄的通道上运算」的收益。</div>' +
+          '<div class="note">步长为 1 的 1×1 卷积主要在每个空间位置上做<b>通道混合</b>，不改变高宽。</div>';
+      }
+    }
+    refresh();
+
+    /* 捷径对齐 */
+    root.appendChild(el("h3", null, "③ 捷径怎么选：恒等 还是 投影"));
+    var c3 = el("div", "card");
+    c3.appendChild(el("h4", null, "改输入/输出形状，看捷径该怎么走"));
+    var st = { H: 56, Cin: 64, Cout: 64, S: 1 };
+    var SL2 = [
+      { k: "H", label: "高=宽", min: 14, max: 112, step: 14 },
+      { k: "Cin", label: "输入通道", min: 64, max: 512, step: 64 },
+      { k: "Cout", label: "输出通道", min: 64, max: 512, step: 64 },
+      { k: "S", label: "步长", min: 1, max: 2, step: 1 }
+    ];
+    var out3 = el("div"); c3.appendChild(out3);
+    SL2.forEach(function(s){
+      var rw = el("div", "row"), rl = el("label", null, s.label), rg = el("input"), rv = el("span", "val");
+      rg.type = "range"; rg.min = s.min; rg.max = s.max; rg.step = s.step; rg.value = st[s.k];
+      rw.appendChild(rl); rw.appendChild(rg); rw.appendChild(rv); c3.appendChild(rw);
+      rg.addEventListener("input", function(){ st[s.k] = +rg.value; refresh3(); });
+      rv.textContent = st[s.k];
+    });
+    function refresh3(){
+      var Hout = Math.floor((st.H - 1) / st.S) + 1;
+      var same = (Hout === st.H) && (st.Cin === st.Cout);
+      out3.innerHTML =
+        '<div class="kv"><span class="k">主支路输出</span><span class="v">' + Hout + "×" + Hout + "×" + st.Cout + '</span></div>' +
+        '<div class="kv"><span class="k">输入</span><span class="v">' + st.H + "×" + st.H + "×" + st.Cin + '</span></div>' +
+        (same
+          ? '<div class="note ok"><b>高宽与通道全相同 → 用恒等映射 S(x)=x</b>，直接逐元素相加。</div>'
+          : '<div class="note warn"><b>形状不同 → 必须用 1×1 卷积投影</b>，' +
+            '输出 ' + st.Cout + ' 通道、步长 ' + st.S + '、填充 0，可接 BN。' +
+            '尺寸验证：(' + st.H + '−1)/' + st.S + '+1 = ' + Hout + '，对上了。</div>') +
+        '<div class="note"><b>最容易漏的一种：</b>即使高宽不变，只要<b>通道变了</b>也要投影。' +
+        '比如 ResNet-50 第一阶段首块：主支路输出 256 通道、高宽仍 56×56，但旁路拿到的是 64 通道输入，必须用 1×1 把 64 对齐到 256。</div>';
+    }
+    refresh3(); root.appendChild(c3);
+
+    /* 结构表 */
+    root.appendChild(el("h3", null, "④ 参数量怎么数"));
+    var ex5c = el("div", "explain");
+    ex5c.innerHTML =
+      '<h4>params = (Kh × Kw × Cin + 1) × Cout，每一项从哪来</h4>' +
+      '<p>把一个卷积层拆成「一个核长什么样」和「有几个这样的核」两件事看：</p>' +
+      MB('\\text{params} = \\big(K_h K_w C_{in} + 1\\big)\\times C_{out}') +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c">' + MI('K_h\\times K_w') +
+      '：一个核在空间上的格子数（比如 3×3 就是 9）。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c">' + MI('\\times C_{in}') +
+      '：<b>最容易漏的一项</b>。一个核要同时和所有输入通道打交道。RGB 图有 3 个通道，' +
+      '那这个核实际上不是一张 3×3 的薄片，而是 <b>3×3×3 的三层薄片</b>——每层负责一个输入通道。<br>' +
+      '<span style="color:var(--muted)">所以：核的通道数永远等于输入通道数，这不是巧合，是定义。</span></div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c">' + MI('+1') + '：每个核配一个偏置。</div></div>' +
+      '<div class="st"><div class="n">4</div><div class="c">' + MI('\\times C_{out}') +
+      '：输出多少个通道，就意味着有<b>多少个不同的核</b>。因为一个核只产出一张响应图，' +
+      '要 96 张就得有 96 个核。<b>「核的个数」和「输出通道数」是同一个数。</b></div></div>' +
+      '</div>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>Kh × Kw</b>：一个核在空间上是 Kh 行 Kw 列，所以有这么多格。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>× Cin</b>：这是最容易被漏的一项。<br>' +
+      '<b>一个核要同时和所有输入通道打交道</b>。RGB 图有 3 个通道，那这个核实际上不是一个 5×5 的薄片，' +
+      '而是 <b>5×5×3 的三层薄片</b>——每层负责一个输入通道。<br>' +
+      '<span style="color:var(--muted)">所以核的「通道数」永远等于输入通道数，这不是巧合，是定义。</span></div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c"><b>+1</b>：每个核配一个偏置 b，加一次。</div></div>' +
+      '<div class="st"><div class="n">4</div><div class="c"><b>× Cout</b>：输出有多少个通道，就意味着有<b>多少个不同的核</b>。<br>' +
+      '因为一个核只产生一张响应图，要得到 96 张响应图，就得有 96 个不同的核。<br>' +
+      '<b>「核的数量」和「输出通道数」是同一个数。</b></div></div>' +
+      '</div>' +
+      '<div class="why"><span class="lbl">用 AlexNet 首层走一遍</span>' +
+      '输入 227×227×<b>3</b>，96 个 <b>11×11</b> 的核：<br>' +
+      '· 一个核的空间大小：11×11 = 121<br>' +
+      '· 它要覆盖 3 个输入通道：121 × 3 = <b>363</b><br>' +
+      '· 加一个偏置：363 + 1 = <b>364</b>（这是一个完整核的参数量）<br>' +
+      '· 有 96 个这样的核：364 × 96 = <b>34,944</b></div>' +
+      '<div class="analogy"><span class="lbl">为什么卷积比全连接省这么多</span>' +
+      '同样输出 55×55×96 个值：<br>' +
+      '· 卷积：<b>3.5 万</b>个参数，因为所有位置<b>共用</b>同一组核权重（权值共享）<br>' +
+      '· 全连接：每个输出位置都要单独连 227×227×3 个输入 = 天文数字<br>' +
+      '差距来自「共享」这两个字，不是来自「核小」。</div>';
+    root.appendChild(ex5c);
+
+    root.appendChild(el("h3", null, "⑤ 结构表怎么读"));
+    var c4 = el("div", "card");
+    c4.innerHTML = '<table class="tbl"><tr><th>部位</th><th>高×宽</th><th>ResNet-18</th><th>ResNet-50</th></tr>' +
+      '<tr><td>首层卷积后</td><td class="num">112×112</td><td>64 通道</td><td>64 通道</td></tr>' +
+      '<tr><td>池化后</td><td class="num">56×56</td><td>64 通道</td><td>64 通道</td></tr>' +
+      '<tr><td>conv2_x</td><td class="num">56×56</td><td>2 块，64</td><td>3 块，256</td></tr>' +
+      '<tr><td>conv3_x</td><td class="num">28×28</td><td>2 块，128</td><td>4 块，512</td></tr>' +
+      '<tr><td>conv4_x</td><td class="num">14×14</td><td>2 块，256</td><td>6 块，1024</td></tr>' +
+      '<tr><td>conv5_x</td><td class="num">7×7</td><td>2 块，512</td><td>3 块，2048</td></tr>' +
+      '<tr><td>全局平均池化</td><td class="num">1×1</td><td>512 个值</td><td>2048 个值</td></tr></table>' +
+      '<div class="formula">224 → 112：7×7 卷积, S=2, P=3 → (224+6−7)/2+1 = 112\n' +
+      '112 → 56 ：3×3 最大池化, S=2, P=1 → (112+2−3)/2+1 = 56</div>' +
+      '<div class="note danger"><b>课件笔误（照片 7195）：</b>把 3×3 最大池化写成 padding=3。' +
+      '按普通尺寸公式会得到 (112+6−3)/2+1 = 58，和配套结构表的 56 对不上。<b>标准实现取 padding=1</b>。' +
+      '首层 7×7 卷积的 padding=3 是正确的。</div>' +
+      '<div class="note"><b>块数 ≠ 层数：</b>表格里「2 块」指 2 个基本块 = 4 层卷积。' +
+      '层数 = 1 + 块数×每块卷积数 + 1（分类全连接）。</div>';
+    root.appendChild(c4);
+  }
+});
+
+/* =========================================================
+   考点 6 卷积（核心计算）
+   ========================================================= */
+function renderMat(host, data, opts){
+  opts = opts || {};
+  var rows = data.length, cols = data[0].length;
+  var box = el("div");
+  var m = el("div", "mat");
+  m.style.gridTemplateColumns = "repeat(" + cols + ", auto)";
+  var hl = opts.hl || {}, out = opts.out || {};
+  for (var i = 0; i < rows; i++){
+    for (var j = 0; j < cols; j++){
+      var s = el("span", null, fmt(data[i][j], opts.dig === undefined ? 0 : opts.dig));
+      var key = i + "," + j;
+      if (hl[key]) s.className = "act";
+      else if (out[key]) s.className = "out";
+      else if (data[i][j] === 0) s.className = "zero";
+      m.appendChild(s);
+    }
+  }
+  box.appendChild(m);
+  if (opts.label) box.appendChild(el("div", "matlabel", opts.label));
+  host.appendChild(box);
+  return m;
+}
+
+SECTIONS.push({
+  id: "p6", no: "06", title: "卷积运算：正向 / 反向 / 转置",
+  desc: "滑窗、回填 dX、累加 dK、铺块做转置卷积，全部逐格演算",
+  hot: true,
+  render: function(root){
+    root.appendChild(el("h2", null, "06 · 卷积运算"));
+    root.appendChild(el("p", "sub", "照片 7209 标了「尤其重要」。要求会计算：正向、反向（dX / dK）、转置卷积。"));
+
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>先动手算一次，比讲十句定义都管用</h4>' +
+      '<p>下面左边是图片里的一小块（2 行 2 列），右边是一个「模板」（也就是卷积核，同样 2 行 2 列）：</p>' +
+      MB('\\underbrace{\\begin{pmatrix} 1 & 2 \\\\ 4 & 5 \\end{pmatrix}}_{\\text{图片的一小块}} \\qquad' +
+         '\\underbrace{\\begin{pmatrix} 1 & 0 \\\\ -1 & 2 \\end{pmatrix}}_{\\text{卷积核（模板）}}') +
+      '<p>现在做一个动作：<b>把对应位置的数两两相乘，再把四个结果加起来。</b></p>' +
+      MB('1\\times 1 + 2\\times 0 + 4\\times(-1) + 5\\times 2 = 1 + 0 - 4 + 10 = \\mathbf{7}') +
+      '<p>就这一个数字 <b>7</b>，它代表"这一小块和模板有多像"。</p>' +
+      '<div class="why"><span class="lbl">为什么这个数能代表"像不像"</span>' +
+      '你盯着那个模板看：它在<b>左上角和右下角</b>要正值（1 和 2），在<b>左下角</b>要负值（−1），右上角不要（0）。<br>' +
+      '现在看图片那一小块：左上 1、右下 5，都<b>不小</b>，乘正值贡献了 1 + 10 = 11；' +
+      '左下是 4，乘上负值贡献了 −4。<br>' +
+      '所以结果是 11 − 4 = 7，<b>正的、而且不小</b>——说明"这块图片的明暗分布，和模板想要的样子比较吻合"。' +
+      '如果图片左下角特别亮、左上角特别暗，得出来就会是个负数，表示"完全不像，甚至是反的"。</div>' +
+      '<p>然后呢？把这个模板<b>往右挪一格</b>，框住另外四个数，再做一次同样的乘加，得到第二个数。' +
+      '再挪、再算……直到框完整张图。最后得到的那一小张"分数表"，就是卷积的输出。</p>' +
+      '<div class="analogy"><span class="lbl">所以卷积核到底是什么</span>' +
+      '它就是一个"找特定花纹的小探测头"。<br>' +
+      '你把一张半透明的刻着数字的模板盖在照片上，一格一格挪。每挪一处，就看"这地方的明暗刻度和模板上的刻度有多吻合"，记一个分。' +
+      '挪完全图，得到一张<b>吻合度地图</b>。<br>' +
+      '<b>这一整套"挪 + 乘加"的动作，就叫一次卷积。</b>深度学习自己学出来的模板，' +
+      '可能是"横向边缘"、可能是"某个角"，人看不懂，但机器知道它在找什么。</div>' +
+      '<p><b>为什么同一个模板要反复用（权值共享）？</b>整张图上挪了几百次，用的都是<b>同一组 4 个数</b>。两个理由：</p>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>参数少得离谱。</b>一张 100×100 的图，' +
+      '若用"每个位置都单独连一套权重"的全连接方式，要 1 万个输入各配一个权重；' +
+      '而一个 3×3 的模板只要 <b>9 个数</b>就能扫遍全图。<b>这就是卷积能处理图片的根本原因。</b></div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>猫在哪都是猫。</b>同一个花纹出现在左上角还是右下角，它都是那个花纹。' +
+      '共享权重意味着"这个探测头不管扫到哪儿都同样有效"——正好就是我们要的。</div></div>' +
+      '</div>' +
+      '<div class="why"><span class="lbl">「翻转核」是怎么回事（考试会挖坑）</span>' +
+      '数学课本里，卷积的严格定义是"先把模板<b>转 180°</b>，再乘加"。' +
+      '深度学习里大家偷懒<b>不转</b>，直接乘加——这个动作严格叫<span class="term">互相关 cross-correlation</span>，' +
+      '但习惯上还是喊它卷积。<br>' +
+      '<b>所以判据是看题面用词：</b>写「CNN 卷积」「卷积层」→ 用原模板，不翻；' +
+      '写「按卷积定义」「翻转卷积核」→ 老老实实先转 180°。<br>' +
+      '另外：模板若本身中心对称（比如全是 1），转不转结果一样，这时候纠结没意义。</div>';
+    root.appendChild(ex);
+
+    var CASES = {
+      cls: { name: "课堂原题（10.19）", X: [[1,2,3],[4,5,6],[7,8,9]], K: [[1,0],[-1,2]], G: [[1,2],[3,4]] },
+      exam: { name: "模拟卷第 6 题", X: [[1,0,2],[2,1,0],[0,3,1]], K: [[1,2],[0,-1]], G: [[1,0],[2,1]] },
+      tc: { name: "转置卷积课堂原题（照片 7211）", X: [[0,1],[2,3]], K: [[0,1],[2,3]], G: [[1,0],[2,1]] }
+    };
+    var S = { k: "cls", mode: "fwd", S: 1, P: 0, step: 0 };
+
+    var card = el("div", "card");
+    /* 例子切换 */
+    var segC = el("div", "seg"); segC.style.flexWrap = "wrap";
+    var caseBtns = {};
+    Object.keys(CASES).forEach(function(k, i){
+      var b = el("button", i === 0 ? "on" : null, CASES[k].name);
+      caseBtns[k] = b;
+      b.addEventListener("click", function(){ setCase(k); });
+      segC.appendChild(b);
+    });
+    card.appendChild(el("div", "row")).appendChild(segC);
+    function setCase(k){
+      S.k = k;
+      for (var kk in caseBtns) if (Object.prototype.hasOwnProperty.call(caseBtns, kk)) caseBtns[kk].classList.toggle("on", kk === k);
+      if (k === "tc" && S.S !== 2){
+        S.S = 2;
+        if (typeof rgS !== "undefined"){ rgS.value = 2; rvS.textContent = "2"; }
+      }
+      reset();
+    }
+
+    /* 模式切换 */
+    var segM = el("div", "seg"); segM.style.flexWrap = "wrap";
+    [["正向卷积", "fwd"], ["反向：求 dX", "dx"], ["反向：求 dK", "dk"], ["转置卷积", "tc"]].forEach(function(m, i){
+      var b = el("button", i === 0 ? "on" : null, m[0]);
+      b.addEventListener("click", function(){
+        [].forEach.call(segM.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on");
+        S.mode = m[1];
+        // 转置卷积自动切到课件那张 2×2 原题（照片 7211），步长 2；离开时回到 3×3 主例
+        if (S.mode === "tc"){ if (S.k !== "tc"){ setCase("tc"); return; } }
+        else if (S.k === "tc"){
+          setCase("cls");
+          if (S.S !== 1){ S.S = 1; rgS.value = 1; rvS.textContent = "1"; }
+          reset(); return;
+        }
+        reset();
+      });
+      segM.appendChild(b);
+    });
+    card.appendChild(el("div", "row")).appendChild(segM);
+
+    /* 步长/填充 */
+    var rwS = el("div", "row"), rgS = el("input"), rvS = el("span", "val");
+    rwS.appendChild(el("label", null, "步长 S")); rgS.type = "range"; rgS.min = 1; rgS.max = 3; rgS.step = 1; rgS.value = 1;
+    rvS.textContent = "1"; rwS.appendChild(rgS); rwS.appendChild(rvS); card.appendChild(rwS);
+    var rwP = el("div", "row"), rgP = el("input"), rvP = el("span", "val");
+    rwP.appendChild(el("label", null, "填充 P")); rgP.type = "range"; rgP.min = 0; rgP.max = 1; rgP.step = 1; rgP.value = 0;
+    rvP.textContent = "0"; rwP.appendChild(rgP); rwP.appendChild(rvP); card.appendChild(rwP);
+    rgS.addEventListener("input", function(){ S.S = +rgS.value; rvS.textContent = S.S; reset(); });
+    rgP.addEventListener("input", function(){ S.P = +rgP.value; rvP.textContent = S.P; reset(); });
+
+    /* 矩阵展示区 */
+    var mats = el("div", "matwrap"); card.appendChild(mats);
+    var explain = el("div"); card.appendChild(explain);
+
+    /* 按钮 */
+    var bRow = el("div", "row"); card.appendChild(bRow);
+    var bNext = el("button", "btn primary", "下一步"), bAll = el("button", "btn", "一次算完"), bRst = el("button", "btn ghost", "重置");
+    bRow.appendChild(bNext); bRow.appendChild(bAll); bRow.appendChild(bRst);
+    root.appendChild(card);
+
+    /* ---------- 计算核心 ---------- */
+    function pads(X, P){
+      if (!P) return X.map(function(r){ return r.slice(); });
+      var H = X.length, W = X[0].length;
+      var o = [];
+      for (var i = 0; i < H + 2 * P; i++){
+        var row = [];
+        for (var j = 0; j < W + 2 * P; j++){
+          var ii = i - P, jj = j - P;
+          row.push((ii >= 0 && ii < H && jj >= 0 && jj < W) ? X[ii][jj] : 0);
+        }
+        o.push(row);
+      }
+      return o;
+    }
+    function outDim(L, K, S, P){ return Math.floor((L + 2 * P - K) / S) + 1; }
+    function zero(r, c){ var a = []; for (var i = 0; i < r; i++){ var q = []; for (var j = 0; j < c; j++) q.push(0); a.push(q); } return a; }
+
+    var ST = null;
+    function build(){
+      var C = CASES[S.k], X = C.X, K = C.K, G = C.G;
+      var padX = pads(X, S.P);
+      var Ho = outDim(X.length, K.length, S.S, S.P);
+      var Wo = outDim(X[0].length, K[0].length, S.S, S.P);
+      var st = { X: X, K: K, G: G, padX: padX, Ho: Ho, Wo: Wo, steps: [], mode: S.mode, out: null, dx: null, dk: null, tc: null };
+      var i, j, a, b;
+      if (S.mode === "fwd"){
+        st.out = zero(Ho, Wo);
+        for (i = 0; i < Ho; i++) for (j = 0; j < Wo; j++){
+          var terms = [], sum = 0;
+          for (a = 0; a < K.length; a++) for (b = 0; b < K[0].length; b++){
+            var vx = padX[i * S.S + a][j * S.S + b], vk = K[a][b];
+            terms.push(vx + "×" + (vk < 0 ? "(" + vk + ")" : vk));
+            sum += vx * vk;
+          }
+          st.steps.push({ i: i, j: j, terms: terms, sum: sum, label: "Y(" + (i+1) + "," + (j+1) + ")" });
+        }
+      } else if (S.mode === "dx"){
+        st.dx = zero(X.length, X[0].length);
+        for (i = 0; i < Ho; i++) for (j = 0; j < Wo; j++){
+          st.steps.push({ i: i, j: j, g: G[i][j], label: "G(" + (i+1) + "," + (j+1) + ") = " + G[i][j] });
+        }
+      } else if (S.mode === "dk"){
+        st.dk = zero(K.length, K[0].length);
+        for (i = 0; i < Ho; i++) for (j = 0; j < Wo; j++){
+          st.steps.push({ i: i, j: j, g: G[i][j], label: "窗口(" + (i+1) + "," + (j+1) + ")，上游梯度 " + G[i][j] });
+        }
+      } else {
+        var Lo = (X.length - 1) * S.S - 2 * S.P + K.length;
+        st.tc = zero(Lo, Lo);
+        for (i = 0; i < X.length; i++) for (j = 0; j < X[0].length; j++){
+          st.steps.push({ i: i, j: j, v: X[i][j], label: "输入(" + (i+1) + "," + (j+1) + ") = " + X[i][j] });
+        }
+      }
+      return st;
+    }
+    function reset(){ applyTo(0); }
+    /** 从干净状态重建，再累加到第 n 步。
+     *  必须重建而不是增量 apply：dX/dK/转置卷积都是 += 累加，
+     *  重复 apply 同一批步会重复累加，矩阵数值就错了。 */
+    function applyTo(n){
+      S.step = n;
+      ST = build();
+      applySteps(n);
+      render();
+    }
+
+    function applySteps(n){
+      var st = ST;
+      for (var s = 0; s < n && s < st.steps.length; s++){
+        var p = st.steps[s], i, j, a, b;
+        if (S.mode === "fwd"){
+          st.out[p.i][p.j] = p.sum;
+        } else if (S.mode === "dx"){
+          for (a = 0; a < st.K.length; a++) for (b = 0; b < st.K[0].length; b++){
+            var ti = p.i * S.S + a, tj = p.j * S.S + b;
+            var oi = ti - S.P, oj = tj - S.P;
+            if (oi >= 0 && oi < st.dx.length && oj >= 0 && oj < st.dx[0].length) st.dx[oi][oj] += p.g * st.K[a][b];
+          }
+        } else if (S.mode === "dk"){
+          for (a = 0; a < st.K.length; a++) for (b = 0; b < st.K[0].length; b++){
+            st.dk[a][b] += p.g * st.padX[p.i * S.S + a][p.j * S.S + b];
+          }
+        } else {
+          for (a = 0; a < st.K.length; a++) for (b = 0; b < st.K[0].length; b++){
+            var yi = p.i * S.S + a - S.P, yj = p.j * S.S + b - S.P;
+            if (yi >= 0 && yi < st.tc.length && yj >= 0 && yj < st.tc[0].length) st.tc[yi][yj] += p.v * st.K[a][b];
+          }
+        }
+      }
+    }
+
+    function render(){
+      var st = ST, cur = st.steps[S.step - 1] || null, nxt = st.steps[S.step] || null;
+      mats.innerHTML = "";
+      var hlX = {}, hlK = {}, outY = {};
+      if (nxt){
+        if (S.mode === "fwd" || S.mode === "dx" || S.mode === "dk"){
+          for (var a = 0; a < st.K.length; a++) for (var b = 0; b < st.K[0].length; b++){
+            var ti = nxt.i * S.S + a, tj = nxt.j * S.S + b;
+            var oi = ti - S.P, oj = tj - S.P;
+            if (oi >= 0 && oi < st.X.length && oj >= 0 && oj < st.X[0].length) hlX[oi + "," + oj] = 1;
+            if (st.mode === "dk") hlK[a + "," + b] = 1;
+          }
+        } else {
+          for (var a2 = 0; a2 < st.K.length; a2++) for (var b2 = 0; b2 < st.K[0].length; b2++){
+            var yy = nxt.i * S.S + a2 - S.P, xx2 = nxt.j * S.S + b2 - S.P;
+            if (yy >= 0 && yy < st.tc.length && xx2 >= 0 && xx2 < st.tc[0].length) outY[yy + "," + xx2] = 1;
+          }
+          hlX[nxt.i + "," + nxt.j] = 1;
+        }
+      }
+      // 各模式显示不同组合
+      if (S.mode === "fwd"){
+        renderMat(mats, st.X, { hl: hlX, label: "输入 X", dig: 0 });
+        renderMat(mats, st.K, { label: "核 K", dig: 0 });
+        renderMat(mats, st.out, { label: "输出 Y（" + st.Ho + "×" + st.Wo + "）", dig: 0 });
+      } else if (S.mode === "dx"){
+        renderMat(mats, st.X, { hl: hlX, label: "输入 X（高亮＝本步回填区域）", dig: 0 });
+        renderMat(mats, st.K, { label: "核 K", dig: 0 });
+        renderMat(mats, st.G, { out: nxt ? (function(){ var o = {}; o[nxt.i + "," + nxt.j] = 1; return o; })() : {}, label: "上游梯度 G", dig: 0 });
+        renderMat(mats, st.dx, { label: "dX（累加中）", dig: 0 });
+      } else if (S.mode === "dk"){
+        renderMat(mats, st.X, { hl: hlX, label: "输入 X（高亮＝本步窗口）", dig: 0 });
+        renderMat(mats, st.G, { out: nxt ? (function(){ var o = {}; o[nxt.i + "," + nxt.j] = 1; return o; })() : {}, label: "上游梯度 G", dig: 0 });
+        renderMat(mats, st.dk, { label: "dK（累加中）", dig: 0 });
+      } else {
+        renderMat(mats, st.X, { hl: hlX, label: "主输入（铺块的来源）", dig: 0 });
+        renderMat(mats, st.K, { label: "核 K", dig: 0 });
+        renderMat(mats, st.tc, { out: outY, label: "转置卷积输出（" + st.tc.length + "×" + st.tc[0].length + "）", dig: 0 });
+      }
+
+      // 文字解说
+      var html = "";
+      if (!nxt && S.step >= st.steps.length){
+        html = '<div class="note ok">全部 ' + st.steps.length + " 步算完。</div>";
+      } else if (nxt){
+        if (S.mode === "fwd"){
+          html = '<div class="note">下一步 <b>' + nxt.label + '</b>：<br><span class="mono" style="font-size:12.5px">' +
+            nxt.terms.join(" + ") + " = <b>" + nxt.sum + "</b></span></div>";
+        } else if (S.mode === "dx"){
+          html = '<div class="note">下一步把 <b>' + nxt.g + "×K</b> 回填到高亮区域（" + nxt.label + "）。" +
+            '重叠的位置要<b>累加</b>，不是覆盖。</div>';
+        } else if (S.mode === "dk"){
+          var xs = [];
+          for (var a3 = 0; a3 < st.K.length; a3++) for (var b3 = 0; b3 < st.K[0].length; b3++)
+            xs.push(st.padX[nxt.i * S.S + a3][nxt.j * S.S + b3]);
+          html = '<div class="note">下一步：把窗口里的输入值 (' + xs.join(", ") + ") 与上游梯度 <b>" + nxt.g +
+            "</b> 逐项相乘，累加到 dK 的对应位置。</div>";
+        } else {
+          html = '<div class="note">下一步：输入值 <b>' + nxt.v + "</b> 铺 " + nxt.v + "×K 到输出对应区域（" + nxt.label + "）。步长 " +
+            S.S + (S.S >= st.K.length ? "，四块不重叠。" : "，块与块会重叠，重叠处累加。") + "</div>";
+        }
+      }
+      // 模式提示
+      var tip = {
+        fwd: "正向卷积：一个局部窗口逐项相乘再求和，得到输出的一格。CNN 默认是<b>互相关</b>（不翻核）。",
+        dx: "求 dX：每个输出格把上游梯度乘核，<b>原样回填</b>到它看过的输入窗口。求 dX 拿<b>核权重</b>乘梯度，dX 与 X 同形。",
+        dk: "求 dK：局部导数换成窗口里的<b>输入值</b>。求 dK 拿<b>输入值</b>乘梯度，dK 与 K 同形。",
+        tc: "转置卷积：对每个输入位置，把 v×K 整块铺到输出。与「反向求 dX」是同一个数学运算（乘 Aᵀ），但用途不同。"
+      }[S.mode];
+      explain.innerHTML = '<div class="note">' + tip + "</div>" + html +
+        '<div class="kv"><span class="k">进度</span><span class="v">' + S.step + " / " + st.steps.length + "</span></div>";
+    }
+
+    bNext.addEventListener("click", function(){ if (S.step < ST.steps.length) applyTo(S.step + 1); });
+    bAll.addEventListener("click", function(){ applyTo(ST.steps.length); });
+    bRst.addEventListener("click", reset);
+    reset();
+
+    /* ---- 反向传播的原理（学生最容易糊的地方） ---- */
+    var ex6b = el("div", "explain");
+    ex6b.innerHTML =
+      '<h4>为什么求 dX 要「回填累加」，为什么 dX 用核、dK 用输入值</h4>' +
+      '<p>这两个问题其实是同一件事的两面。从一个中学生都懂的式子开始看：</p>' +
+      MB('y = x \\cdot k \\quad\\Longrightarrow\\quad \\frac{\\partial y}{\\partial x}=k,\\;\\; \\frac{\\partial y}{\\partial k}=x') +
+      '<p>看到没？<b>相乘的两个数互相是对方的导数。</b>卷积就是一大堆相乘再相加，所以这条规则直接搬过来：</p>' +
+      MB('\\text{求 } dX \\text{ 时：局部导数} = K \\qquad \\text{求 } dK \\text{ 时：局部导数} = X') +
+      '<p>就这么简单。<b>dX 拿核权重乘梯度，dK 拿输入值乘梯度</b>——不是两条要背的规则，是同一句话。</p>' +
+      '<p><b>那「回填累加」又是怎么回事？</b></p>' +
+      '<p>因为前向时，<b>输入里的同一个格子被好几个输出格反复用到了</b>。看中间那个格子，它同时落在左上、右上、左下、右下四个窗口里。</p>' +
+      '<p>反向时，这四个输出格都想对「改它」这件事发表意见，各自送来一份梯度。' +
+      '按链式法则，影晌要<b>全部加起来</b>，不能只取最后一份：</p>' +
+      MB('\\frac{\\partial L}{\\partial X_{\\text{中央}}} = ' +
+         '\\underbrace{\\frac{\\partial L}{\\partial Y_{11}}\\cdot K_{22}}_{\\text{左上窗}} + ' +
+         '\\underbrace{\\frac{\\partial L}{\\partial Y_{12}}\\cdot K_{21}}_{\\text{右上窗}} + ' +
+         '\\underbrace{\\frac{\\partial L}{\\partial Y_{21}}\\cdot K_{12}}_{\\text{左下窗}} + ' +
+         '\\underbrace{\\frac{\\partial L}{\\partial Y_{22}}\\cdot K_{11}}_{\\text{右下窗}}') +
+      '<div class="analogy"><span class="lbl">打个比方</span>' +
+      '四个人共同出资买了一件东西（输入的那个格子被四次用到）。' +
+      '现在要算「这件东西总共花了多少」，得把四份出资<b>加在一起</b>，不能只看最后一个掏钱的人。<br>' +
+      '角上的格子只被用到一次，所以它的梯度就只有一份，简单。中间的格子被用到四次，所以要收四份。</div>' +
+      '<div class="why"><span class="lbl">自查方法：看形状</span>' +
+      '<b>dX 一定和输入 X 同形；dK 一定和卷积核 K 同形。</b>写完先看形状对不对，能挡掉一大半错误。<br>' +
+      '如果 dX 算成了输出的大小，说明你把「回填」做成了「直接赋值」，累加那一步漏了。</div>';
+    root.appendChild(ex6b);
+
+    /* ---- 尺寸公式的由来 ---- */
+    var ex6c = el("div", "explain");
+    ex6c.innerHTML =
+      '<h4>输出尺寸那个公式，为什么要向下取整</h4>' +
+      MB('L_{out} = \\left\\lfloor \\frac{L_{in} + 2P - K}{S} \\right\\rfloor + 1') +
+      '<p>一项一项读：</p>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>Lin + 2P</b>：先在左右各补 P 圈（通常是补 0）。' +
+      '补边是为了让边缘的像素也有机会被「完整窗口」覆盖到，同时保住尺寸。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>减 K</b>：第一个窗口要占掉 K 格，所以核最多还能往后挪 (Lin+2P−K) 格。</div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c"><b>除以 S，再取整</b>：每次挪 S 格，所以能挪几次是「距离 ÷ 步长」。' +
+      '<b>取整是因为不许半个窗口</b>——剩下不够一个窗口的部分直接丢掉。</div></div>' +
+      '<div class="st"><div class="n">4</div><div class="c"><b>+1</b>：不要忘了起点本身也算一个位置。挪 0 次也是 1 个窗口。</div></div>' +
+      '</div>' +
+      '<div class="why"><span class="lbl">举例验证</span>' +
+      '7×7 输入、3×3 核、步长 2、不补边：<br>' +
+      '(7 + 0 − 3) / 2 = 2，取整得 2，再 +1 = <b>3</b>。<br>' +
+      '起点分别落在第 1、3、5 格，共 3 个窗口，正好把 7 格用完还剩 1 格。<b>那条剩的边就丢掉了。</b></div>' +
+      '<div class="note warn">高度和宽度要<b>分别算</b>。输入不是正方形时，两个方向的答案不一样。</div>';
+    root.appendChild(ex6c);
+
+    /* ---------- 尺寸计算器 ---------- */
+    root.appendChild(el("h3", null, "尺寸与参数量计算器"));
+    var cc = el("div", "card");
+    var sz = { Lin: 7, K: 3, S: 2, P: 0 };
+    var szOut = el("div"); cc.appendChild(szOut);
+    [["Lin", "输入边长", 1, 224], ["K", "核边长", 1, 11], ["S", "步长", 1, 4], ["P", "填充", 0, 6]].forEach(function(p){
+      var rw = el("div", "row"), rl = el("label", null, p[1]), rg = el("input"), rv = el("span", "val");
+      rg.type = "range"; rg.min = p[2]; rg.max = p[3]; rg.step = 1; rg.value = sz[p[0]];
+      rw.appendChild(rl); rw.appendChild(rg); rw.appendChild(rv); cc.appendChild(rw);
+      rv.textContent = sz[p[0]];
+      rg.addEventListener("input", function(){ sz[p[0]] = +rg.value; rv.textContent = sz[p[0]]; refreshSz(); });
+    });
+    function refreshSz(){
+      var Lo = outDim(sz.Lin, sz.K, sz.S, sz.P);
+      szOut.innerHTML =
+        MB('L_{out} = \\left\\lfloor \\frac{L_{in} + 2P - K}{S} \\right\\rfloor + 1 ' +
+           '= \\left\\lfloor \\frac{' + sz.Lin + ' + 2\\times ' + sz.P + ' - ' + sz.K + '}{' + sz.S + '} \\right\\rfloor + 1 ' +
+           '= \\mathbf{' + Lo + '}') +
+        '<div class="note">看到那个 <b>⌊ ⌋</b>（向下取整）了吗？它的意思是：最后剩下那一截<b>不够一个完整窗口的，直接扔掉</b>。' +
+        '高度和宽度要分别算，输入不是正方形时两个方向的答案不一样。</div>' +
+        '<p style="margin:14px 0 6px;font-weight:600">走一遍 AlexNet 首层</p>' +
+        MB('L_{in}=227,\\; K=11,\\; S=4,\\; P=0 \\;\\Rightarrow\\; ' +
+           '\\left\\lfloor\\frac{227-11}{4}\\right\\rfloor+1 = 54+1 = 55') +
+        '<p>所以输出是 55×55×96（96 是因为有 96 个不同的核）。参数量这样算：</p>' +
+        MB('\\underbrace{11\\times 11\\times 3}_{\\text{一个核}} + \\underbrace{1}_{\\text{偏置}} = 364 ' +
+           '\\quad\\Rightarrow\\quad 364\\times 96 = \\mathbf{34{,}944}') +
+        '<p style="margin:14px 0 6px;font-weight:600">再走一遍 32×32×3、6 个 5×5 核</p>' +
+        MB('L_{out} = \\left\\lfloor\\frac{32-5}{1}\\right\\rfloor+1 = 28 \\;\\Rightarrow\\; 28\\times 28\\times 6') +
+        MB('(5\\times 5\\times 3 + 1)\\times 6 = 76\\times 6 = \\mathbf{456}') +
+        '<div class="note warn"><b>为什么才 456 个参数就能处理整张图？</b>' +
+        '因为每个核在 28×28 = 784 个位置上都用了<b>同一组 76 个权重</b>。' +
+        '如果换成"每个位置单独连一套"的全连接，参数量是 784×6×3072 的量级，差了四个数量级。<b>这就是权值共享的威力。</b></div>';
+    }
+    refreshSz(); root.appendChild(cc);
+
+    /* ---------- 数学卷积 vs 互相关 ---------- */
+    root.appendChild(el("h3", null, "数学卷积 vs 互相关（陷阱题）"));
+    var cm = el("div", "card");
+    cm.innerHTML = '<p>CNN 里说的「卷积」其实是<b>互相关</b>：把模板直接盖上去乘加，<b>不翻</b>。</p>' +
+      '<p>只有在题面明确写「按卷积定义」时，才需要先把模板<b>转 180°</b>（上下翻一次、左右翻一次）。</p>' +
+      MB('\\text{原核}\\;\\begin{pmatrix} 1 & 0 \\\\ -1 & 2 \\end{pmatrix}' +
+         '\\qquad\\xrightarrow{\\text{转 180°}}\\qquad' +
+         '\\text{翻转后}\\;\\begin{pmatrix} 2 & -1 \\\\ 0 & 1 \\end{pmatrix}') +
+      '<p>同一个左上角窗口，两种算法给出的答案不一样：</p>' +
+      MB('\\text{互相关（不翻）}: 1\\times 1 + 2\\times 0 + 4\\times(-1) + 5\\times 2 = \\mathbf{7}') +
+      MB('\\text{数学卷积（翻了）}: 1\\times 2 + 2\\times(-1) + 4\\times 0 + 5\\times 1 = \\mathbf{5}') +
+      '<div class="note"><b>判据就一条——看题面用词：</b><br>' +
+      '写「CNN 卷积」「卷积层」→ 用原模板，<b>不翻</b>；<br>' +
+      '写「按卷积定义」「翻转卷积核」→ 先转 180°，<b>翻</b>；<br>' +
+      '模板本身中心对称（比如全是 1）→ 翻不翻结果一样，这时纠结没意义。</div>';
+    root.appendChild(cm);
+
+    /* ---------- 转置卷积公式 ---------- */
+    root.appendChild(el("h3", null, "转置卷积的尺寸公式"));
+    var ct = el("div", "card");
+    ct.innerHTML =
+      MB('L_{out} = (L_{in}-1)\\times S - 2P + K') +
+      '<p>课堂原题（照片 7211）：输入和核的两行都是 (0,1)、(2,3)，S = 2，P = 0。</p>' +
+      MB('L_{out} = (2-1)\\times 2 - 0 + 2 = \\mathbf{4}') +
+      '<p>做法：把输入里的每个数，乘上整个核，<b>整块铺</b>到输出上。步长等于核宽，所以四块刚好不重叠：</p>' +
+      MB('\\underbrace{0}_{(0,0)}\\to\\mathbf{0}K\\;\\;\\; ' +
+         '\\underbrace{1}_{(0,1)}\\to\\mathbf{1}K\\;\\;\\; ' +
+         '\\underbrace{2}_{(1,0)}\\to\\mathbf{2}K\\;\\;\\; ' +
+         '\\underbrace{3}_{(1,1)}\\to\\mathbf{3}K') +
+      '<p>四块拼起来就是（对照你上面交互里按「一次算完」看到的矩阵）：</p>' +
+      MB('\\begin{pmatrix} 0&0&0&1 \\\\ 0&0&2&3 \\\\ 0&2&0&3 \\\\ 4&6&6&9 \\end{pmatrix}') +
+      '<div class="note">若把 S 改成 1，输出变 3×3，四块会在中间<b>撞在一起</b>，撞到的地方要累加：' +
+      '中央值 = 0×3 + 1×2 + 2×1 + 3×0 = <b>4</b>。</div>' +
+      '<div class="note warn">两种算法（<b>铺块法</b> / <b>插零翻核法</b>）结果完全一样。' +
+      '<b>考试只挑一种做到底，别混着算</b>——混着算最容易把中间步骤搞乱。</div>' +
+      '<div class="note">最后一个概念澄清：即使转置卷积把尺寸放大了，<b>原始像素信息也没法靠这个操作真正恢复</b>。' +
+      '它只是"把小的摊大"，不是"把丢的找回来"。「反卷积」这个名字有误导性。</div>';
+    root.appendChild(ct);
+  }
+});
+
+/* =========================================================
+   考点 7 计算图与反向传播
+   ========================================================= */
+SECTIONS.push({
+  id: "p7", no: "07", title: "计算图与反向传播",
+  desc: "给模型要会画，能算出梯度；w 的两条路径别漏",
+  hot: true,
+  render: function(root){
+    root.appendChild(el("h2", null, "07 · 计算图与反向传播"));
+    root.appendChild(el("p", "sub", "前向从左往右记数值，反向从损失往回乘局部导数。"));
+
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>先讲清「链式法则」——反向传播全靠这一条</h4>' +
+      '<p>假设你开车，油耗取决于车速，车速又取决于油门。</p>' +
+      '<p>你踩深一点油门，油耗会变多少？答案是<b>两段相乘</b>：</p>' +
+      '<div class="deriv">(d油耗/d车速) × (d车速/d油门)\n\n' +
+      '  第一段：车速变一点，油耗变多少\n' +
+      '  第二段：油门变一点，车速变多少\n' +
+      '  乘起来：油门变一点，油耗变多少</div>' +
+      '<p>这就是<span class="term">链式法则</span>，写成公式：</p>' +
+      MB('y = f(g(x)) \\quad\\Longrightarrow\\quad \\frac{dy}{dx} = f\'(g(x))\\cdot g\'(x)') +
+      '<p style="text-align:center;margin:10px 0"><b>一句话：外层导数 × 内层导数，一路乘下去。</b></p>' +
+      '<p><b>那「计算图」是干什么的？</b></p>' +
+      '<p>一个复杂公式（比如 ŷ = ReLU(w·x+b) + w）没法一步求导。但如果把它<b>拆成一个个只做一件事的小节点</b>' +
+      '（乘、加、减、ReLU、平方），每个小节点的导数都简单到可以心算，' +
+      '那么整条链路的导数就是把沿途所有小导数<b>连乘起来</b>。</p>' +
+      '<div class="analogy"><span class="lbl">打个比方</span>' +
+      '计算图就是一张「工序流程图」。前向是照着图从原料走到成品，每一步都记下当时的数值；' +
+      '反向是从成品往回走，每退一步就问「这步工序会把这个误差放大还是缩小几倍」，' +
+      '把倍数一路乘回去。<b>最后得到的数，就是「原料改一点，成品会变多少」。</b></div>' +
+      '<div class="why"><span class="lbl">为什么分支一定要「相加」</span>' +
+      '如果同一个变量（比如 w）在公式里出现了两次，说明图上有<b>两条路</b>都能从 w 走到损失。<br>' +
+      '两条路各自都算出一个「w 改一点、损失变多少」，那就得<b>把两个影响力加起来</b>——' +
+      '因为它们同时、独立地起作用。<br>' +
+      '<b>漏掉一条，梯度就少算一部分。</b>这是本章最容易失分的地方。</div>' +
+      '<div class="why"><span class="lbl">为什么 ReLU 一关，梯度就断了</span>' +
+      'ReLU 在 z &lt; 0 时输出恒为 0，斜率也是 0。链式法则是连乘，<b>乘一个 0，整条链就归零了</b>。<br>' +
+      '所以那一路的梯度传不回去。但注意：如果这个参数还有<b>别的路</b>（比如 w 的直接支路），' +
+      '那条路仍然照常给梯度。所以「某条路断了」≠「这个参数没梯度」。</div>';
+    root.appendChild(ex);
+
+    var P = { x: 2, w: 1, b: 1, y: 2 };
+    var card = el("div", "card");
+    card.appendChild(el("h4", null, "改输入，看整张图的数值怎么变"));
+    [["x", -3, 4], ["w", -2, 3], ["b", -3, 3], ["y", -2, 5]].forEach(function(p){
+      var rw = el("div", "row"), rl = el("label", null, p[0]), rg = el("input"), rv = el("span", "val");
+      rg.type = "range"; rg.min = p[1]; rg.max = p[2]; rg.step = 0.5; rg.value = P[p[0]];
+      rw.appendChild(rl); rw.appendChild(rg); rw.appendChild(rv); card.appendChild(rw);
+      rv.textContent = P[p[0]];
+      rg.addEventListener("input", function(){ P[p[0]] = +rg.value; rv.textContent = P[p[0]]; reset(); });
+    });
+
+    var formulas = el("div", "card"); formulas.style.background = "var(--panel2)";
+    formulas.innerHTML = '<div class="formula" style="margin:0">a = w·x　z = a + b　h = ReLU(z)\nŷ = h + w　e = ŷ − y　L = ½e²</div>';
+    card.appendChild(formulas);
+
+    var nodeBox = el("div"); card.appendChild(nodeBox);
+    var bRow = el("div", "row"); card.appendChild(bRow);
+    var bF = el("button", "btn primary", "▶ 前向"), bB = el("button", "btn", "◀ 反向"), bR = el("button", "btn ghost", "重置");
+    bRow.appendChild(bF); bRow.appendChild(bB); bRow.appendChild(bR);
+    var summ = el("div"); card.appendChild(summ);
+    root.appendChild(card);
+
+    var idx = 0;
+    var NODES = [];
+    function buildNodes(){
+      var x = P.x, w = P.w, b = P.b, y = P.y;
+      var a = w * x, z = a + b, h = Math.max(0, z), yh = h + w, e = yh - y, L = 0.5 * e * e;
+      // 反向
+      var dLde = e, dLdyh = dLde * 1, dLdh = dLdyh * 1, wDirect = dLdyh * 1;
+      var dz = z > 0 ? 1 : 0;
+      var dLdz = dLdh * dz, dLda = dLdz * 1, dLdb = dLdz * 1;
+      var wMul = dLda * x, dLdx = dLda * w;
+      var dLdw = wMul + wDirect;
+      return [
+        { k: "a = w·x", fv: a, g: dLda, local: "∂a/∂w = x = " + x + "，∂a/∂x = w = " + w, note: "w 在这里第一次被用到" },
+        { k: "z = a + b", fv: z, g: dLdz, local: "对 a、b 都是 1" },
+        { k: "h = ReLU(z)", fv: h, g: dLdh, local: "z = " + fmt(z, 2) + (z > 0 ? " > 0 → 导数 1" : " ≤ 0 → 导数 0（这条支路断了！）") },
+        { k: "ŷ = h + w", fv: yh, g: dLdyh, local: "对 h、w 都是 1", note: "w 第二次被用到（直接支路）" },
+        { k: "e = ŷ − y", fv: e, g: dLde, local: "对 ŷ 是 1，对 y 是 −1" },
+        { k: "L = ½e²", fv: L, g: 1, local: "对 e 的导数 = e = " + fmt(e, 4) }
+      ];
+    }
+    function reset(){ idx = 0; NODES = buildNodes(); renderNodes(); summ.innerHTML = '<div class="note">点「▶ 前向」逐节点算数值，点「◀ 反向」逐节点传梯度。</div>'; }
+    function renderNodes(){
+      var html = "";
+      for (var i = 0; i < NODES.length; i++){
+        var n = NODES[i];
+        var fwdShown = idx >= (i + 1);          // 前向显示到第 i 个
+        var bwdShown = idx >= (NODES.length + (NODES.length - i));
+        html += '<div class="card" style="margin:6px 0;padding:10px 12px;background:' +
+          (fwdShown ? "var(--panel2)" : "transparent") + '">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">' +
+          '<span class="mono" style="font-size:13px;font-weight:600">' + n.k + '</span>' +
+          '<span class="mono" style="font-size:12.5px;color:var(--accent)">' +
+          (fwdShown ? "前向 = " + fmt(n.fv, 4) : "前向 = ?") + '</span></div>' +
+          '<div class="mono" style="font-size:11.5px;color:var(--accent2);margin-top:3px">' +
+          (bwdShown ? "梯度 dL/d(此) = " + fmt(n.g, 4) + "　｜　局部导数：" + n.local : "") + '</div>' +
+          (n.note && (fwdShown || bwdShown) ? '<div style="font-size:11.5px;color:var(--warn);margin-top:3px">⚠ ' + n.note + '</div>' : "") +
+          '</div>';
+      }
+      nodeBox.innerHTML = html;
+    }
+    bF.addEventListener("click", function(){
+      if (idx < NODES.length){ idx++; renderNodes(); }
+      if (idx >= NODES.length){
+        var L = NODES[NODES.length - 1].fv;
+        summ.innerHTML = '<div class="note ok">前向完成，L = <b>' + fmt(L, 4) + "</b>。现在点「◀ 反向」。</div>";
+      }
+    });
+    bB.addEventListener("click", function(){
+      if (idx < NODES.length){ idx = NODES.length; }
+      if (idx < NODES.length * 2){ idx++; renderNodes(); }
+      if (idx >= NODES.length * 2){
+        var last = NODES[0];
+        var wMul = last.g * P.x, wDir = NODES[3].g;
+        var dw = wMul + wDir;
+        summ.innerHTML = '<div class="note ok"><b>结论：</b>dL/dw = ' + fmt(wMul, 4) + "（乘法路径） + " + fmt(wDir, 4) +
+          "（直接加路径） = <b>" + fmt(dw, 4) + "</b>；dL/db = " + fmt(NODES[1].g, 4) + "；dL/dx = " + fmt(last.g * P.w, 4) + "</div>" +
+          (P.w < 0 && (P.x * P.w + P.b) <= 0
+            ? '<div class="note danger"><b>注意这个变式：</b>ReLU 现在是关的（z ≤ 0），主支路梯度归零，但直接加 w 的路径仍然给梯度。' +
+              "所以「某条路梯度为 0」不等于「w 不受影响」。</div>"
+            : "");
+      }
+    });
+    bR.addEventListener("click", reset);
+    reset();
+
+    root.appendChild(el("h3", null, "每个节点的局部导数（背下来）"));
+    var c2 = el("div", "card");
+    c2.innerHTML = '<table class="tbl"><tr><th>运算</th><th>对输入的局部导数</th><th>收到上游梯度 g 后</th></tr>' +
+      '<tr><td>a + b</td><td>都是 1</td><td>两个输入各收到 g</td></tr>' +
+      '<tr><td>a − b</td><td>对 a 是 1，对 b 是 −1</td><td>分别收到 g、−g</td></tr>' +
+      '<tr><td>a·b</td><td>对 a 是 b，对 b 是 a</td><td>分别收到 g·b、g·a</td></tr>' +
+      '<tr><td>½a²</td><td>对 a 是 a</td><td>收到 g·a</td></tr>' +
+      '<tr><td>ReLU(z)</td><td>正区间 1，负区间 0</td><td>z&gt;0 收到 g，z&lt;0 收到 0</td></tr></table>' +
+      '<div class="note">每个局部导数回答的是<b>「只看这一个节点，改动一个输入会怎样」</b>。乘上已经传来的上游梯度，才得到这个输入对最终损失的影响。</div>';
+    root.appendChild(c2);
+
+    root.appendChild(el("h3", null, "例题 · 一个「两条路径」的模型（模拟卷第 7 题）"));
+    var c3 = el("div", "card");
+    c3.innerHTML =
+      '<div class="note">模型：' + MI('h=\\mathrm{ReLU}(wx+b)') + '，' + MI('\\hat y=2h+w') + '，' +
+      MI('L=\\tfrac12(\\hat y-y)^2') + '。<br>已知 ' + MI('x=3,\\;w=2,\\;b=-1,\\;y=4') +
+      '。求前向损失，以及 ' + MI('\\partial L/\\partial w') + '、' + MI('\\partial L/\\partial b') + '。</div>' +
+
+      '<p style="margin:16px 0 6px;font-weight:600">第一段：前向，每个中间值都记下来（反向要用）</p>' +
+      STEP('① 加权输入',
+        'wx = 2\\times 3 = 6',
+        'w 乘 x。这一步之后 w 就"离开"了，想再见到它只能靠反向时回头找。',
+        'wx = 6') +
+      STEP('② 加偏置',
+        'z = wx + b = 6 + (-1) = 5',
+        '加上偏置 b。',
+        'z = 5') +
+      STEP('③ 过激活函数',
+        'h = \\mathrm{ReLU}(5) = 5',
+        'ReLU 的规则：<b>正数原样通过，负数砍成 0</b>。现在是 5，大于 0，所以原样出来。<br>' +
+        '<b>顺便记住"它是开着的"</b>——反向时要靠这个判断导数取 1 还是取 0。',
+        'h = 5（ReLU 处于开启状态）') +
+      STEP('④ 再算预测值',
+        '\\hat y = 2h + w = 2\\times 5 + 2 = 12',
+        '<b>注意这里又用了一次 w</b>。这就是本题的机关：w 被用了两次，反向时会有两条路。<br>' +
+        '（另一个参数 2 是固定系数，不是要学的参数。）',
+        'ŷ = 12　←　w 在这里第二次出场') +
+      STEP('⑤ 算误差',
+        'e = \\hat y - y = 12 - 4 = 8',
+        '预测 12，正确答案 4，差得很远——误差 8。',
+        'e = 8') +
+      STEP('⑥ 算损失',
+        'L = \\tfrac12 e^2 = \\tfrac12\\times 64 = 32',
+        '平方再乘 1/2。乘 1/2 纯粹是为了求导时能消掉那个 2，让导数正好等于 e，看着干净。',
+        'L = 32') +
+
+      '<p style="margin:18px 0 6px;font-weight:600">第二段：反向，从损失一路乘回来</p>' +
+      STEP('⑦ 损失对误差求导',
+        '\\frac{\\partial L}{\\partial e} = e = 8',
+        MI('L=\\tfrac12e^2') + ' 对 e 求导就是 e。因为前面乘了 1/2，那个 2 被抵消了，所以结果干净利落。',
+        '∂L/∂e = 8') +
+      STEP('⑧ 传到预测值',
+        '\\frac{\\partial L}{\\partial \\hat y} = 8 \\times 1 = 8',
+        MI('e = \\hat y - y') + ' 对 ŷ 的导数是 1（减法是线性运算）。所以梯度原样传过去。',
+        '∂L/∂ŷ = 8') +
+      STEP('⑨ 分叉：ŷ 有两个"上游"',
+        '\\hat y = 2h + w',
+        '加法节点会把上游梯度 <b>8 复制成两份</b>，分别送往 h 和 w。<br>' +
+        '<b>这就是最重要的一步：不能只送一份。</b>',
+        '') +
+      STEP('⑩ 路径一：直接加 w 的那条',
+        '\\frac{\\partial \\hat y}{\\partial w}\\Big|_{\\text{直接}} = 1 \\;\\Rightarrow\\; 8\\times 1 = 8',
+        '式子 ' + MI('\\hat y = 2h + w') + ' 里，w 是加上的，对 w 求导得 1。所以这条路径贡献 <b>8</b>。',
+        '路径①贡献 = 8') +
+      STEP('⑪ 路径二：经过 2、ReLU、wx 的那条',
+        '\\frac{\\partial L}{\\partial h}=8\\times 2=16 \\;\\Rightarrow\\; ' +
+        '\\frac{\\partial h}{\\partial z}=1 \\;\\Rightarrow\\; \\frac{\\partial z}{\\partial w}=x=3',
+        '一路乘过来：<br>' +
+        '· ŷ 对 h 求导是 2（因为 ŷ = 2h + w）→ 16<br>' +
+        '· ReLU 对 z 求导是 <b>1</b>（因为 z=5 &gt; 0，它是开着的）→ 16<br>' +
+        '· z 对 w 求导是 <b>x = 3</b>（因为 z = wx + b）→ 16×3 = 48',
+        '路径②贡献 = 48') +
+      STEP('⑫ 两条路径相加',
+        '\\frac{\\partial L}{\\partial w} = 8 + 48 = \\mathbf{56}',
+        '<b>这是本题唯一的考点：w 出现了两次，所以梯度是两条路之和。</b><br>' +
+        '如果只在图上画了一条路，你会得到 48，或者 8，都是错的。',
+        '∂L/∂w = 56') +
+      STEP('⑬ 顺带求 b 的梯度',
+        '\\frac{\\partial L}{\\partial b} = 8\\times 2\\times 1\\times 1 = \\mathbf{16}',
+        'b 只在 ' + MI('z = wx+b') + ' 里出现过一次，没有第二条路。<br>' +
+        '它前面的链是：8（到 ŷ）→ ×2（到 h）→ ×1（ReLU 开）→ ×1（z 对 b 导数是 1）= 16。',
+        '∂L/∂b = 16') +
+      '<div class="note danger"><b>一句话记住这道题：</b>w 出现两次 → 两条路径 → 梯度相加。' +
+      '不画第二条路，答案就少一半。</div>' +
+      '<div class="note">若还要更新参数（η=0.01）：' + MI('w_{new}=2-0.01\\times 56=1.44') + '，' +
+      MI('b_{new}=-1-0.01\\times 16=-1.16') + '。<br>' +
+      '两个都用<b>旧位置</b>算出的梯度，不能先用新 w 去算 b 的梯度。</div>';
+    root.appendChild(c3);
+  }
+});
+
+/* =========================================================
+   考点 8 交叉熵
+   ========================================================= */
+SECTIONS.push({
+  id: "p8", no: "08", title: "损失函数与交叉熵",
+  desc: "Softmax、损失、梯度 q−p，以及老师讲的那段 KL = 交叉熵 − 熵",
+  hot: true,
+  render: function(root){
+    root.appendChild(el("h2", null, "08 · 损失函数与交叉熵"));
+    root.appendChild(el("p", "sub", "拖着 logit 滑块，看概率、损失、梯度一起变。"));
+
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>先搞清三个东西各自在干什么</h4>' +
+      '<p>模型最后吐出的是三个原始分数（叫 <span class="term">logit</span>），比如 (0, 1.2, 0.2)。' +
+      '它们可正可负、加起来也不等于 1，<b>不是概率，不能直接比大小当概率用</b>。</p>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>Softmax：把分数变成概率</b><br>' +
+      '先取 exp（保证变正），再除以总和（保证加起来等于 1）。<br>' +
+      '<span style="color:var(--muted)">为什么用 exp 而不是别的？</span>因为 exp 能保留大小顺序、把差距放大、且永远为正，' +
+      '再配上「除以和」就得到一组干净的概率分布。而且它求导特别漂亮（见下面梯度那节）。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>交叉熵：给「预测概率」打分</b><br>' +
+      'ℓ = −ln(模型给正确答案的概率)。<br>' +
+      '<span style="color:var(--muted)">为什么取负对数？</span>因为概率越接近 1，−ln 越接近 0（答得越好分越低，符合「损失」的含义）；' +
+      '概率越接近 0，−ln 冲得越大（答得越离谱罚得越狠）。<b>这个「罚得狠」是关键</b>——它逼模型别乱自信。</div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c"><b>求梯度：告诉模型该往哪改</b><br>' +
+      '∂ℓ/∂z = q − p，也就是「预测概率 − 真实标签」。<br>' +
+      '真类那一项是负数（q &lt; 1），所以下降时<b>真类分数会被推高</b>，其他类被压低。</div></div>' +
+      '</div>' +
+      '<p><b>为什么分类不用平方损失？</b></p>' +
+      '<p>因为平方损失配 Softmax 会「学得慢」。当模型错得很离谱时（真类概率接近 0），' +
+      '交叉熵的梯度仍然很大，会狠狠纠正；而平方损失的梯度会因为 Sigmoid/Softmax 饱和而变得极小，' +
+      '错得越狠反而学得越慢——这显然不对。交叉熵没有这个毛病。</p>' +
+      '<div class="analogy"><span class="lbl">一句话记住交叉熵在惩罚什么</span>' +
+      '它在惩罚「<b>模型给正确答案的把握太小</b>」。<br>' +
+      '答对了但只有 51% 把握 → 轻罚；答对了有 99% 把握 → 几乎不罚；' +
+      '答错且很自信 → 重罚。这正是我们想要的打分方式。</div>';
+    root.appendChild(ex);
+
+    var card = el("div", "card");
+    var L = { z: [0, 1.2, 0.2], cls: 1 };
+    var segT = el("div", "seg");
+    [0, 1, 2].forEach(function(k, i){
+      var b = el("button", (L.cls === k) ? "on" : null, "真类 = 第 " + (k + 1) + " 类");
+      b.addEventListener("click", function(){
+        [].forEach.call(segT.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on"); L.cls = k; refresh();
+      });
+      segT.appendChild(b);
+    });
+    card.appendChild(el("div", "row")).appendChild(segT);
+
+    ["第1类 logit", "第2类 logit", "第3类 logit"].forEach(function(nm, k){
+      var rw = el("div", "row"), rl = el("label", null, nm), rg = el("input"), rv = el("span", "val");
+      rg.type = "range"; rg.min = -3; rg.max = 3; rg.step = 0.1; rg.value = L.z[k];
+      rw.appendChild(rl); rw.appendChild(rg); rw.appendChild(rv); card.appendChild(rw);
+      rv.textContent = L.z[k].toFixed(1);
+      rg.addEventListener("input", function(){ L.z[k] = +rg.value; rv.textContent = L.z[k].toFixed(1); refresh(); });
+    });
+    var cvs = mkCanvas(120); card.appendChild(cvs);
+    var out = el("div"); card.appendChild(out);
+    root.appendChild(card);
+
+    function softmax(z){
+      var m = Math.max.apply(null, z), e = z.map(function(v){ return Math.exp(v - m); });
+      var s = e.reduce(function(a, b){ return a + b; }, 0);
+      return e.map(function(v){ return v / s; });
+    }
+    function refresh(){
+      var q = softmax(L.z);
+      var loss = -Math.log(q[L.cls]);
+      var grad = q.map(function(v, i){ return v - (i === L.cls ? 1 : 0); });
+      // 熵 H(p)=0（one-hot），交叉熵 = 损失，KL = 损失
+      draw(cvs, function(ctx, w, h){
+        var n = 3, bw = (w - 40) / n, base = h - 26;
+        var mx = Math.max.apply(null, q);
+        ctx.font = "11px sans-serif"; ctx.textAlign = "center";
+        for (var i = 0; i < n; i++){
+          var bh = (q[i] / Math.max(mx, 0.01)) * (h - 50);
+          var x = 20 + i * bw + 6;
+          ctx.fillStyle = (i === L.cls) ? col("accent2") : col("accent");
+          ctx.fillRect(x, base - bh, bw - 12, bh);
+          ctx.fillStyle = col("fg2");
+          ctx.fillText(fmt(q[i], 3) + (i === L.cls ? " 真" : ""), x + (bw - 12) / 2, base + 14);
+        }
+        // 负对数曲线参考
+        var ax = { X: function(v){ return 30 + v * (w - 50); }, Y: function(v){ return 14 + (1 - v / 4) * (h - 50) * 0 + 0; } };
+        ctx.strokeStyle = col("line"); ctx.beginPath(); ctx.moveTo(20, base); ctx.lineTo(w - 20, base); ctx.stroke();
+        ctx.fillStyle = col("muted"); ctx.textAlign = "left";
+        ctx.fillText("预测概率", 20, h - 6);
+      });
+      out.innerHTML =
+        '<div class="kv"><span class="k">Softmax 概率 q</span><span class="v">(' + q.map(function(v){ return fmt(v, 3); }).join(", ") + ')</span></div>' +
+        '<div class="kv"><span class="k">真类概率 q<sub>y</sub></span><span class="v">' + fmt(q[L.cls], 4) + '</span></div>' +
+        '<div class="kv"><span class="k">交叉熵损失 −ln q<sub>y</sub></span><span class="v">' + fmt(loss, 4) + '</span></div>' +
+        '<div class="kv"><span class="k">梯度 ∂ℓ/∂z = q − p</span><span class="v">(' + grad.map(function(v){ return fmt(v, 3); }).join(", ") + ')</span></div>' +
+        '<div class="kv"><span class="k">梯度和（必为 0）</span><span class="v">' + fmt(grad.reduce(function(a, b){ return a + b; }, 0), 6) + '</span></div>' +
+        '<div class="note"><b>为什么梯度和为 0：</b>Softmax 输出和为 1，约束在单纯形上，梯度必然和为 0。</div>' +
+        '<div class="note warn"><b>一手验证「一手算一个 log」：</b>ℓ = ln Σexp(z) − z<sub>y</sub> = ln(' +
+        fmt(Math.exp(L.z[0]) + Math.exp(L.z[1]) + Math.exp(L.z[2]), 3) + ") − (" + L.z[L.cls].toFixed(1) + ") = " +
+        fmt(loss, 4) + "。因为 one-hot 下只有真类那一项留下来。</div>";
+    }
+    refresh();
+
+    root.appendChild(el("h3", null, "老师视频里那段推导（PDF 漏掉的部分）"));
+
+    var ex8b = el("div", "explain");
+    ex8b.innerHTML =
+      '<h4>交叉熵公式 H(p,q) = −Σ p log q，每个字母是谁</h4>' +
+      '<p>这个式子最容易搞混的地方是：<b>为什么求和外面乘的是 p，而 log 里却是 q？</b></p>' +
+      MB('H(p,q) = -\\sum_{x} p(x)\\cdot \\log q(x)') +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">p</div><div class="c"><b>p(x) 是权重</b>，代表"这件事在现实中发生的概率有多大"。' +
+      '现实里发生了什么，是客观事实，不随模型改变，所以 p 是<b>固定的</b>。</div></div>' +
+      '<div class="st"><div class="n">q</div><div class="c"><b>log q(x) 是被评价的对象</b>。q 是模型自己猜的概率分布，' +
+      '是<b>要改的东西</b>。模型给某个结果的概率越离谱（q 越小），log q 越负，加上负号后罚得越狠。</div></div>' +
+      '<div class="st"><div class="n">Σ</div><div class="c"><b>加权求和</b>：按现实情况，把各种结果被罚的程度平均起来。' +
+      '不太可能发生的错误（p 小）罚一点；经常发生的错误（p 大）重罚。</div></div>' +
+      '</div>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>p(x) 是权重</b>，代表「这件事在现实中发生的概率有多大」。' +
+      '现实里发生了什么，是客观事实，不随模型变化。所以 p 是<b>固定的</b>。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>log q(x) 是被评价的对象</b>。q 是模型自己猜的概率分布，是<b>要改的东西</b>。<br>' +
+      '模型给某个结果的概率越离谱（q 很小），log q 越负，前面加上负号就越大 → 罚得越狠。</div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c"><b>Σ 加权求和</b>的意思是：按现实情况，把各种结果被罚的程度平均起来。<br>' +
+      '不太可能发生的错误（p 小），罚一点；经常发生的错误（p 大），重罚。</div></div>' +
+      '</div>' +
+      '<div class="analogy"><span class="lbl">用编码打比方（老师视频里的讲法）</span>' +
+      '把分布想成一套「密码本」。<br>' +
+      '<b>熵 H(p)</b> = 你完全了解真实情况 p，为它设计最省字的编码，平均每条消息要花多少字。<br>' +
+      '<b>交叉熵 H(p,q)</b> = 真实情况还是 p，但<b>你拿了一套按 q 设计的密码本</b>去编它，平均要多花多少字。<br>' +
+      '<b>多花的那部分</b>，就是 KL 散度。<br>' +
+      '所以：<b>交叉熵 = 熵 + 多花的冤枉字</b>。</div>' +
+      '<div class="why"><span class="lbl">为什么分类任务可以直接拿交叉熵当损失</span>' +
+      '因为真实标签是 one-hot（百分百确定是第 k 类），这种情况下最省字的编码一个字都不用花，<b>熵 = 0</b>。<br>' +
+      '于是「多花的冤枉字」就等于交叉熵本身。最小化交叉熵 ≡ 让预测分布贴近真实标签分布。这就是老师的结论。</div>';
+    root.appendChild(ex8b);
+    var c2 = el("div", "card");
+    c2.innerHTML =
+      '<p>那页 PPT 只有四行：</p>' +
+      '<div class="formula">熵      H(p)   = −Σ p(x) log p(x)\n' +
+      '交叉熵  H(p,q) = −Σ p(x) log q(x)\n' +
+      '相对熵  KL(p‖q)= Σ p(x) log[p(x)/q(x)]\n' +
+      '关系    KL(p,q)= H(p,q) − H(p)</div>' +
+      '<p>老师说「用交叉熵减去任务自身的那个熵，把差异单独拎出来」。这一步他没写完，这就是补全：</p>' +
+      '<div class="formula">KL(p‖q) = Σ p log(p/q)\n' +
+      '        = Σ p log p − Σ p log q\n' +
+      '        = −H(p) + H(p,q)\n' +
+      '        = H(p,q) − H(p)</div>' +
+      '<p>当标签是 one-hot，设真类为 k，则 p(k)=1、其余 0：</p>' +
+      MB('H(p) = -\\big[\\,1\\cdot\\log 1 + 0 + 0\\,\\big] = \\mathbf{0}') +
+      MB('\\mathrm{KL}(p\\Vert q) = H(p,q) - 0 = H(p,q) = -\\log q(k)') +
+      '<div class="note ok"><b>三层结论，按这个层次记：</b><br>' +
+      '① p 是标签分布、固定不变，H(p) 是常数 → 最小化交叉熵 ≡ 最小化 KL。one-hot 下 H(p)=0，两者数值也相等。<br>' +
+      '② 损失的实际数值就是 −log(模型给正确类别的概率)。越自信且答对，越接近 0。<br>' +
+      '③ 负例为什么不用管：p(x)=0 的那些项，0·log q(x) 恒等于 0，对损失无贡献。所以 PyTorch 的 CrossEntropyLoss 只取 target 那一维。</div>' +
+      '<div class="note"><b>通俗版：</b>把分布想成一套密码本。熵 = 用最优编码编真实分布，平均花多少字；交叉熵 = 拿按 q 设计的密码本去编 p，平均多花多少字。' +
+      '交叉熵 = 熵 + 冤枉字。分类任务里答案永远 100% 确定（one-hot），熵为 0，所以冤枉字就等于交叉熵本身。</div>' +
+      '<div class="note warn"><b>工程提醒：</b>PyTorch 的 CrossEntropyLoss 内部是 log_softmax + NLLLoss，输入要<b>未过 softmax 的 logits</b>。自己再做一次 softmax 就是重复归一化。</div>';
+    root.appendChild(c2);
+
+    root.appendChild(el("h3", null, "例题 · 交叉熵与梯度（模拟卷第 8 题）"));
+    var c3 = el("div", "card");
+    c3.innerHTML =
+      '<div class="note">某样本的三个原始分数是 ' + MI('(0,\\; \\ln 3,\\; \\ln 2)') +
+      '，真实类别是<b>第 3 类</b>。<br>求：Softmax 概率、交叉熵损失、对三个分数的梯度。' +
+      '再加一条真类概率为 3/4 的样本，求两条的平均损失。</div>' +
+
+      '<p style="margin:16px 0 6px;font-weight:600">第一段：原始分数 → 概率</p>' +
+      STEP('① 每个分数取 exp',
+        '\\exp(0)=1,\\qquad \\exp(\\ln 3)=3,\\qquad \\exp(\\ln 2)=2',
+        '取 exp 有两个作用：<b>把负数变正数</b>（概率不能是负的），' +
+        '以及<b>把差距拉开</b>。<br>' +
+        '这里题目很贴心，用的是 ' + MI('\\ln') + ' 形式，所以 ' + MI('e^{\\ln 3}=3') + ' 直接就出来了。',
+        '指数 = (1, 3, 2)') +
+      STEP('② 求和',
+        '1+3+2 = 6',
+        '这个和是后面做归一化用的分母。',
+        '总和 = 6') +
+      STEP('③ 除以总和，得到概率',
+        'q = \\left(\\frac{1}{6},\\; \\frac{3}{6},\\; \\frac{1}{3}\\right) = \\left(\\frac16,\\; \\frac12,\\; \\frac13\\right)',
+        '每个数除以 6。<b>检查一件事：三项加起来必须等于 1。</b>' +
+        MI('\\tfrac16+\\tfrac12+\\tfrac13 = \\tfrac16+\\tfrac36+\\tfrac26 = 1') + ' ✓<br>' +
+        '如果不等于 1，说明中间算错了，立刻停下重来。',
+        'q = (1/6, 1/2, 1/3)') +
+
+      '<p style="margin:18px 0 6px;font-weight:600">第二段：算损失</p>' +
+      STEP('④ 取真类那一项',
+        '\\ell = -\\ln q_3 = -\\ln\\frac13',
+        '真实类别是第 3 类，所以只看 q₃。<b>其余两项完全不用管</b>——' +
+        '因为真实标签是 one-hot，其他类的 p 都是 0，' + MI('0\\times\\ln q') + ' 恒为 0。',
+        '') +
+      STEP('⑤ 化简',
+        '\\ell_1 = -\\ln\\frac13 = \\ln 3 \\approx 1.0986',
+        '负号把倒数翻上来：' + MI('-\\ln\\tfrac13 = \\ln 3') + '。<br>' +
+        '直观检查：模型给真实类别的概率只有 1/3，挺不自信的，所以损失接近 1.1，' +
+        '比"完全确定"（损失 0）差远了。合理。',
+        'ℓ₁ = ln3 ≈ 1.0986') +
+
+      '<p style="margin:18px 0 6px;font-weight:600">第三段：求梯度（这条公式最好记）</p>' +
+      STEP('⑥ 用 q − p 直接算',
+        '\\frac{\\partial \\ell}{\\partial z} = q - p = ' +
+        '\\left(\\frac16-0,\\;\\; \\frac12-0,\\;\\; \\frac13-1\\right) = \\left(\\frac16,\\;\\frac12,\\;-\\frac23\\right)',
+        'p 是真实标签的 one-hot 向量 ' + MI('(0,0,1)') + '。<br>' +
+        '所以只有第三项减了 1，前两项减 0 不变。<br>' +
+        '<b>这个结果非常好记：预测概率减去真实标签，就完了。</b>',
+        '') +
+      STEP('⑦ 自查：三项之和必须为 0',
+        '\\frac16+\\frac12-\\frac23 = \\frac16+\\frac36-\\frac46 = 0 \\;\\checkmark',
+        '为什么必然为 0？因为 Softmax 输出的三项和恒为 1（被约束在一个平面上），' +
+        '所以它的梯度在这三个方向上必然抵消。<br>' +
+        '<b>算完梯度顺手加一下，和不是 0 就一定错了</b>——这是最快的自检。',
+        '梯度 = (1/6, 1/2, −2/3)，和为 0 ✓') +
+      STEP('⑧ 这个梯度想告诉我们什么',
+        '\\theta \\leftarrow \\theta - \\eta\\,\\nabla',
+        '看符号：第三项是 <b>−2/3</b>（负的），前两项是正的。<br>' +
+        '更新时是<b>减去</b>梯度，所以第三类分数会<b>变大</b>，前两类会<b>变小</b>。<br>' +
+        '换句话说：<b>模型在往"更相信第 3 类"的方向调。</b>方向正确。',
+        '') +
+
+      '<p style="margin:18px 0 6px;font-weight:600">第四段：两条样本求平均</p>' +
+      STEP('⑨ 第二条样本的损失',
+        '\\ell_2 = -\\ln\\frac34 = \\ln\\frac43 \\approx 0.2877',
+        '真类概率是 3/4，比第一条的 1/3 自信多了，所以损失小得多（0.29 vs 1.10）。',
+        'ℓ₂ = ln(4/3) ≈ 0.2877') +
+      STEP('⑩ 取平均',
+        '\\bar\\ell = \\frac{\\ell_1+\\ell_2}{2} = \\frac{\\ln 3 + \\ln\\frac43}{2} = \\frac{\\ln 4}{2} = \\ln 2 \\approx 0.693',
+        '这里有个漂亮的地方：两个对数相加可以合并（' + MI('\\ln 3 + \\ln\\tfrac43 = \\ln 4') + '），' +
+        '再除以 2 正好是 ' + MI('\\ln 2') + '。<br>' +
+        '<b>算出这么整齐的答案，说明你走对了。</b>如果得出一串乱七八糟的小数，多半哪里错了。<br>' +
+        '<b>顺序不能反</b>：是先各自取对数、再平均，不是先平均概率再取对数。',
+        '平均损失 = ln2 ≈ 0.693') +
+      '<div class="note"><b>二分类版本，别记混：</b>' + MI('\\ell = -[\\,y\\ln q + (1-y)\\ln(1-q)\\,]') + '<br>' +
+      '· ' + MI('q=0.9') + ' 且 ' + MI('y=1') + '：' + MI('-\\ln 0.9 \\approx 0.105') + '<br>' +
+      '· ' + MI('q=0.9') + ' 但 ' + MI('y=0') + '：<b>要用负类概率 1−q = 0.1</b>，' + MI('-\\ln 0.1 \\approx 2.303') + '<br>' +
+      '第二个是最常见的错：看到 q=0.9 就直接用 0.9，忘了 y=0 时正确标签的概率其实是 0.1。</div>';
+    root.appendChild(c3);
+  }
+});
+
+/* =========================================================
+   考点 9 熵与决策树
+   ========================================================= */
+SECTIONS.push({
+  id: "p9", no: "09", title: "熵与决策树",
+  desc: "熵是什么、四种熵怎么算、15 人贷款题完整复算",
+  hot: true,
+  render: function(root){
+    root.appendChild(el("h2", null, "09 · 熵与决策树"));
+    root.appendChild(el("p", "sub", "先搞懂「惊讶程度」，再算四种熵，最后把贷款题走一遍。"));
+
+    var ex = el("div", "explain");
+    ex.innerHTML =
+      '<h4>信息量 −log p 是怎么来的？不能随便定个公式吗</h4>' +
+      '<p>能推出来一点，不用硬背。我们希望「信息量」这个东西满足三条常识：</p>' +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c"><b>必然发生的事，信息量为 0。</b>「太阳明天会升起」这句话没有任何信息。' +
+      '所以 p=1 时，信息量应该是 0。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c"><b>越罕见的事，信息量越大。</b>「明天下雪」比「明天晴天」信息量大。</div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c"><b>两件独立的事同时发生，信息量应该相加。</b>' +
+      '「抛硬币正面」+「掷骰子出 6」，两条消息一起收到的信息量 = 各自之和。</div></div>' +
+      '</div>' +
+      '<p>满足「p=1 时为 0」「单调递减」「可加」这三个要求的函数，对数恰好是唯一自然的选择。' +
+      '因为独立事件的概率是<b>相乘</b>的（p₁×p₂），而对数能把相乘变成<b>相加</b>：</p>' +
+      MB('\\log(p_1\\cdot p_2) = \\log p_1 + \\log p_2') +
+      '<p>再配上负号让结果为正，就得到 <b>信息量 = −log p</b>。</p>' +
+      '<div class="why"><span class="lbl">底数为什么常用 2</span>' +
+      '用 2 为底时，单位叫 <b>bit</b>，含义很实在：<b>「用最优编码方案编这条消息，平均要几位二进制」</b>。<br>' +
+      '例：概率 1/8 的事件，−log₂(1/8) = 3，意思是「8 种等可能里挑 1 个，需要 3 位二进制」（2³=8）。</div>' +
+      '<p><b>那「熵」又是什么？</b></p>' +
+      '<p>信息量说的是「某一个结果」有多意外。但抽之前我们面对的是<b>一整个分布</b>。' +
+      '熵 = 把每种结果的信息量，<b>按它出现的概率加权平均</b>：</p>' +
+      MB('H(p) = -\\sum_{k} p_k \\log p_k') +
+      '<div class="steps">' +
+      '<div class="st"><div class="n">1</div><div class="c">' + MI('p_k') +
+      '：这个结果出现的概率，拿来当<b>权重</b>。</div></div>' +
+      '<div class="st"><div class="n">2</div><div class="c">' + MI('-\\log p_k') +
+      '：这个结果一旦出现，能带来<b>多少信息量</b>。</div></div>' +
+      '<div class="st"><div class="n">3</div><div class="c">' + MI('\\sum') +
+      '：按概率加权平均。</div></div>' +
+      '</div>' +
+      '<p><b>所以熵 = "平均每个结果带来多少信息量" = "抽之前，平均有多不确定"。</b>两个说法是同一件事。</p>' +
+      '<p>所以熵的含义是：<b>抽之前，平均有多不确定。</b>或者说「平均每次要接收多少信息量才能确定结果」。</p>' +
+      '<div class="analogy"><span class="lbl">决策树为什么盯上熵</span>' +
+      '决策树每一步都在问「用哪个特征把样本分开，能让每组里的人尽量一致」。<br>' +
+      '「一致」＝「不确定度低」＝「熵小」。<br>' +
+      '所以：<b>分完之后，各组的加权平均熵（条件熵）比原来的熵小了多少 → 这就是信息增益。</b><br>' +
+      '减少得越多，说明这个问题越有诊断价值，就越该拿它当根节点。</div>';
+    root.appendChild(ex);
+
+    /* --- 熵曲线 --- */
+    root.appendChild(el("h3", null, "① 熵是什么：惊讶程度的平均"));
+    var c1 = el("div", "card");
+    c1.innerHTML = MB('-\\log_2 p \\quad\\text{←　这件事一旦发生，带来的信息量}') +
+      MB('H(p) = -\\sum_{k} p_k \\log_2 p_k') +
+      '<div class="note">概率 1 的事件 → 信息量 0；概率 1/2 → 1 bit；概率 1/8 → 3 bit。<br>' +
+      '熵还等于「用最优编码方案编这个分布，平均每条消息要多少位」——两种说法是同一件事。</div>';
+    var rw = el("div", "row"), rg = el("input"), rv = el("span", "val");
+    rw.appendChild(el("label", null, "正类占比 p")); rg.type = "range"; rg.min = 0.01; rg.max = 0.99; rg.step = 0.01; rg.value = 0.5;
+    rw.appendChild(rg); rw.appendChild(rv); c1.appendChild(rw);
+    var cvs1 = mkCanvas(180); c1.appendChild(cvs1);
+    var out1 = el("div"); c1.appendChild(out1);
+    function H2(p){ if (p <= 0 || p >= 1) return 0; return -(p * Math.log2(p) + (1 - p) * Math.log2(1 - p)); }
+    function refresh1(){
+      var p = +rg.value; rv.textContent = p.toFixed(2);
+      draw(cvs1, function(ctx, w, h){
+        var ax = axes(ctx, w, h, { l: 34, r: 12, t: 12, b: 24 }, 0, 1, 0, 1.15);
+        ctx.strokeStyle = col("accent"); ctx.lineWidth = 2.4; ctx.beginPath();
+        for (var i = 0; i <= 200; i++){
+          var pp = i / 200;
+          if (pp <= 0 || pp >= 1) continue;
+          var vv = H2(pp);
+          if (i === 0) ctx.moveTo(ax.X(pp), ax.Y(vv)); else ctx.lineTo(ax.X(pp), ax.Y(vv));
+        }
+        ctx.stroke();
+        ctx.strokeStyle = col("line"); ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(ax.X(p), 12); ctx.lineTo(ax.X(p), h - 24); ctx.stroke();
+        var hv = H2(p);
+        ctx.fillStyle = col("accent2"); ctx.beginPath(); ctx.arc(ax.X(p), ax.Y(hv), 6, 0, 7); ctx.fill();
+        ctx.fillStyle = col("muted"); ctx.font = "10px ui-monospace,monospace"; ctx.textAlign = "center";
+        ctx.fillText("p", w / 2, h - 7);
+        ctx.textAlign = "right"; ctx.fillText("1.0", 30, ax.Y(1) + 4); ctx.fillText("0", 30, ax.Y(0) + 4);
+      });
+      out1.innerHTML = '<div class="kv"><span class="k">比例 (' + p.toFixed(2) + ", " + (1 - p).toFixed(2) + ")</span><span class=\"v\">H = " + fmt(H2(p), 3) + " bit</span></div>" +
+        '<div class="note">' + (Math.abs(p - 0.5) < 0.02 ? "两类均分，最难猜，熵取到最大值 <b>1 bit</b>。" :
+          (p > 0.5 ? "多数类较明显，不确定性下降。" : "多数类较明显（负类那边），不确定性下降。")) +
+        "K 个类别最均匀时熵为 <b>log₂K</b>（2 类→1，3 类→1.585，4 类→2）。</div>";
+    }
+    rg.addEventListener("input", refresh1);
+    refresh1(); root.appendChild(c1);
+
+    /* --- 四种熵 --- */
+    root.appendChild(el("h3", null, "② 决策树要算的四个量（别混）"));
+    var ex9b = el("div", "explain");
+    ex9b.innerHTML =
+      '<h4>四个公式，逐个符号拆开看它到底在算谁</h4>' +
+
+      '<p style="margin:14px 0 4px;font-weight:600">① 条件熵 —— 用某个特征分完以后，整体还剩多乱</p>' +
+      MB('H(D \\mid A) \\;=\\; \\sum_{v} \\frac{|D_v|}{|D|}\\, H(D_v)') +
+      '<div class="why"><span class="lbl">一个字一个字读</span>' +
+      '· ' + MI('\\sum_{v}') + '：把每个分支的贡献加起来（v 遍历所有分支）<br>' +
+      '· ' + MI('\\dfrac{|D_v|}{|D|}') + '：这一支的样本数 ÷ 总样本数 = "这一支占多大比例"，拿来当<b>权重</b><br>' +
+      '· ' + MI('H(D_v)') + '：这一支<b>内部</b>的乱度<br>' +
+      '<b>合起来读就是：按每支占的比例，把各支的乱度加权平均。</b><br>' +
+      '直观理解：分完之后，整体还有多乱？这个数越小，说明分得越干净。</div>' +
+
+      '<p style="margin:16px 0 4px;font-weight:600">② 信息增益 —— 乱度减少了多少</p>' +
+      MB('g(D,A) \\;=\\; H(D) - H(D \\mid A)') +
+      '<div class="why"><span class="lbl">这一条几乎不用解释</span>' +
+      '「分之前多乱」减去「分之后还有多乱」= <b>乱度被消灭了多少</b>。<br>' +
+      '减少得越多，说明这个问题问得越有价值，就越该拿它当根节点。<br>' +
+      'ID3 算法就是「在所有候选特征里，挑 g 最大的那一个」。</div>' +
+
+      '<p style="margin:16px 0 4px;font-weight:600">③ 划分熵 —— 只看"分得多零碎"，和标签毫无关系</p>' +
+      MB('HA(D) \\;=\\; -\\sum_{v} \\frac{|D_v|}{|D|}\\log_2\\frac{|D_v|}{|D|}') +
+      '<div class="why"><span class="lbl">注意这里少了什么</span>' +
+      '仔细对比①和③：<b>加权权重一模一样，都是 ' + MI('|D_v|/|D|') + '</b>。<br>' +
+      '区别只在于<b>求和的是什么东西</b>：<br>' +
+      '· 条件熵 → 求和里是 ' + MI('H(D_v)') + '，也就是<b>组内的标签</b>（关心标签）<br>' +
+      '· 划分熵 → 求和里是 ' + MI('\\log_2\\frac{|D_v|}{|D|}') + '，也就是<b>组有多大</b>（<b>完全不看标签</b>）<br>' +
+      '<b>抓住这一句，这两个量就再也不会搞反。</b><br>' +
+      '它回答的问题是：样本被分到这么多支，本身有多"零碎"？</div>' +
+
+      '<p style="margin:16px 0 4px;font-weight:600">④ 增益比 —— 用划分熵纠正信息增益的偏心</p>' +
+      MB('g_R \\;=\\; \\frac{g(D,A)}{HA(D)}') +
+      '<div class="why"><span class="lbl">信息增益偏心在哪</span>' +
+      '它<b>偏爱取值多的特征</b>。极端例子：按唯一学号把 15 人拆成 15 组，每组只剩 1 个人——' +
+      '这一组当然"纯"（就一个人，不是批就是拒）。' +
+      '于是每个 ' + MI('H(D_v)=0') + '，条件熵 = 0，信息增益 = ' + MI('H(D)') + ' − 0 = <b>最大值</b>。<br>' +
+      '<b>看起来完美，其实毫无意义</b>：你没学到任何规律，只是把每个人的答案原样记住了。<br>' +
+      '而这时划分熵很大（' + MI('\\log_2 15\\approx 3.9') + '），拿它当分母一除，增益比立刻被压下去。<br>' +
+      '<b>这就是增益比存在的全部理由：不是让分数更好看，是压制"分得太碎"这种作弊。</b></div>' +
+      '<div class="analogy"><span class="lbl">四个量的关系，一句话串起来</span>' +
+      '父节点熵 ' + MI('H(D)') + ' 是"分之前有多乱"。<br>' +
+      '条件熵 ' + MI('H(D\\mid A)') + ' 是"用 A 分完之后还剩多乱"。<br>' +
+      '信息增益 ' + MI('g') + ' 是"消灭了多少乱"。<br>' +
+      '划分熵 ' + MI('HA') + ' 是"分得多零碎"，拿它当惩罚项做分母，得到增益比 ' + MI('g_R') + '。<br>' +
+      'ID3 比 ' + MI('g') + '，C4.5 比 ' + MI('g_R') + '。</div>';
+    root.appendChild(ex9b);
+    var c2 = el("div", "card");
+    c2.innerHTML = '<table class="tbl"><tr><th>量</th><th style="text-align:left">用哪些比例</th><th style="text-align:left">回答什么</th></tr>' +
+      '<tr><td>父节点熵 H(D)</td><td style="text-align:left">父节点内各类别占比</td><td style="text-align:left">分组前有多混杂</td></tr>' +
+      '<tr><td>子节点熵 H(Dᵥ)</td><td style="text-align:left">组内各类别占比</td><td style="text-align:left">组内有多混杂</td></tr>' +
+      '<tr><td>条件熵 H(D|A)</td><td style="text-align:left">组占比加权子节点熵</td><td style="text-align:left">分组后的平均不确定性</td></tr>' +
+      '<tr><td>划分熵 HA(D)</td><td style="text-align:left">只拿组大小/父节点数</td><td style="text-align:left">分到哪支有多不确定</td></tr></table>' +
+      '<div class="formula">H(D|A) = Σᵥ (|Dᵥ|/|D|)·H(Dᵥ)\n' +
+      'g(D,A) = H(D) − H(D|A)\n' +
+      'HA(D)  = −Σᵥ (|Dᵥ|/|D|)·log₂(|Dᵥ|/|D|)\n' +
+      'gR     = g / HA</div>' +
+      '<div class="note danger"><b>最容易混的一点：</b>条件熵的加权权重是组占比，但求的是 <b>H(Dᵥ)——组内标签熵</b>；' +
+      '划分熵的加权权重也是组占比，但求的是 <b>log₂(组占比)——只看组大小，完全不看标签</b>。</div>' +
+      '<div class="note"><b>为什么需要增益比：</b>信息增益偏爱取值多的特征。极端情况按唯一学号拆分，每组只有一个样本、标签必然纯，条件熵=0，信息增益=父节点熵，看起来完美但毫无泛化意义。' +
+      '增益比用划分熵做分母把这种偏好压下去。</div>' +
+      '<div class="note">若划分只有一个分支，HA=0，除零 → 跳过该候选。原版 C4.5 是先在信息增益不低于平均值的候选里挑，再比较增益比。题面明确规定时按题设。</div>';
+    root.appendChild(c2);
+
+    /* --- 15 人贷款题 --- */
+    root.appendChild(el("h3", null, "③ 15 人贷款题：完整复算"));
+    var c3 = el("div", "card");
+    var FEATS = [
+      { name: "年龄", groups: [[2,3],[3,2],[4,1]], labels: ["青年","中年","老年"] },
+      { name: "工作", groups: [[5,0],[4,6]], labels: ["有","无"] },
+      { name: "房产", groups: [[6,0],[3,6]], labels: ["有","无"] },
+      { name: "信贷", groups: [[1,4],[4,2],[4,0]], labels: ["一般","好","很好"] }
+    ];
+    var HD = H2(9 / 15);
+    function Hgrp(ok, no){ var n = ok + no; if (!n) return 0; var p = ok / n; return H2(p); }
+    var tbl = el("table", "tbl"); c3.appendChild(tbl);
+    var tbody = el("tbody"); tbl.appendChild(tbody);
+    var detail = el("div"); c3.appendChild(detail);
+    var rows = [];
+    FEATS.forEach(function(F){
+      var tot = 0, cond = 0, sizes = [];
+      F.groups.forEach(function(g){ var n = g[0] + g[1]; tot += n; sizes.push(n); });
+      F.groups.forEach(function(g, i){
+        var n = sizes[i];
+        cond += (n / tot) * Hgrp(g[0], g[1]);
+      });
+      var gain = HD - cond;
+      var ha = 0;
+      sizes.forEach(function(n){ var p = n / tot; if (p > 0) ha -= p * Math.log2(p); });
+      rows.push({ name: F.name, cond: cond, gain: gain, ha: ha, gr: ha > 0 ? gain / ha : 0, sizes: sizes, groups: F.groups, labels: F.labels });
+    });
+    var html = '<tr><th>特征</th><th>分支计数(批准,拒绝)</th><th>条件熵</th><th>信息增益</th><th>增益比</th></tr>';
+    rows.forEach(function(r, i){
+      html += '<tr data-i="' + i + '"><td>' + r.name + '</td><td class="num" style="font-size:11px">' +
+        r.groups.map(function(g, k){ return r.labels[k] + "(" + g[0] + "," + g[1] + ")"; }).join("，") +
+        '</td><td class="num">' + fmt(r.cond) + '</td><td class="num">' + fmt(r.gain) + '</td><td class="num">' + fmt(r.gr) + '</td></tr>';
+    });
+    tbody.innerHTML = html;
+    // 点击行看逐步计算
+    var trs = tbody.querySelectorAll("tr[data-i]");
+    for (var ti = 0; ti < trs.length; ti++){
+      (function(tr){
+        tr.style.cursor = "pointer";
+        tr.addEventListener("click", function(){
+          var r = rows[+tr.getAttribute("data-i")];
+          var steps = r.groups.map(function(g, k){
+            var n = g[0] + g[1];
+            return "  " + r.labels[k] + "组 (" + g[0] + "批准," + g[1] + "拒绝)，共 " + n + " 人：H = " + fmt(Hgrp(g[0], g[1]));
+          }).join("\n");
+          var terms = r.groups.map(function(g, k){ return "(" + r.sizes[k] + "/15)×" + fmt(Hgrp(g[0], g[1])); }).join(" + ");
+          detail.innerHTML = '<div class="note"><b>父节点熵：</b>H(D) = −(9/15)log₂(9/15) − (6/15)log₂(6/15) = <b>' + fmt(HD) + '</b></div>' +
+            '<div class="formula">' + steps + '\n\n条件熵 H(D|A) = ' + terms + '\n              = ' + fmt(r.cond) + '\n' +
+            '信息增益 g = ' + fmt(HD) + ' − ' + fmt(r.cond) + ' = <b>' + fmt(r.gain) + '</b>\n' +
+            '划分熵 HA = ' + fmt(r.ha) + '（只看各组大小）\n' +
+            '增益比 gR = ' + fmt(r.gain) + '/' + fmt(r.ha) + ' = <b>' + fmt(r.gr) + '</b></div>';
+        });
+      })(trs[ti]);
+    }
+    c3.appendChild(el("p", "sub", "点表格任意一行，看这一行的逐步计算。"));
+    c3.appendChild(el("div", "note ok", "<b>结论：</b>按信息增益选「房产」（0.420 最大）。有房组 6 人全批准，已成纯节点直接判批准；无房组只拿剩下的 9 人继续按「工作」划分。" +
+      "<br><b>注意分母：</b>这一步的分母是 <b>9</b>，不是 15。已经离开当前分支的那 6 个人不用再计入——这是决策树手算题最常见的错。"));
+    c3.appendChild(el("div", "note", "<b>一个巧合别慌：</b>房产的划分熵 0.971 恰好等于父节点熵 0.971。原因是分支比例 6:9 和类别比例 9:6 互为交换，而熵对交换不敏感。"));
+    root.appendChild(c3);
+
+    /* --- 三者关系 --- */
+    root.appendChild(el("h3", null, "④ 熵 / 交叉熵 / KL 三者关系"));
+    var c4 = el("div", "card");
+    c4.innerHTML = '<div class="formula">D_KL(p‖q) = Σ pₖ ln(pₖ/qₖ) = H(p,q) − H(p)</div>' +
+      '<div class="note"><b>验算 p=q=(½,½)：</b>KL = 0；交叉熵 = ln2 ≈ 0.693；H(p) 也是 ln2；KL = ln2 − ln2 = 0 ✓<br>' +
+      '这个例子说明「交叉熵不为 0」和「预测完全正确」可以同时成立。</div>' +
+      '<table class="tbl"><tr><th>区别</th><th style="text-align:left">内容</th></tr>' +
+      '<tr><td>底数</td><td style="text-align:left">树题用 log₂（bit），分类损失用 ln（nat）。题目指定就按题目</td></tr>' +
+      '<tr><td>最小值</td><td style="text-align:left">交叉熵最小值不一定为 0。q=p 时取到 H(p)；只有 one-hot 时理想损失才是 0</td></tr>' +
+      '<tr><td>对称性</td><td style="text-align:left">KL 不对称 ⚠ 不是距离。它衡量「用 q 近似 p 多付的编码代价」</td></tr></table>';
+    root.appendChild(c4);
+
+    root.appendChild(el("h3", null, "模拟卷第 9 题原题"));
+    var c5 = el("div", "card");
+    c5.innerHTML = '<p>节点正负各 4 个。A 分 (3正,0负)、(1正,4负)；B 分 (3正,1负)、(1正,3负)。</p>' +
+      '<div class="formula">父节点：4 正 4 负 → H(D) = <b>1 bit</b>\n\n' +
+      'A：第一组纯 → H=0；第二组 (1/5,4/5) → H≈0.722\n' +
+      '   H(D|A) = (3/8)×0 + (5/8)×0.722 ≈ <b>0.451</b>\n' +
+      '   g(A) = 1 − 0.451 = <b>0.549</b>\n' +
+      '   HA(3:5) ≈ 0.954　→ gR(A) ≈ <b>0.575</b>\n\n' +
+      'B：两组都是 (3/4,1/4) → H ≈ 0.811\n' +
+      '   H(D|B) = 0.5×0.811 + 0.5×0.811 ≈ <b>0.811</b>\n' +
+      '   g(B) = 1 − 0.811 = <b>0.189</b>\n' +
+      '   HA(4:4) = 1　→ gR(B) = <b>0.189</b></div>' +
+      '<div class="note ok">ID3 比信息增益 → 选 <b>A</b>（0.549 &gt; 0.189）。按增益比也是 A（0.575 &gt; 0.189），两个判据一致。</div>' +
+      '<div class="note warn"><b>答题提示：</b>熵的运算全程保留 5 位以上中间位数，最后统一四舍五入到三位。中途就舍入，误差会累积到增益比上。</div>';
+    root.appendChild(c5);
+  }
+});
+
+/* =========================================================
+   自测
+   ========================================================= */
+function renderTest(){
+  var w = el("div");
+  w.appendChild(el("h2", null, "自测 · 12 道"));
+  w.appendChild(el("p", "sub", "选完立刻判卷并给解释。"));
+  var score = el("div", "card");
+  var done = {}, right = 0;
+  score.innerHTML = '<div class="kv"><span class="k">已答</span><span class="v" id="__done">0 / 12</span></div>' +
+    '<div class="kv"><span class="k">正确</span><span class="v" id="__right">0</span></div>' +
+    '<div class="pbar"><i id="__bar" style="width:0%"></i></div>';
+  w.appendChild(score);
+
+  var QS = [
+    { q: "模型把训练损失降到 0，能推出新样本上的损失也是 0 吗？", o: ["能，说明模型完全正确", "不能，训练损失只评价已知样本", "能，只要测试集和训练集同分布"], a: 1,
+      e: "训练损失只评价这批已知样本。高容量模型可能记住噪声，或利用只在训练数据中碰巧成立的关系。要判断泛化必须看验证集/测试集。" },
+    { q: "用验证集选了训练轮次，然后用测试集报告结果，这个流程", o: ["可以，这是标准做法", "不行，测试集被污染了", "只有小数据集才不行"], a: 0,
+      e: "标准流程就是这个：训练集拟合权重 → 验证集选轮次/超参数 → 测试集只报告一次。反过来用测试集选轮次再用它报告，才是错的。" },
+    { q: "先把图片做翻转增强，再随机划分训练/测试集，问题是", o: ["没问题", "同一张图的原图与翻转版可能分到两边，造成泄漏", "只会让训练变慢"], a: 1,
+      e: "数据泄漏。正确做法是先切分，再只对训练部分做增强。" },
+    { q: "两层仿射层串联 W₂(W₁x+b₁)+b₂ 等价于", o: ["一个更复杂的非线性函数", "一层仿射函数 (W₂W₁)x + (W₂b₁+b₂)", "无法化简"], a: 1,
+      e: "这是恒等式。没有非线性激活，堆多少层都还在同一类函数里，能力上限就是线性分类器。" },
+    { q: "ReLU 在 z = −2 处的导数是", o: ["−2", "1", "0"], a: 2,
+      e: "ReLU 负区间输出恒为 0，斜率是 0。所以该位置的梯度传不回去，这就是「神经元死掉」。" },
+    { q: "Adam 第二步递推 m₂、v₂ 时，应该用", o: ["修正后的 m̂₁、v̂₁", "原始的 m₁、v₁", "随便哪个都行"], a: 1,
+      e: "必须用原始状态。偏差修正得到的 m̂、v̂ 只用于当轮参数更新，不写回状态。这是 Adam 手算最大的坑。" },
+    { q: "AdaGrad 与 RMSProp 的主要区别是", o: ["AdaGrad 累计平方和只增不减，RMSProp 用移动平均能回落", "AdaGrad 用动量，RMSProp 不用", "两者完全一样"], a: 0,
+      e: "AdaGrad 的 r 单调递增，有效学习率只会变小；RMSProp 用 ρ 加权让旧平方向量衰减，有效学习率能回升。" },
+    { q: "ResNet 的 Bottleneck 主支路卷积核尺寸顺序是", o: ["3×3 → 3×3", "1×1 → 3×3 → 1×1", "3×3 → 1×1 → 3×3"], a: 1,
+      e: "先 1×1 降通道，再在窄通道上做 3×3，最后 1×1 升通道。BasicBlock 才是 3×3 → 3×3。" },
+    { q: "一个 5×5 输入，3×3 核，步长 2，无填充，输出边长是", o: ["2", "3", "1"], a: 0,
+      e: "⌊(5+0−3)/2⌋+1 = ⌊1⌋+1 = 2。舍去的那个不完整窗口不参与计算。" },
+    { q: "求卷积层对输入的梯度 dX 时，局部导数是", o: ["窗口里的输入值", "卷积核里的权重", "上游梯度"], a: 1,
+      e: "求 dX 拿核权重乘梯度，dX 与 X 同形；求 dK 则拿输入值乘梯度，dK 与 K 同形。这两者搞反是最高频失分点。" },
+    { q: "one-hot 标签下，交叉熵损失等于", o: ["−log(模型给真实类别的概率)", "熵 H(p) 本身", "KL 散度加熵"], a: 0,
+      e: "因为 H(p)=0，KL(p‖q)=H(p,q)−H(p)=H(p,q)，而交叉熵在 one-hot 下只剩 −log q(真类) 一项。" },
+    { q: "决策树的增益比为什么要除以划分熵 HA", o: ["为了归一化数值范围", "为了抑制信息增益对「取值多的特征」的偏好", "没有实际意义"], a: 1,
+      e: "取值越多，HA 越大、分母越大，把信息增益的偏好压下去。典型反例是按唯一学号拆分，信息增益极高但毫无泛化意义。" }
+  ];
+
+  var box = el("div");
+  QS.forEach(function(Q, qi){
+    var d = el("div", "q");
+    d.appendChild(el("div", "qt", (qi + 1) + ". " + Q.q));
+    var expl = el("div", "expl", Q.e);
+    Q.o.forEach(function(opt, oi){
+      var b = el("button", "opt", opt);
+      b.addEventListener("click", function(){
+        if (done[qi]) return;
+        done[qi] = true;
+        var ok = (oi === Q.a);
+        if (ok) right++;
+        // 标出所有选项
+        [].forEach.call(d.querySelectorAll(".opt"), function(x, xi){
+          if (xi === Q.a){ x.classList.add("right"); x.innerHTML += '<span class="mk">✓</span>'; }
+          else if (xi === oi){ x.classList.add("wrong"); x.innerHTML += '<span class="mk">✗</span>'; }
+        });
+        expl.classList.add("show");
+        var n = Object.keys(done).length;
+        document.getElementById("__done").textContent = n + " / " + QS.length;
+        document.getElementById("__right").textContent = right;
+        document.getElementById("__bar").style.width = (n / QS.length * 100) + "%";
+        if (n === QS.length){
+          toast("答完 " + n + " 题，正确 " + right + " 道");
+        }
+      });
+      d.appendChild(b);
+    });
+    d.appendChild(expl);
+    box.appendChild(d);
+  });
+  w.appendChild(box);
+  VIEW.appendChild(w);
+}
+
+/* =========================================================
+   速查 / 自测 / 关于
+   ========================================================= */
+function renderCheat(){
+  var w = el("div");
+  w.appendChild(el("h2", null, "速查卡"));
+  w.appendChild(el("p", "sub", "考前十分钟只看这一页。"));
+  var c = el("div", "card");
+  c.innerHTML =
+    '<h4 style="margin-top:0">卷积</h4>' +
+    '<div class="formula">Lout = ⌊(Lin + 2P − K)/S⌋ + 1\nparams = (Kh·Kw·Cin + 1)·Cout\n转置卷积 Lout = (Lin−1)·S − 2P + K</div>' +
+    '<h4>梯度下降</h4>' +
+    '<div class="formula">GD      θ ← θ − η·g\nMomentum m = βm + (1−β)g\nAdaGrad  r += g²\nRMSProp  r = ρr + (1−ρ)g²\nAdam     m,v + 偏差修正 m̂=m/(1−β₁ᵗ)</div>' +
+    '<h4>交叉熵</h4>' +
+    '<div class="formula">q = softmax(z)　ℓ = −Σ p·ln q = −ln q(真类)\n∂ℓ/∂z = q − p　（和为 0）\nH(p,q) = H(p) + KL(p‖q)</div>' +
+    '<h4>熵 / 决策树</h4>' +
+    '<div class="formula">H(D)    = −Σ pₖ log₂ pₖ\nH(D|A)  = Σ (|Dᵥ|/|D|)·H(Dᵥ)\ng(D,A)  = H(D) − H(D|A)\nHA(D)   = −Σ (|Dᵥ|/|D|) log₂(|Dᵥ|/|D|)\ngR      = g / HA</div>' +
+    '<h4>ResNet</h4>' +
+    '<div class="formula">BasicBlock  3×3 → 3×3\nBottleneck  1×1 → 3×3 → 1×1\n形状同→恒等捷径；不同→1×1 投影\n层数 = 1 + 块数×卷积数 + 1</div>';
+  w.appendChild(c);
+  VIEW.appendChild(w);
+}
+
+function renderAbout(){
+  var w = el("div");
+  w.appendChild(el("h2", null, "关于"));
+  var c = el("div", "card");
+  c.innerHTML =
+    '<p>本 App 依据以下材料整理，所有算例均已重算核对：</p>' +
+    '<p>· 《机器学习期末复习 · 9 个考点详解》33 页<br>' +
+    '· 10.19 课堂视频（熵 / 交叉熵 / KL 散度）转写<br>' +
+    '· 10.19 课堂视频知识点总结（3 页）<br>' +
+    '· 11.9 课堂照片（7191 标「RSNET要考」、7209 标「尤其重要」等）</p>' +
+    '<div class="note">完全离线，零权限，不联网、不读存储。</div>' +
+    '<div class="note">主题：按右上角 ◐ 在「跟随系统 / 浅色 / 深色」之间循环，选择会记住。</div>';
+  w.appendChild(c);
+  VIEW.appendChild(w);
+}
+
+/* 启动 */
+applyTheme();
+go("home");
+</script>
+</body>
+</html>
