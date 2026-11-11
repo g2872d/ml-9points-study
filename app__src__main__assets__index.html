@@ -1,0 +1,2072 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>机器学习 9 考点</title>
+<style>
+/* ========== 主题变量 ========== */
+html[data-theme="light"]{
+  --bg:#f5f7fa; --panel:#ffffff; --panel2:#eef2f7; --fg:#141a21; --fg2:#3d4a58;
+  --muted:#6b7885; --line:#dfe5ec; --accent:#2563eb; --accent2:#0e9f6e;
+  --warn:#d97706; --danger:#dc2626; --grid:#c9d3dd; --shadow:0 1px 3px rgba(16,24,40,.08),0 1px 2px rgba(16,24,40,.04);
+  --chip:#e8eef8; --chipfg:#1d4ed8;
+}
+html[data-theme="dark"]{
+  --bg:#0e1318; --panel:#161d24; --panel2:#1d262e; --fg:#e7edf3; --fg2:#c2cdd8;
+  --muted:#8fa0b0; --line:#26313b; --accent:#6aa5ff; --accent2:#34d399;
+  --warn:#fbbf24; --danger:#f87171; --grid:#33414d; --shadow:0 1px 3px rgba(0,0,0,.5);
+  --chip:#1c2b3f; --chipfg:#9ec5ff;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--fg);
+  font-family:-apple-system,"PingFang SC","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;
+  font-size:15px; line-height:1.65;
+  -webkit-text-size-adjust:100%;
+  padding-bottom:calc(64px + env(safe-area-inset-bottom));
+  transition:background .18s,color .18s;
+}
+/* ========== 顶栏 ========== */
+#topbar{
+  position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:8px;
+  padding:calc(6px + env(safe-area-inset-top)) 12px 6px;
+  background:var(--panel); border-bottom:1px solid var(--line);
+}
+#topbar h1{font-size:15px; margin:0; flex:1; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.iconbtn{
+  border:1px solid var(--line); background:var(--panel2); color:var(--fg);
+  width:38px; height:38px; border-radius:10px; font-size:17px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+}
+.iconbtn:active{transform:scale(.94)}
+/* ========== 主区 ========== */
+main{padding:12px 12px 20px; max-width:760px; margin:0 auto}
+h2{font-size:19px; margin:4px 0 2px; line-height:1.35}
+.sub{color:var(--muted); font-size:12.5px; margin:0 0 14px}
+h3{font-size:15px; margin:20px 0 8px; color:var(--fg); border-left:3px solid var(--accent); padding-left:8px}
+h4{font-size:13.5px; margin:14px 0 6px; color:var(--fg2)}
+p{margin:8px 0}
+small{color:var(--muted); font-size:12px}
+code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace}
+code{background:var(--panel2); padding:1px 5px; border-radius:5px; font-size:12.5px}
+/* ========== 卡片 ========== */
+.card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; margin:12px 0; box-shadow:var(--shadow)}
+.grid{display:grid; gap:10px}
+@media(min-width:520px){ .grid.two{grid-template-columns:1fr 1fr} }
+/* 首页考点卡 */
+.tile{
+  background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:13px 14px;
+  display:flex; gap:12px; align-items:flex-start; cursor:pointer; box-shadow:var(--shadow);
+  transition:transform .12s,border-color .12s;
+}
+.tile:active{transform:scale(.985); border-color:var(--accent)}
+.tile .n{
+  flex:0 0 auto; width:30px; height:30px; border-radius:9px; background:var(--chip); color:var(--chipfg);
+  font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center;
+}
+.tile .t{font-weight:600; font-size:14.5px; margin-bottom:2px}
+.tile .d{color:var(--muted); font-size:12px; line-height:1.5}
+.tile .badge{font-size:10.5px; padding:1px 6px; border-radius:6px; background:var(--warn); color:#fff; margin-left:6px; vertical-align:2px}
+/* ========== 控件 ========== */
+.row{display:flex; align-items:center; gap:10px; margin:10px 0; flex-wrap:wrap}
+.row label{font-size:12.5px; color:var(--muted); flex:0 0 auto; min-width:64px}
+input[type=range]{
+  -webkit-appearance:none; appearance:none; flex:1; height:34px; background:transparent; min-width:120px;
+}
+input[type=range]::-webkit-slider-runnable-track{height:5px; background:var(--panel2); border-radius:3px; border:1px solid var(--line)}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:22px; height:22px; border-radius:50%; background:var(--accent);
+  margin-top:-9px; border:2px solid var(--panel); box-shadow:0 1px 4px rgba(0,0,0,.3);
+}
+input[type=range]::-moz-range-track{height:5px; background:var(--panel2); border-radius:3px}
+input[type=range]::-moz-range-thumb{width:20px; height:20px; border:2px solid var(--panel); border-radius:50%; background:var(--accent)}
+.val{font-family:ui-monospace,Consolas,monospace; font-size:13px; color:var(--accent); min-width:52px; text-align:right; font-weight:600}
+.btn{
+  border:1px solid var(--line); background:var(--panel2); color:var(--fg);
+  padding:9px 14px; border-radius:10px; font-size:13.5px; cursor:pointer; font-weight:500;
+  min-height:40px; display:inline-flex; align-items:center; justify-content:center; gap:6px;
+}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--accent); color:#fff; border-color:var(--accent)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:6px 10px; min-height:32px; font-size:12.5px}
+.btn.on{background:var(--accent); color:#fff; border-color:var(--accent)}
+.btn:disabled{opacity:.45}
+.seg{display:inline-flex; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--panel2)}
+.seg button{
+  border:0; background:transparent; color:var(--fg2); padding:8px 12px; font-size:12.5px;
+  cursor:pointer; min-height:36px; border-right:1px solid var(--line);
+}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--accent); color:#fff; font-weight:600}
+/* ========== 表格 ========== */
+.tbl{width:100%; border-collapse:collapse; font-size:12.5px; margin:8px 0}
+.tbl th,.tbl td{border:1px solid var(--line); padding:6px 7px; text-align:right}
+.tbl th{background:var(--panel2); font-weight:600; color:var(--fg2); text-align:center}
+.tbl td:first-child,.tbl th:first-child{text-align:left}
+.tbl tr.hi td{background:var(--chip); font-weight:600}
+.tbl td.num{font-family:ui-monospace,Consolas,monospace}
+/* ========== 公式块 ========== */
+.formula{
+  background:var(--panel2); border-radius:10px; padding:11px 13px; margin:9px 0;
+  font-family:ui-monospace,Consolas,"DejaVu Sans Mono",monospace; font-size:13px;
+  line-height:1.9; overflow-x:auto; white-space:nowrap; color:var(--fg);
+}
+/* ========== 提示条 ========== */
+.note{
+  border-left:3px solid var(--accent); background:var(--panel2); border-radius:0 9px 9px 0;
+  padding:9px 12px; margin:10px 0; font-size:13px; color:var(--fg2);
+}
+.note.warn{border-left-color:var(--warn)}
+.note.danger{border-left-color:var(--danger)}
+.note.ok{border-left-color:var(--accent2)}
+.note b{color:var(--fg)}
+/* ========== canvas ========== */
+canvas{display:block; width:100%; border-radius:10px; background:var(--panel2); touch-action:pan-y}
+/* ========== 矩阵 ========== */
+.mat{display:inline-grid; gap:3px; vertical-align:middle}
+.mat span{
+  min-width:38px; height:34px; display:flex; align-items:center; justify-content:center;
+  background:var(--panel2); border:1px solid var(--line); border-radius:6px;
+  font-family:ui-monospace,Consolas,monospace; font-size:12.5px; transition:all .22s;
+}
+.mat span.act{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700; transform:scale(1.06)}
+.mat span.out{background:var(--accent2); color:#fff; border-color:var(--accent2); font-weight:700}
+.mat span.zero{color:var(--muted)}
+.matwrap{display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:center; margin:10px 0}
+.matlabel{font-size:11px; color:var(--muted); text-align:center; margin-top:4px}
+/* ========== 底栏 ========== */
+#tabbar{
+  position:fixed; left:0; right:0; bottom:0; z-index:50; display:flex;
+  background:var(--panel); border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#tabbar button{
+  flex:1; border:0; background:transparent; color:var(--muted); padding:9px 4px 8px;
+  font-size:10.5px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px;
+}
+#tabbar button .ic{font-size:17px; line-height:1}
+#tabbar button.on{color:var(--accent); font-weight:600}
+/* ========== 进度条 ========== */
+.pbar{height:5px; background:var(--panel2); border-radius:3px; overflow:hidden; margin:6px 0}
+.pbar>i{display:block; height:100%; background:var(--accent); border-radius:3px; transition:width .25s}
+/* ========== 单选题 ========== */
+.q{margin:14px 0; padding-bottom:12px; border-bottom:1px dashed var(--line)}
+.q:last-child{border-bottom:0}
+.q .qt{font-size:13.5px; font-weight:600; margin-bottom:8px}
+.opt{
+  display:block; width:100%; text-align:left; border:1px solid var(--line); background:var(--panel2);
+  color:var(--fg); padding:10px 12px; border-radius:9px; margin:6px 0; font-size:13px; cursor:pointer;
+  line-height:1.5;
+}
+.opt:active{transform:scale(.99)}
+.opt.right{border-color:var(--accent2); background:color-mix(in srgb,var(--accent2) 16%,var(--panel)); font-weight:600}
+.opt.wrong{border-color:var(--danger); background:color-mix(in srgb,var(--danger) 16%,var(--panel))}
+.opt .mk{float:right; font-weight:700}
+.expl{font-size:12.5px; color:var(--fg2); background:var(--panel2); border-radius:8px; padding:9px 11px; margin-top:7px; display:none}
+.expl.show{display:block}
+.hidden{display:none !important}
+.kv{display:flex; justify-content:space-between; gap:8px; padding:4px 0; font-size:13px; border-bottom:1px dotted var(--line)}
+.kv:last-child{border-bottom:0}
+.kv .k{color:var(--muted)}
+.kv .v{font-family:ui-monospace,Consolas,monospace; font-weight:600; color:var(--accent)}
+.tag{display:inline-block; font-size:11px; padding:1px 7px; border-radius:6px; background:var(--chip); color:var(--chipfg); margin-right:5px}
+</style>
+</head>
+<body>
+
+<header id="topbar">
+  <button class="iconbtn" id="btnBack" title="返回">‹</button>
+  <h1 id="crumb">机器学习 9 考点</h1>
+  <button class="iconbtn" id="btnTheme" title="切换主题">◐</button>
+</header>
+
+<main id="view"></main>
+
+<nav id="tabbar">
+  <button data-tab="home" class="on"><span class="ic">▦</span>考点</button>
+  <button data-tab="test"><span class="ic">✓</span>自测</button>
+  <button data-tab="cheat"><span class="ic">⚡</span>速查</button>
+  <button data-tab="about"><span class="ic">ⓘ</span>关于</button>
+</nav>
+
+<script>
+"use strict";
+/* =========================================================
+   0. 主题
+   ========================================================= */
+var THEME_KEY = "ml9.theme";
+function systemDark(){ return window.matchMedia && matchMedia("(prefers-color-scheme:dark)").matches; }
+function resolveTheme(){
+  var t = localStorage.getItem(THEME_KEY) || "auto";
+  if (t === "auto") return systemDark() ? "dark" : "light";
+  return t;
+}
+function cssVar(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function applyTheme(){
+  var t = resolveTheme();
+  document.documentElement.setAttribute("data-theme", t);
+  var bg = cssVar("--bg");
+  // 同步原生状态栏；light=深色图标
+  try{
+    if (window.AndroidHost && AndroidHost.applyChrome){
+      AndroidHost.applyChrome(bg, t === "light");
+    }
+  }catch(e){}
+  redrawAll();
+}
+function cycleTheme(){
+  var cur = localStorage.getItem(THEME_KEY) || "auto";
+  var next = cur === "auto" ? "light" : (cur === "light" ? "dark" : "auto");
+  localStorage.setItem(THEME_KEY, next);
+  applyTheme();
+  toast(next === "auto" ? "主题：跟随系统" : (next === "light" ? "主题：浅色" : "主题：深色"));
+}
+
+/* =========================================================
+   1. 工具
+   ========================================================= */
+function el(tag, cls, html){
+  var d = document.createElement(tag);
+  if (cls) d.className = cls;
+  if (html != null) d.innerHTML = html;
+  return d;
+}
+function fmt(x, n){ n = (n === undefined) ? 3 : n; return (Math.abs(x) < 1e-12 ? 0 : x).toFixed(n); }
+function toast(msg){
+  var t = document.getElementById("__toast");
+  if (!t){
+    t = el("div", ""); t.id = "__toast";
+    t.style.cssText = "position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));"+
+      "background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:20px;font-size:13px;z-index:999;"+
+      "opacity:0;transition:opacity .22s;pointer-events:none;max-width:80%;text-align:center";
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = "1";
+  clearTimeout(t._tm);
+  t._tm = setTimeout(function(){ t.style.opacity = "0"; }, 1500);
+}
+/* canvas 高清绘制 + 主题切换自动重绘 */
+var CANVASES = [];
+function mkCanvas(h){
+  var c = document.createElement("canvas");
+  c.style.height = h + "px";
+  CANVASES.push(c);
+  return c;
+}
+function draw(c, fn){
+  c._fn = fn;
+  paint(c);
+}
+function paint(c){
+  if (!c.isConnected || !c._fn) return;
+  var dpr = window.devicePixelRatio || 1;
+  var w = c.clientWidth || 300, h = c.clientHeight || 150;
+  c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+  var ctx = c.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  c._fn(ctx, w, h);
+}
+function redrawAll(){
+  for (var i = 0; i < CANVASES.length; i++) paint(CANVASES[i]);
+}
+window.addEventListener("resize", function(){ setTimeout(redrawAll, 60); });
+if (window.matchMedia){
+  try{
+    matchMedia("(prefers-color-scheme:dark)").addEventListener("change", function(){
+      if ((localStorage.getItem(THEME_KEY) || "auto") === "auto") applyTheme();
+    });
+  }catch(e){}
+}
+
+/* 画坐标系 */
+function axes(ctx, w, h, pad, xmin, xmax, ymin, ymax){
+  var X = function(v){ return pad.l + (v - xmin) / (xmax - xmin) * (w - pad.l - pad.r); };
+  var Y = function(v){ return h - pad.b - (v - ymin) / (ymax - ymin) * (h - pad.t - pad.b); };
+  ctx.strokeStyle = cssVar("--grid"); ctx.lineWidth = 1;
+  ctx.beginPath();
+  if (ymin <= 0 && ymax >= 0){ ctx.moveTo(X(xmin), Y(0)); ctx.lineTo(X(xmax), Y(0)); }
+  if (xmin <= 0 && xmax >= 0){ ctx.moveTo(X(0), Y(ymin)); ctx.lineTo(X(0), Y(ymax)); }
+  ctx.stroke();
+  return { X: X, Y: Y };
+}
+
+/* 从 CSS 变量取色 */
+function col(n){ return cssVar("--" + n); }
+
+/* =========================================================
+   2. 路由
+   ========================================================= */
+var VIEW = document.getElementById("view");
+var CRUMB = document.getElementById("crumb");
+var BACK = document.getElementById("btnBack");
+var CURRENT = "home";
+var SECTIONS = [];
+
+function go(route){
+  CANVASES.length = 0;
+  VIEW.innerHTML = "";
+  CURRENT = route;
+  window.scrollTo(0, 0);
+  if (route === "home"){ renderHome(); setTab("home"); BACK.style.visibility = "hidden"; CRUMB.textContent = "机器学习 9 考点"; }
+  else if (route === "test"){ renderTest(); setTab("test"); BACK.style.visibility = "hidden"; CRUMB.textContent = "自测"; }
+  else if (route === "cheat"){ renderCheat(); setTab("cheat"); BACK.style.visibility = "hidden"; CRUMB.textContent = "速查"; }
+  else if (route === "about"){ renderAbout(); setTab("about"); BACK.style.visibility = "hidden"; CRUMB.textContent = "关于"; }
+  else {
+    var s = null;
+    for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].id === route) s = SECTIONS[i];
+    if (!s){ renderHome(); return; }
+    setTab("");
+    BACK.style.visibility = "visible";
+    CRUMB.textContent = "考点 " + s.no;
+    s.render(VIEW);
+  }
+  setTimeout(redrawAll, 30);
+}
+function setTab(t){
+  var bs = document.querySelectorAll("#tabbar button");
+  for (var i = 0; i < bs.length; i++) bs[i].classList.toggle("on", bs[i].getAttribute("data-tab") === t);
+}
+BACK.addEventListener("click", function(){ go("home"); });
+document.getElementById("btnTheme").addEventListener("click", cycleTheme);
+(function(){
+  var bs = document.querySelectorAll("#tabbar button");
+  for (var i = 0; i < bs.length; i++){
+    bs[i].addEventListener("click", function(){ go(this.getAttribute("data-tab")); });
+  }
+})();
+
+/* =========================================================
+   3. 首页
+   ========================================================= */
+function renderHome(){
+  var wrap = el("div");
+  wrap.appendChild(el("h2", null, "机器学习 · 9 个考点"));
+  wrap.appendChild(el("p", "sub", "每个考点都能动手玩。算例与课堂课件一致，数字都核过。"));
+  var g = el("div", "grid");
+  for (var i = 0; i < SECTIONS.length; i++){
+    (function(s){
+      var t = el("div", "tile");
+      t.innerHTML = '<div class="n">' + s.no + '</div><div style="flex:1"><div class="t">' + s.title +
+        (s.hot ? '<span class="badge">必考计算</span>' : '') + '</div><div class="d">' + s.desc + '</div></div>';
+      t.addEventListener("click", function(){ go(s.id); });
+      g.appendChild(t);
+    })(SECTIONS[i]);
+  }
+  wrap.appendChild(g);
+  wrap.appendChild(el("p", "sub", "提示：右上角 ◐ 切换 跟随系统 / 浅色 / 深色。"));
+  VIEW.appendChild(wrap);
+}
+
+/* =========================================================
+   考点 1 机器学习 ≠ 优化
+   ========================================================= */
+SECTIONS.push({
+  id: "p1", no: "01", title: "机器学习为什么不等于优化",
+  desc: "训练损失最低的那个模型，为什么常常不能选",
+  render: function(root){
+    root.appendChild(el("h2", null, "01 · 机器学习为什么不等于优化"));
+    root.appendChild(el("p", "sub", "拖动滑块改变训练轮次，看两条曲线怎么分家。"));
+
+    /* --- 曲线 --- */
+    var card = el("div", "card");
+    var capSeg = el("div", "seg");
+    var CAPS = [["小容量", 0], ["中容量", 1], ["大容量", 2]];
+    CAPS.forEach(function(c, i){
+      var b = el("button", i === 1 ? "on" : null, c[0]);
+      b.addEventListener("click", function(){
+        cap = c[1];
+        [].forEach.call(capSeg.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on"); refresh();
+      });
+      capSeg.appendChild(b);
+    });
+    card.appendChild(el("div", "row")).appendChild(capSeg);
+    var cvs = mkCanvas(180); card.appendChild(cvs);
+    var info = el("div"); card.appendChild(info);
+    var rw = el("div", "row"), rl = el("label", null, "训练轮次"), rg = el("input"), rv = el("span", "val");
+    rg.type = "range"; rg.min = 0; rg.max = 40; rg.value = 12; rg.step = 1;
+    rw.appendChild(rl); rw.appendChild(rg); rw.appendChild(rv); card.appendChild(rw);
+    root.appendChild(card);
+
+    var cap = 1, epoch = 12;
+    function curves(c, k){
+      // 训练损失：容量越大降得越快越低
+      var tau = [7, 4.5, 2.6][c];
+      var base = [0.95, 0.72, 0.42][c];
+      var tr = base * Math.exp(-k / tau) + 0.012;
+      // 验证损失：先跟着降，容量越大越早抬头
+      var up = [0.00012, 0.00075, 0.0026][c];
+      var va = [0.98, 0.80, 0.58][c] * Math.exp(-k / (tau * 1.25)) + 0.06 + up * k * k;
+      return [tr, va];
+    }
+    function bestEpoch(c){
+      var best = 1e9, bi = 0;
+      for (var k = 0; k <= 40; k++){ var v = curves(c, k)[1]; if (v < best){ best = v; bi = k; } }
+      return bi;
+    }
+    function refresh(){
+      rv.textContent = epoch;
+      var be = bestEpoch(cap);
+      draw(cvs, function(ctx, w, h){
+        var pts = [], i;
+        for (i = 0; i <= 40; i++) pts.push(curves(cap, i));
+        var ymax = 0.02;
+        for (i = 0; i < pts.length; i++) ymax = Math.max(ymax, pts[i][0], pts[i][1]);
+        ymax = Math.ceil(ymax * 10) / 10 + 0.05;
+        var ax = axes(ctx, w, h, { l: 34, r: 10, t: 12, b: 24 }, 0, 40, 0, ymax);
+        // 网格标
+        ctx.fillStyle = col("muted"); ctx.font = "10px ui-monospace,monospace"; ctx.textAlign = "right";
+        for (var t = 0; t <= 4; t++){
+          var yv = ymax * t / 4;
+          ctx.fillText(yv.toFixed(2), 30, ax.Y(yv) + 3);
+          ctx.strokeStyle = col("line"); ctx.beginPath(); ctx.moveTo(34, ax.Y(yv)); ctx.lineTo(w - 10, ax.Y(yv)); ctx.stroke();
+        }
+        ctx.textAlign = "center";
+        for (var e = 0; e <= 40; e += 10) ctx.fillText(e, ax.X(e), h - 8);
+        // 最佳轮次虚线
+        ctx.strokeStyle = col("accent2"); ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(ax.X(be), 12); ctx.lineTo(ax.X(be), h - 24); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = col("accent2"); ctx.textAlign = "left";
+        ctx.fillText("验证最低 @" + be, Math.min(ax.X(be) + 4, w - 78), 22);
+        // 两条线
+        function line(idx, color){
+          ctx.strokeStyle = color; ctx.lineWidth = 2.2; ctx.beginPath();
+          for (var k = 0; k <= 40; k++){
+            var p = curves(cap, k)[idx];
+            if (k === 0) ctx.moveTo(ax.X(k), ax.Y(p)); else ctx.lineTo(ax.X(k), ax.Y(p));
+          }
+          ctx.stroke();
+        }
+        line(0, col("accent")); line(1, col("warn"));
+        // 当前点
+        var cp = curves(cap, epoch);
+        ctx.fillStyle = col("accent"); ctx.beginPath(); ctx.arc(ax.X(epoch), ax.Y(cp[0]), 4, 0, 7); ctx.fill();
+        ctx.fillStyle = col("warn"); ctx.beginPath(); ctx.arc(ax.X(epoch), ax.Y(cp[1]), 4, 0, 7); ctx.fill();
+        // 图例
+        ctx.fillStyle = col("accent"); ctx.fillRect(w - 96, 10, 10, 3);
+        ctx.fillStyle = col("fg2"); ctx.textAlign = "left"; ctx.font = "11px sans-serif";
+        ctx.fillText("训练", w - 82, 15);
+        ctx.fillStyle = col("warn"); ctx.fillRect(w - 96, 24, 10, 3);
+        ctx.fillStyle = col("fg2"); ctx.fillText("验证", w - 82, 29);
+      });
+      var tr = curves(cap, epoch)[0], va = curves(cap, epoch)[1];
+      info.innerHTML =
+        '<div class="kv"><span class="k">第 ' + epoch + ' 轮 训练损失</span><span class="v">' + fmt(tr) + '</span></div>' +
+        '<div class="kv"><span class="k">第 ' + epoch + ' 轮 验证损失</span><span class="v">' + fmt(va) + '</span></div>' +
+        '<div class="kv"><span class="k">两者差距（泛化间隙）</span><span class="v">' + fmt(va - tr) + '</span></div>' +
+        (epoch > be
+          ? '<div class="note warn">已经越过验证最低点（第 ' + be + ' 轮）。训练损失还在降，但验证在升——这就是过拟合开始的地方。<b>该保留的是第 ' + be + ' 轮，不是第 ' + epoch + ' 轮。</b></div>'
+          : (epoch === be
+            ? '<div class="note ok">正好踩在验证最低点上，这一轮的权重该被留下来。</div>'
+            : '<div class="note">还没到验证最低点，继续训练通常还有收益。</div>'));
+    }
+    rg.addEventListener("input", function(){ epoch = +rg.value; refresh(); });
+    refresh();
+
+    /* --- 三要素 --- */
+    root.appendChild(el("h3", null, "机器学习三要素：三个词要能分开说"));
+    var c2 = el("div", "card");
+    c2.innerHTML =
+      '<table class="tbl"><tr><th>要素</th><th style="text-align:left">回答什么问题</th><th style="text-align:left">房价例子</th></tr>' +
+      '<tr><td>模型</td><td style="text-align:left">用什么样的函数预测</td><td style="text-align:left">ŷ = wx + b，或更复杂的曲线</td></tr>' +
+      '<tr><td>学习准则</td><td style="text-align:left">怎样比较两个候选模型</td><td style="text-align:left">平均平方损失，可再加正则项</td></tr>' +
+      '<tr><td>优化算法</td><td style="text-align:left">参数怎么找出来</td><td style="text-align:left">梯度下降反复更新 w、b</td></tr></table>' +
+      '<div class="note"><b>区分口诀：</b>换优化算法（SGD→Adam）→ 能表达的规律没变；换模型（直线→曲线）→ 能力上限变了；' +
+      '换学习准则（平方损失→交叉熵）→ 打分规则变了。</div>' +
+      '<div class="note danger">判断题常挖坑：「用了 Adam 所以模型更强了」——错。Adam 只影响能不能更快更好地找到同一族函数里的参数。</div>';
+    root.appendChild(c2);
+
+    /* --- 两种风险 --- */
+    root.appendChild(el("h3", null, "经验风险 vs 期望风险"));
+    var c3 = el("div", "card");
+    c3.innerHTML =
+      '<div class="formula">经验风险  R<sub>emp</sub>(θ) = (1/N) · Σ<sub>i</sub> ℓ(f<sub>θ</sub>(x<sub>i</sub>), y<sub>i</sub>)</div>' +
+      '<div class="formula">期望风险  R(θ) = E<sub>(x,y)~P</sub>[ ℓ(f<sub>θ</sub>(x), y) ]</div>' +
+      '<p>前者是<b>能算出来的</b>（训练集上 N 个损失取平均）；后者是<b>真实分布上的平均</b>，P 你不知道，只能估。</p>' +
+      '<div class="note">例：三条训练样本损失 1、3、2 → 经验风险 = (1+3+2)/3 = <b>2</b>。『2』这个数不能告诉你未来房子的平均误差。</div>';
+    root.appendChild(c3);
+
+    root.appendChild(el("h3", null, "加正则项：把「简单」写进目标函数"));
+    var c4 = el("div", "card");
+    c4.innerHTML =
+      '<div class="formula">训练时最小化： R<sub>emp</sub>(θ) + λ·Ω(θ)　　例如 Ω(θ)=‖θ‖²</div>' +
+      '<div class="note warn"><b>重要区分：</b>降低这个训练目标是<b>优化</b>动作；它到底有没有改善新样本的表现，<b>要看验证集</b>，不能想当然。</div>';
+    root.appendChild(c4);
+  }
+});
+
+/* =========================================================
+   考点 2 训练集 / 验证集 / 测试集
+   ========================================================= */
+SECTIONS.push({
+  id: "p2", no: "02", title: "训练集、验证集、测试集",
+  desc: "三份数据各干什么，提前停止看哪个数，泄漏发生在哪",
+  render: function(root){
+    root.appendChild(el("h2", null, "02 · 训练集 / 验证集 / 测试集"));
+    root.appendChild(el("p", "sub", "练习题、模拟卷、期末考卷——三份数据缺一不可。"));
+
+    /* --- 划分沙盒 --- */
+    var card = el("div", "card");
+    card.appendChild(el("h4", null, "拖动滑块分数据（自动归一化）"));
+    var st = { tr: 70, va: 15, te: 15 };
+    var cvs = mkCanvas(110); card.appendChild(cvs);
+    var labels = el("div"); card.appendChild(labels);
+    ["tr", "va", "te"].forEach(function(k){
+      var nm = { tr: "训练集", va: "验证集", te: "测试集" }[k];
+      var rw = el("div", "row"), rl = el("label", null, nm), rg = el("input"), rv = el("span", "val");
+      rg.type = "range"; rg.min = 5; rg.max = 90; rg.value = st[k];
+      rw.appendChild(rl); rw.appendChild(rg); rw.appendChild(rv); card.appendChild(rw);
+      rg.addEventListener("input", function(){ st[k] = +rg.value; refresh(); });
+    });
+    root.appendChild(card);
+    function refresh(){
+      var sum = st.tr + st.va + st.te;
+      var p = [st.tr / sum, st.va / sum, st.te / sum];
+      var cols = [col("accent"), col("accent2"), col("warn")];
+      draw(cvs, function(ctx, w, h){
+        var y = 26, hh = 44, x = 0;
+        ctx.font = "12px sans-serif";
+        for (var i = 0; i < 3; i++){
+          var ww = p[i] * w;
+          ctx.fillStyle = cols[i]; ctx.fillRect(x, y, Math.max(ww - 2, 1), hh);
+          if (ww > 44){
+            ctx.fillStyle = "#fff"; ctx.textAlign = "center";
+            ctx.fillText(Math.round(p[i] * 100) + "%", x + ww / 2, y + hh / 2 + 4);
+          }
+          x += ww;
+        }
+        ctx.fillStyle = col("muted"); ctx.textAlign = "left"; ctx.font = "11px sans-serif";
+        ctx.fillText("训练 " + Math.round(p[0] * 100) + "%　验证 " + Math.round(p[1] * 100) + "%　测试 " + Math.round(p[2] * 100) + "%", 0, 16);
+        ctx.fillText("训练：学权重与偏置", 0, 92);
+      });
+      labels.innerHTML =
+        '<div class="kv"><span class="k">训练集（' + Math.round(p[0] * 100) + "%）</span><span class=\"v\">学权重与偏置</span></div>" +
+        '<div class="kv"><span class="k">验证集（' + Math.round(p[1] * 100) + "%）</span><span class=\"v\">选配置与轮次</span></div>" +
+        '<div class="kv"><span class="k">测试集（' + Math.round(p[2] * 100) + "%）</span><span class=\"v\">只报告成绩</span></div>";
+    }
+    refresh();
+
+    /* --- 提前停止 --- */
+    root.appendChild(el("h3", null, "提前停止：看哪个数，保留哪一轮"));
+    var c2 = el("div", "card");
+    var DATA = [
+      { e: 1, tr: 0.70, va: 0.74 },
+      { e: 2, tr: 0.48, va: 0.53 },
+      { e: 3, tr: 0.35, va: 0.45 },
+      { e: 4, tr: 0.26, va: 0.52 }
+    ];
+    var tb = el("table", "tbl");
+    tb.innerHTML = '<tr><th>轮次</th><th>第1轮</th><th>第2轮</th><th>第3轮</th><th>第4轮</th></tr>' +
+      '<tr><td>训练损失</td>' + DATA.map(function(d){ return '<td class="num">' + d.tr.toFixed(2) + '</td>'; }).join("") + '</tr>' +
+      '<tr><td>验证损失</td>' + DATA.map(function(d){ return '<td class="num">' + d.va.toFixed(2) + '</td>'; }).join("") + '</tr>';
+    c2.appendChild(tb);
+    var pick = el("div", "row"); c2.appendChild(pick);
+    var res = el("div"); c2.appendChild(res);
+    DATA.forEach(function(d, i){
+      var b = el("button", "btn sm", "保留第 " + d.e + " 轮");
+      b.addEventListener("click", function(){
+        [].forEach.call(pick.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on");
+        var ok = (d.e === 3);
+        res.innerHTML = ok
+          ? '<div class="note ok">对。第 3 轮验证损失 0.45 是观察到的最低值。第 4 轮训练损失更低（0.26），但验证回升到 0.52——继续训就过拟合了。</div>'
+          : '<div class="note danger">不对。请找「验证损失」这一行的最小值。第 ' + d.e + ' 轮验证损失是 ' + d.va.toFixed(2) + '。<b>训练损失最低不等于该留这一轮。</b></div>';
+      });
+      pick.appendChild(b);
+    });
+    res.innerHTML = '<div class="note">点上面任意一轮试试。判据是<b>验证损失最小</b>，不是训练损失最小。</div>';
+    c2.appendChild(el("div", "note warn", "若评价指标是<b>准确率</b>（越大越好），比较方向反过来——要保存准确率<b>最高</b>的那一轮。"));
+    root.appendChild(c2);
+
+    /* --- 数据泄漏 --- */
+    root.appendChild(el("h3", null, "数据泄漏：三种最常见的错法"));
+    var c3 = el("div", "card");
+    var leakBox = el("div");
+    var LEAKS = [
+      { t: "① 先增强再随机拆分", bad: "同一张图的原图与翻转版被分到训练和测试两边，测试集就『见过』近似答案了。", good: "先切分数据，再只对训练部分做增强。" },
+      { t: "② 用全部样本估计预处理参数", bad: "标准化用的均值 μ 与标准差 σ 如果拿全部数据算，验证集和测试集的信息就漏进训练流程了。", good: "μ、σ 只用训练集估计；验证集和测试集拿这两个数做变换，不许重新统计。" },
+      { t: "③ 把相关记录拆到两边", bad: "同一位受试者常有多条测量记录，被分到训练和测试两边等于泄题。", good: "预测新受试者就按人分组划分；预测未来就检查划分是否符合时间顺序。" }
+    ];
+    LEAKS.forEach(function(L){
+      var d = el("div", "card"); d.style.margin = "8px 0"; d.style.background = "var(--panel2)";
+      d.innerHTML = '<h4 style="margin-top:0">' + L.t + '</h4>' +
+        '<div class="note danger" style="margin:6px 0"><b>错：</b>' + L.bad + '</div>' +
+        '<div class="note ok" style="margin:6px 0"><b>对：</b>' + L.good + '</div>';
+      leakBox.appendChild(d);
+    });
+    c3.appendChild(leakBox);
+    c3.appendChild(el("div", "note", "<b>自检：</b>用验证集选训练轮次，然后用测试集报告结果——可以。用测试集选轮次，再用同一个测试集报告——不行，评估独立性被破坏了。"));
+    c3.appendChild(el("div", "note warn", "训练:验证:测试 = 8:1:1 只是常见说法，<b>不是必须背死的常数</b>。取决于任务和规模。"));
+    root.appendChild(c3);
+  }
+});
+
+/* =========================================================
+   考点 3 非线性
+   ========================================================= */
+SECTIONS.push({
+  id: "p3", no: "03", title: "神经网络为什么非得有非线性",
+  desc: "两层仿射等于一层、XOR 分不开、激活函数怎么处理数字",
+  render: function(root){
+    root.appendChild(el("h2", null, "03 · 神经网络为什么非得有非线性"));
+    root.appendChild(el("p", "sub", "没有非线性，堆多少层都等于一层。"));
+
+    /* --- 仿射合并 --- */
+    root.appendChild(el("h3", null, "① 两层仿射串联 = 一层"));
+    var c1 = el("div", "card");
+    c1.innerHTML = '<div class="formula">W₂(W₁x + b₁) + b₂ = (W₂W₁)x + (W₂b₁ + b₂)</div>' +
+      '<p>右边仍然能写成 W′x + b′ 的形式，其中 W′ = W₂W₁、b′ = W₂b₁ + b₂。<b>绕一圈还是同一种函数。</b></p>' +
+      '<div class="note">一维例子：先算 2x+1，再乘 3 加 4 → 3(2x+1)+4 = <b>6x+7</b>，还是一条直线。</div>';
+    var st = { W1: 2, b1: 1, W2: 3, b2: 4 };
+    var out = el("div"); c1.appendChild(out);
+    [["W1", -4, 4, .5], ["b1", -4, 4, .5], ["W2", -4, 4, .5], ["b2", -4, 4, .5]].forEach(function(p){
+      var rw = el("div", "row"), rl = el("label", null, p[0]), rg = el("input"), rv = el("span", "val");
+      rg.type = "range"; rg.min = p[1]; rg.max = p[2]; rg.step = p[3]; rg.value = st[p[0]];
+      rw.appendChild(rl); rw.appendChild(rg); rw.appendChild(rv); c1.appendChild(rw);
+      rg.addEventListener("input", function(){ st[p[0]] = +rg.value; refresh(); });
+    });
+    var cvs1 = mkCanvas(150); c1.appendChild(cvs1);
+    function refresh(){
+      var W = st.W2 * st.W1, bb = st.W2 * st.b1 + st.b2;
+      out.innerHTML = '<div class="kv"><span class="k">合并后 W′ = W₂·W₁</span><span class="v">' + fmt(W, 2) + '</span></div>' +
+        '<div class="kv"><span class="k">合并后 b′ = W₂·b₁ + b₂</span><span class="v">' + fmt(bb, 2) + '</span></div>';
+      draw(cvs1, function(ctx, w, h){
+        var ax = axes(ctx, w, h, { l: 30, r: 12, t: 12, b: 22 }, -5, 5, -10, 10);
+        // 原两层：先 y1=W1x+b1，再 y2=W2y1+b2
+        function plot(f, color, dash, lw){
+          ctx.strokeStyle = color; ctx.lineWidth = lw || 2; ctx.setLineDash(dash || []);
+          ctx.beginPath();
+          for (var i = 0; i <= 100; i++){
+            var x = -5 + i / 100 * 10, y = f(x);
+            if (y < -10 || y > 10) continue;
+            var px = ax.X(x), py = ax.Y(y);
+            if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+          }
+          ctx.stroke(); ctx.setLineDash([]);
+        }
+        plot(function(x){ return st.W1 * x + st.b1; }, col("warn"), [5, 4], 1.6);
+        plot(function(x){ return st.W2 * (st.W1 * x + st.b1) + st.b2; }, col("accent"), null, 2.4);
+        plot(function(x){ return W * x + bb; }, col("accent2"), [3, 3], 2.4);
+        ctx.font = "11px sans-serif"; ctx.textAlign = "left";
+        ctx.fillStyle = col("warn"); ctx.fillText("第一层 y₁", 36, 20);
+        ctx.fillStyle = col("accent"); ctx.fillText("两层串联 y₂", 36, 36);
+        ctx.fillStyle = col("accent2"); ctx.fillText("合并成一层（与 y₂ 完全重合）", 36, 52);
+      });
+    }
+    refresh(); root.appendChild(c1);
+
+    /* --- XOR --- */
+    root.appendChild(el("h3", null, "② 异或为什么线性分不开"));
+    var c2 = el("div", "card");
+    var modeSeg = el("div", "seg");
+    var MODES = [["线性模型", "lin"], ["加 ReLU 隐藏层", "relu"]];
+    MODES.forEach(function(m, i){
+      var b = el("button", i === 0 ? "on" : null, m[0]);
+      b.addEventListener("click", function(){
+        [].forEach.call(modeSeg.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on"); mode = m[1]; refresh2();
+      });
+      modeSeg.appendChild(b);
+    });
+    c2.appendChild(el("div", "row")).appendChild(modeSeg);
+    var cvs2 = mkCanvas(230); c2.appendChild(cvs2);
+    var note2 = el("div"); c2.appendChild(note2);
+    var mode = "lin";
+    function f_lin(x1, x2){ return x1 + x2 - 1; }              // 线性打分
+    function f_relu(x1, x2){                                   // h1=ReLU(s), h2=ReLU(s-1), out=h1-2h2，s=x1+x2
+      var s = x1 + x2;
+      var h1 = Math.max(0, s), h2 = Math.max(0, s - 1);
+      return h1 - 2 * h2 - 0.5;
+    }
+    function refresh2(){
+      draw(cvs2, function(ctx, w, h){
+        var pad = 24, n = 68;
+        var img = ctx.createImageData(1, 1); // 占位
+        var f = mode === "lin" ? f_lin : f_relu;
+        // 逐格上色（正类淡蓝，负类淡橙）
+        var cellW = (w - pad * 2) / n, cellH = (h - pad * 2) / n;
+        for (var i = 0; i < n; i++){
+          for (var j = 0; j < n; j++){
+            var x1 = i / (n - 1), x2 = 1 - j / (n - 1);
+            var v = f(x1, x2);
+            var a = Math.min(Math.abs(v) / 1.6, 1) * 0.42;
+            if (v > 0) ctx.fillStyle = "rgba(37,99,235," + a.toFixed(3) + ")";
+            else ctx.fillStyle = "rgba(217,119,6," + a.toFixed(3) + ")";
+            ctx.fillRect(pad + i * cellW, pad + j * cellH, cellW + 1, cellH + 1);
+          }
+        }
+        // 边框
+        ctx.strokeStyle = col("grid"); ctx.lineWidth = 1;
+        ctx.strokeRect(pad, pad, w - pad * 2, h - pad * 2);
+        // 四个点
+        var PTS = [[0, 0, 0], [0, 1, 1], [1, 0, 1], [1, 1, 0]];
+        PTS.forEach(function(p){
+          var px = pad + p[0] * (w - pad * 2), py = pad + (1 - p[1]) * (h - pad * 2);
+          ctx.beginPath(); ctx.arc(px, py, 7, 0, 7);
+          ctx.fillStyle = p[2] ? col("accent") : col("warn"); ctx.fill();
+          ctx.strokeStyle = col("panel"); ctx.lineWidth = 2; ctx.stroke();
+          ctx.fillStyle = "#fff"; ctx.font = "bold 10px sans-serif"; ctx.textAlign = "center";
+          ctx.fillText(p[2] ? "1" : "0", px, py + 3.5);
+        });
+        ctx.fillStyle = col("muted"); ctx.font = "10px sans-serif"; ctx.textAlign = "center";
+        ctx.fillText("x₁ →", w / 2, h - 6);
+        ctx.save(); ctx.translate(11, h / 2); ctx.rotate(-Math.PI / 2); ctx.fillText("x₂ →", 0, 0); ctx.restore();
+      });
+      if (mode === "lin"){
+        note2.innerHTML = '<div class="note danger">线性打分是 x₁+x₂−1，分界线是一条<b>直线</b> x₁+x₂=1。' +
+          '无论怎么调 w、b，都分不开对角的两类点——这就是线性模型的死穴。</div>';
+      } else {
+        note2.innerHTML = '<div class="note ok">s = x₁+x₂，构造 h₁=ReLU(s)、h₂=ReLU(s−1)，输出 h₁−2h₂。' +
+          '代入 s=0、1、2，输出分别是 <b>0、1、0</b>，XOR 解出来了。</div>' +
+          '<table class="tbl"><tr><th>输入</th><th>s</th><th>h₁</th><th>h₂</th><th>输出 h₁−2h₂</th><th>答案</th></tr>' +
+          '<tr><td>(0,0)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td>类0 ✓</td></tr>' +
+          '<tr><td>(0,1)/(1,0)</td><td class="num">1</td><td class="num">1</td><td class="num">0</td><td class="num">1</td><td>类1 ✓</td></tr>' +
+          '<tr><td>(1,1)</td><td class="num">2</td><td class="num">2</td><td class="num">1</td><td class="num">0</td><td>类0 ✓</td></tr></table>' +
+          '<div class="note">ReLU 是「折角」函数：在 s=0 折一次，在 s=1 处（通过 s−1）再折一次。每折一次斜率就变一次，' +
+          '两条直线拼成折线，折线才能分开对角点。</div>';
+      }
+    }
+    refresh2(); root.appendChild(c2);
+
+    /* --- 激活函数 --- */
+    root.appendChild(el("h3", null, "③ 激活函数：前向算什么，反向算什么"));
+    var c3 = el("div", "card");
+    var seg3 = el("div", "seg");
+    var ACTS = ["ReLU", "Leaky ReLU", "Sigmoid", "tanh"];
+    var act = "ReLU";
+    ACTS.forEach(function(a, i){
+      var b = el("button", i === 0 ? "on" : null, a);
+      b.addEventListener("click", function(){
+        [].forEach.call(seg3.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on"); act = a; refresh3();
+      });
+      seg3.appendChild(b);
+    });
+    c3.appendChild(el("div", "row")).appendChild(seg3);
+    var cvs3 = mkCanvas(190); c3.appendChild(cvs3);
+    var zr = el("div", "row"), zl = el("label", null, "输入 z"), zg = el("input"), zv = el("span", "val");
+    zg.type = "range"; zg.min = -4; zg.max = 4; zg.step = .1; zg.value = 1.5;
+    zr.appendChild(zl); zr.appendChild(zg); zr.appendChild(zv); c3.appendChild(zr);
+    var out3 = el("div"); c3.appendChild(out3);
+
+    function actF(a, z){
+      if (a === "ReLU") return Math.max(0, z);
+      if (a === "Leaky ReLU") return z < 0 ? 0.01 * z : z;
+      if (a === "Sigmoid") return 1 / (1 + Math.exp(-z));
+      return Math.tanh(z);
+    }
+    function actD(a, z){
+      if (a === "ReLU") return z > 0 ? 1 : 0;
+      if (a === "Leaky ReLU") return z >= 0 ? 1 : 0.01;
+      if (a === "Sigmoid"){ var s = 1 / (1 + Math.exp(-z)); return s * (1 - s); }
+      var t = Math.tanh(z); return 1 - t * t;
+    }
+    function refresh3(){
+      var z = +zg.value; zv.textContent = z.toFixed(1);
+      draw(cvs3, function(ctx, w, h){
+        var ax = axes(ctx, w, h, { l: 32, r: 12, t: 12, b: 22 }, -4, 4, -1.3, 1.6);
+        // 网格
+        ctx.strokeStyle = col("line"); ctx.lineWidth = 1;
+        [-1, 0, 1].forEach(function(v){ ctx.beginPath(); ctx.moveTo(32, ax.Y(v)); ctx.lineTo(w - 12, ax.Y(v)); ctx.stroke(); });
+        // 函数曲线
+        ctx.strokeStyle = col("accent"); ctx.lineWidth = 2.4; ctx.beginPath();
+        for (var i = 0; i <= 160; i++){
+          var zz = -4 + i / 160 * 8, yy = actF(act, zz);
+          if (i === 0) ctx.moveTo(ax.X(zz), ax.Y(yy)); else ctx.lineTo(ax.X(zz), ax.Y(yy));
+        }
+        ctx.stroke();
+        // 导数曲线
+        ctx.strokeStyle = col("accent2"); ctx.lineWidth = 1.8; ctx.setLineDash([4, 3]); ctx.beginPath();
+        for (var j = 0; j <= 160; j++){
+          var z2 = -4 + j / 160 * 8, d2 = actD(act, z2);
+          if (j === 0) ctx.moveTo(ax.X(z2), ax.Y(d2)); else ctx.lineTo(ax.X(z2), ax.Y(d2));
+        }
+        ctx.stroke(); ctx.setLineDash([]);
+        // 当前点
+        var y = actF(act, z), dy = actD(act, z);
+        ctx.strokeStyle = col("warn"); ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
+        ctx.beginPath(); ctx.moveTo(ax.X(z), 12); ctx.lineTo(ax.X(z), h - 22); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = col("accent"); ctx.beginPath(); ctx.arc(ax.X(z), ax.Y(y), 5, 0, 7); ctx.fill();
+        ctx.fillStyle = col("accent2"); ctx.beginPath(); ctx.arc(ax.X(z), ax.Y(dy), 4, 0, 7); ctx.fill();
+        ctx.font = "11px sans-serif"; ctx.textAlign = "left";
+        ctx.fillStyle = col("accent"); ctx.fillText("函数 φ(z)  实线", 36, 20);
+        ctx.fillStyle = col("accent2"); ctx.fillText("导数 φ′(z)  虚线", 36, 35);
+      });
+      out3.innerHTML = '<div class="kv"><span class="k">前向输出 φ(' + z.toFixed(1) + ')</span><span class="v">' + fmt(actF(act, z), 4) + '</span></div>' +
+        '<div class="kv"><span class="k">反向局部导数 φ′(' + z.toFixed(1) + ')</span><span class="v">' + fmt(actD(act, z), 4) + '</span></div>';
+    }
+    zg.addEventListener("input", refresh3);
+    refresh3();
+    c3.appendChild(el("div", "note warn", "<b>Sigmoid / tanh 为什么会梯度消失：</b>两端接近水平，斜率接近 0。反传是连乘，穿过 k 个 Sigmoid 就乘了 k 个不超过 0.25 的数，乘几次就趋近 0。<br>" +
+      "<b>ReLU 为什么不会：</b>正半轴斜率恒为 1，这一段传播不会因它本身缩小梯度。但负半轴梯度为 0，神经元可能『死掉』——Leaky ReLU 就是给负半轴留一个 α 小斜率。"));
+    root.appendChild(c3);
+  }
+});
+
+/* =========================================================
+   考点 4 梯度下降
+   ========================================================= */
+SECTIONS.push({
+  id: "p4", no: "04", title: "梯度下降与六种优化方法",
+  desc: "六种都会认，挑一种能算到出结果；Adam 最常考",
+  hot: true,
+  render: function(root){
+    root.appendChild(el("h2", null, "04 · 梯度下降与六种优化方法"));
+    root.appendChild(el("p", "sub", "老师说「考其中一种」。六种都要认识，但要能挑一种手算到底。"));
+
+    var card = el("div", "card");
+    /* 优化器选择 */
+    var segO = el("div", "seg"); segO.style.flexWrap = "wrap";
+    var OPTS = ["GD", "Momentum", "AdaGrad", "RMSProp", "Adam"];
+    var opt = "GD";
+    OPTS.forEach(function(o, i){
+      var b = el("button", i === 0 ? "on" : null, o);
+      b.addEventListener("click", function(){
+        [].forEach.call(segO.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on"); opt = o; reset(); refresh();
+      });
+      segO.appendChild(b);
+    });
+    card.appendChild(el("div", "row")).appendChild(segO);
+
+    /* 损失函数选择 */
+    var segL = el("div", "seg");
+    var LOSSES = [["单谷", 0], ["多谷（看动量）", 1]];
+    var lossK = 0;
+    LOSSES.forEach(function(o, i){
+      var b = el("button", i === 0 ? "on" : null, o[0]);
+      b.addEventListener("click", function(){
+        [].forEach.call(segL.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on"); lossK = o[1]; reset(); refresh();
+      });
+      segL.appendChild(b);
+    });
+    card.appendChild(el("div", "row")).appendChild(segL);
+
+    var cvs = mkCanvas(190); card.appendChild(cvs);
+
+    /* 参数滑块 */
+    var P = { eta: 0.25, beta: 0.9, rho: 0.9, b1: 0.9, b2: 0.999 };
+    var SL = [
+      { k: "eta", label: "学习率 η", min: 0.01, max: 1.5, step: 0.01 },
+      { k: "beta", label: "动量 β", min: 0.1, max: 0.99, step: 0.01 },
+      { k: "rho", label: "RMSProp ρ", min: 0.1, max: 0.99, step: 0.01 },
+      { k: "b1", label: "Adam β₁", min: 0.1, max: 0.99, step: 0.01 },
+      { k: "b2", label: "Adam β₂", min: 0.5, max: 0.999, step: 0.001 }
+    ];
+    var slBox = el("div"); card.appendChild(slBox);
+    SL.forEach(function(s){
+      var rw = el("div", "row"), rl = el("label", null, s.label), rg = el("input"), rv = el("span", "val");
+      rg.type = "range"; rg.min = s.min; rg.max = s.max; rg.step = s.step; rg.value = P[s.k];
+      rg.setAttribute("data-k", s.k);
+      rw.appendChild(rl); rw.appendChild(rg); rw.appendChild(rv); slBox.appendChild(rw);
+      rg.addEventListener("input", function(){ P[s.k] = +rg.value; rv.textContent = (+rg.value).toFixed(s.step < 0.01 ? 3 : 2); });
+    });
+    function syncSliders(){
+      var rgs = slBox.querySelectorAll("input");
+      for (var i = 0; i < rgs.length; i++){
+        var k = rgs[i].getAttribute("data-k");
+        rgs[i].value = P[k];
+        rgs[i].parentNode.querySelector(".val").textContent = P[k].toFixed(rgs[i].step < 0.01 ? 3 : 2);
+        // 只显示当前优化器用得到的
+        var need = k === "eta" || (opt === "Momentum" && k === "beta") ||
+          (opt === "RMSProp" && k === "rho") || (opt === "Adam" && (k === "b1" || k === "b2"));
+        rgs[i].parentNode.style.display = need ? "" : "none";
+      }
+    }
+
+    /* 按钮 */
+    var bRow = el("div", "row"); card.appendChild(bRow);
+    var b1 = el("button", "btn primary", "单步"), b2 = el("button", "btn", "连续跑"), b3 = el("button", "btn ghost", "重置");
+    bRow.appendChild(b1); bRow.appendChild(b2); bRow.appendChild(b3);
+
+    var tblBox = el("div"); card.appendChild(tblBox);
+    root.appendChild(card);
+
+    /* 状态 */
+    var S = null, timer = null;
+    function L(w){ return lossK === 0 ? 0.5 * (w - 3) * (w - 3) : 0.5 * (w - 3) * (w - 3) + 1.2 * Math.cos(2 * w) + 1.2; }
+    function dL(w){ return lossK === 0 ? (w - 3) : (w - 3) - 2.4 * Math.sin(2 * w); }
+    function reset(){
+      S = { t: 0, w: 0.2, m: 0, r: 0, v: 0, hist: [{ w: 0.2 }] };
+      if (timer){ clearInterval(timer); timer = null; b2.textContent = "连续跑"; b2.classList.remove("on"); }
+    }
+    function stepOnce(){
+      if (S.t >= 60) return false;
+      var w = S.w, g = dL(w), eta = P.eta, eps = 1e-8;
+      var rec = { t: S.t + 1, w0: w, g: g, L: L(w) };
+      if (opt === "GD"){
+        w = w - eta * g; rec.memo = "g";
+      } else if (opt === "Momentum"){
+        S.m = P.beta * S.m + (1 - P.beta) * g;
+        w = w - eta * S.m; rec.memo = "m=" + fmt(S.m, 4);
+      } else if (opt === "AdaGrad"){
+        S.r = S.r + g * g;
+        w = w - eta * g / (Math.sqrt(S.r) + eps); rec.memo = "r=" + fmt(S.r, 4);
+      } else if (opt === "RMSProp"){
+        S.r = P.rho * S.r + (1 - P.rho) * g * g;
+        w = w - eta * g / (Math.sqrt(S.r) + eps); rec.memo = "r=" + fmt(S.r, 4);
+      } else {
+        S.m = P.b1 * S.m + (1 - P.b1) * g;
+        S.v = P.b2 * S.v + (1 - P.b2) * g * g;
+        var mh = S.m / (1 - Math.pow(P.b1, S.t + 1));
+        var vh = S.v / (1 - Math.pow(P.b2, S.t + 1));
+        w = w - eta * mh / (Math.sqrt(vh) + eps);
+        rec.memo = "m=" + fmt(S.m, 4) + " v=" + fmt(S.v, 5);
+      }
+      S.t++; S.w = w; rec.w1 = w; rec.L1 = L(w);
+      S.hist.push(rec);
+      return true;
+    }
+    function refresh(){
+      syncSliders();
+      draw(cvs, function(ctx, w, h){
+        var ax = axes(ctx, w, h, { l: 34, r: 12, t: 12, b: 22 }, -1.5, 7, -0.3, 8);
+        // 曲线
+        ctx.strokeStyle = col("accent"); ctx.lineWidth = 2.2; ctx.beginPath();
+        var started = false;
+        for (var i = 0; i <= 200; i++){
+          var xx = -1.5 + i / 200 * 8.5, yy = L(xx);
+          if (yy < -0.3 || yy > 8){ continue; }
+          if (!started){ ctx.moveTo(ax.X(xx), ax.Y(yy)); started = true; } else ctx.lineTo(ax.X(xx), ax.Y(yy));
+        }
+        ctx.stroke();
+        // 轨迹
+        for (var k = 1; k < S.hist.length; k++){
+          var hh = S.hist[k];
+          ctx.strokeStyle = "rgba(14,159,110,.45)"; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(ax.X(hh.w0), ax.Y(hh.L)); ctx.lineTo(ax.X(hh.w1), ax.Y(hh.L1)); ctx.stroke();
+        }
+        // 当前点
+        var cur = S.hist[S.hist.length - 1];
+        var cw = cur.w1 !== undefined ? cur.w1 : cur.w;
+        var cl = L(cw);
+        ctx.fillStyle = col("accent2"); ctx.beginPath(); ctx.arc(ax.X(cw), ax.Y(cl), 6, 0, 7); ctx.fill();
+        ctx.strokeStyle = col("panel"); ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = col("muted"); ctx.font = "11px ui-monospace,monospace"; ctx.textAlign = "left";
+        ctx.fillText("w = " + fmt(cw, 4) + "   L = " + fmt(cl, 4), 38, h - 6);
+        ctx.fillStyle = col("accent2"); ctx.textAlign = "right";
+        ctx.fillText(lossK === 0 ? "谷底 w=3" : "多谷：动量能翻过去", w - 12, h - 6);
+      });
+      // 表格
+      var rows = S.hist.slice(-9);
+      var html = '<table class="tbl"><tr><th>步</th><th>w(前)</th><th>梯度 g</th><th>' +
+        (opt === "GD" ? "更新量" : (opt === "Momentum" ? "动量 m" : (opt === "Adam" ? "m / v" : "r"))) +
+        '</th><th>w(后)</th><th>损失</th></tr>';
+      rows.forEach(function(r, i){
+        if (r.t === undefined) return;
+        html += '<tr><td class="num">' + r.t + '</td><td class="num">' + fmt(r.w0, 4) + '</td><td class="num">' + fmt(r.g, 4) +
+          '</td><td class="num" style="font-size:11px">' + (r.memo || "-") + '</td><td class="num">' + fmt(r.w1, 4) +
+          '</td><td class="num">' + fmt(r.L1, 4) + '</td></tr>';
+      });
+      html += '</table>';
+      tblBox.innerHTML = html;
+      if (S.t === 0) tblBox.innerHTML = '<div class="note">从 w₀ = 0.2 出发。点「单步」看每一步怎么走，点「连续跑」看整条轨迹。</div>' + html;
+    }
+    b1.addEventListener("click", function(){ if (stepOnce()) refresh(); });
+    b2.addEventListener("click", function(){
+      if (timer){ clearInterval(timer); timer = null; b2.textContent = "连续跑"; b2.classList.remove("on"); return; }
+      b2.textContent = "暂停"; b2.classList.add("on");
+      timer = setInterval(function(){
+        if (!stepOnce()){ clearInterval(timer); timer = null; b2.textContent = "连续跑"; b2.classList.remove("on"); return; }
+        refresh();
+      }, 420);
+    });
+    b3.addEventListener("click", function(){ reset(); refresh(); });
+    reset(); refresh();
+
+    /* 公式与两种特例 */
+    root.appendChild(el("h3", null, "六种方法一张辨认表"));
+    var tb = el("div", "card");
+    tb.innerHTML = '<table class="tbl"><tr><th>方法</th><th>保存什么</th><th style="text-align:left">关键更新式</th></tr>' +
+      '<tr><td>全批量 GD</td><td>无</td><td style="text-align:left;font-size:11.5px">θ ← θ − η·mean(全部样本梯度)</td></tr>' +
+      '<tr><td>小批量 SGD</td><td>无</td><td style="text-align:left;font-size:11.5px">θ ← θ − η·mean(一个 batch)</td></tr>' +
+      '<tr><td>动量</td><td>方向 m</td><td style="text-align:left;font-size:11.5px">m = βm + (1−β)g；θ ← θ − η·m</td></tr>' +
+      '<tr><td>AdaGrad</td><td>平方累加 r</td><td style="text-align:left;font-size:11.5px">r += g²；θ ← θ − η·g/(√r+ε)</td></tr>' +
+      '<tr><td>RMSProp</td><td>平方的移动平均 r</td><td style="text-align:left;font-size:11.5px">r = ρr + (1−ρ)g²；θ ← θ − η·g/(√r+ε)</td></tr>' +
+      '<tr><td>Adam</td><td>方向 m + 平方 v</td><td style="text-align:left;font-size:11.5px">m、v 都做移动平均，再偏差修正</td></tr></table>' +
+      '<div class="note"><b>三步辨认：</b>只累计 g² → AdaGrad；对 g² 做指数移动平均 → RMSProp；同时平滑 g 和 g² 并做初值修正 → Adam。</div>';
+    root.appendChild(tb);
+
+    root.appendChild(el("h3", null, "Adam 两步手算（模拟卷第 4 题原题）"));
+    var cA = el("div", "card");
+    cA.innerHTML =
+      '<p>条件：w₀=1，m₀=v₀=0，η=0.1，β₁=β₂=0.5，梯度 g₁=−2、g₂=4，忽略 ε。</p>' +
+      '<div class="formula">第 1 步：\n' +
+      '  m₁ = 0.5·0 + 0.5·(−2) = −1\n' +
+      '  v₁ = 0.5·0 + 0.5·4     = 2\n' +
+      '  1−β₁ = 0.5 → m̂₁ = −1/0.5 = −2\n' +
+      '  1−β₂ = 0.5 → v̂₁ =  2/0.5 = 4\n' +
+      '  w₁ = 1 − 0.1·(−2)/√4 = 1 + 0.1 = 1.1</div>' +
+      '<div class="formula">第 2 步（从原始 m₁、v₁ 递推！）：\n' +
+      '  m₂ = 0.5·(−1) + 0.5·4 = 1.5\n' +
+      '  v₂ = 0.5·2 + 0.5·16   = 9\n' +
+      '  1−β₁² = 0.75 → m̂₂ = 1.5/0.75 = 2\n' +
+      '  1−β₂² = 0.75 → v̂₂ = 9/0.75  = 12\n' +
+      '  w₂ = 1.1 − 0.1·2/√12 ≈ 1.0423</div>' +
+      '<div class="note danger"><b>最大的坑：</b>第 2 步必须拿<b>原始的</b> m₁=−0.2… 不，本例是 m₁=−1、v₁=2 去递推，<b>不能用修正后的 −2 和 4</b>。修正值只用于当轮参数更新，不写回状态。</div>' +
+      '<div class="note ok"><b>给分要点：</b>同时写出两组数——原始状态（m、v）和修正状态（m̂、v̂）。只写一组会扣分。</div>';
+    root.appendChild(cA);
+
+    root.appendChild(el("h3", null, "动量的两步（最干净的一种推导）"));
+    var cM = el("div", "card");
+    cM.innerHTML = '<p>w₀=1，m₀=0，β=0.5，η=0.1，梯度依次 −2、+2。</p>' +
+      '<div class="formula">m₁ = 0.5·0 + 0.5·(−2) = −1　→　w₁ = 1 − 0.1·(−1) = 1.1\n' +
+      'm₂ = 0.5·(−1) + 0.5·2  = 0.5　→　w₂ = 1.1 − 0.1·0.5 = 1.05</div>' +
+      '<div class="note">第 2 步梯度已经是正的（+2，本该往左走），但上一步攒下的 −1 惯性把合力拉成 +0.5，' +
+      '所以参数<b>继续往左移</b>（1.1 → 1.05），只是退得少了。这就是「惯性让方向平滑」。</div>';
+    root.appendChild(cM);
+
+    root.appendChild(el("h3", null, "AdaGrad 与 RMSProp 的分母对比"));
+    var cG = el("div", "card");
+    cG.innerHTML = '<p>从 r₀=0 开始，两次梯度 4、1，w₀=1，η=0.1，忽略 ε。</p>' +
+      '<div class="formula">AdaGrad：r₁=16, r₂=17\n' +
+      '  w₁ = 1 − 0.1·4/√16 = 0.9\n' +
+      '  w₂ = 0.9 − 0.1·1/√17 ≈ 0.8757\n\n' +
+      'RMSProp（ρ=0.5）：r₁=8, r₂=4.5\n' +
+      '  w₁ = 1 − 0.1·4/√8 ≈ 0.8586\n' +
+      '  w₂ = 0.8586 − 0.1·1/√4.5 ≈ 0.8114</div>' +
+      '<div class="note warn"><b>关键细节：</b>两种方法的分母都要用<b>该步刚刚更新过的 r</b>，不是上一步的 r。这是最容易算错的地方。</div>' +
+      '<div class="note">AdaGrad 的 r 只增不减 → 有效学习率越来越小；RMSProp 的 r 能回落 → 有效学习率可以回升。</div>';
+    root.appendChild(cG);
+  }
+});
+
+/* =========================================================
+   考点 5 ResNet
+   ========================================================= */
+SECTIONS.push({
+  id: "p5", no: "05", title: "ResNet 的两种核心结构",
+  desc: "BasicBlock 与 Bottleneck，捷径怎么对齐，参数省多少",
+  hot: true,
+  render: function(root){
+    root.appendChild(el("h2", null, "05 · ResNet 的两种核心结构"));
+    root.appendChild(el("p", "sub", "照片 7191 标了「RSNET要考」。两种核心结构，考其中一种。"));
+
+    root.appendChild(el("h3", null, "① 残差在解决什么"));
+    var c0 = el("div", "card");
+    c0.innerHTML = '<p>深层网络的问题不是过拟合，是<b>优化不动</b>——层数加上去，训练误差反而不降。</p>' +
+      '<p>残差块把「学 H(x)」改成「学 H(x) − x」：</p>' +
+      '<div class="formula">u = F(x) + S(x)　输出 = ReLU(u)\n空间形状不变时 S(x) = x（恒等捷径）</div>' +
+      '<div class="note">如果这一段其实只需要「把输入原样传下去」（H(x)=x），让 F(x) 逼近 0 比让一堆非线性层去拟合恒等映射容易得多。' +
+      '反传时加法节点把同一份上游梯度分给两条路，恒等捷径提供了一条直通路径，梯度不用连乘穿过多层就能回到前面。</div>' +
+      '<div class="note warn">注意：加法后面如果还有激活，<b>仍要计入该激活的导数</b>。</div>';
+    root.appendChild(c0);
+
+    /* 主结构切换 */
+    root.appendChild(el("h3", null, "② 两种核心结构"));
+    var card = el("div", "card");
+    var segK = el("div", "seg");
+    var KINDS = [["BasicBlock（18/34）", "basic"], ["Bottleneck（50/101/152）", "bottle"]];
+    var kind = "basic";
+    KINDS.forEach(function(k, i){
+      var b = el("button", i === 0 ? "on" : null, k[0]);
+      b.addEventListener("click", function(){
+        [].forEach.call(segK.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on"); kind = k[1]; refresh();
+      });
+      segK.appendChild(b);
+    });
+    card.appendChild(el("div", "row")).appendChild(segK);
+
+    var cvs = mkCanvas(300); card.appendChild(cvs);
+    var detail = el("div"); card.appendChild(detail);
+    root.appendChild(card);
+
+    function refresh(){
+      draw(cvs, function(ctx, w, h){
+        var cx = w / 2, top = 26, bw = Math.min(w - 90, 200), bh = 34, gap = 22;
+        function box(y, txt, sub, color){
+          ctx.fillStyle = color || col("panel2");
+          ctx.strokeStyle = col("line"); ctx.lineWidth = 1.2;
+          var x = cx - bw / 2;
+          roundRect(ctx, x, y, bw, bh, 8); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = color ? "#fff" : col("fg"); ctx.font = "600 12.5px sans-serif"; ctx.textAlign = "center";
+          ctx.fillText(txt, cx, y + (sub ? 15 : bh / 2 + 4));
+          if (sub){ ctx.font = "10px sans-serif"; ctx.fillStyle = color ? "rgba(255,255,255,.85)" : col("muted"); ctx.fillText(sub, cx, y + 28); }
+        }
+        function arrow(y1, y2){
+          ctx.strokeStyle = col("grid"); ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.moveTo(cx, y1); ctx.lineTo(cx, y2); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(cx - 4, y2 - 6); ctx.lineTo(cx, y2); ctx.lineTo(cx + 4, y2 - 6); ctx.stroke();
+        }
+        var y = top;
+        box(y, "输入 x", null, col("accent")); var yIn = y; y += bh + gap;
+        if (kind === "basic"){
+          arrow(yIn + bh, y);
+          box(y, "3×3 卷积 → BN → ReLU", "第 1 层"); y += bh + gap;
+          arrow(y - gap, y);
+          box(y, "3×3 卷积 → BN", "第 2 层（这里不加 ReLU）"); y += bh + gap;
+        } else {
+          arrow(yIn + bh, y);
+          box(y, "1×1 卷积 → BN → ReLU", "降通道"); y += bh + gap;
+          arrow(y - gap, y);
+          box(y, "3×3 卷积 → BN → ReLU", "在窄通道上提特征"); y += bh + gap;
+          arrow(y - gap, y);
+          box(y, "1×1 卷积 → BN", "升通道（这里不加 ReLU）"); y += bh + gap;
+        }
+        // 加法节点
+        arrow(y - gap, y + 6);
+        var addY = y;
+        ctx.beginPath(); ctx.arc(cx, addY + 13, 13, 0, 7);
+        ctx.fillStyle = col("accent2"); ctx.fill();
+        ctx.fillStyle = "#fff"; ctx.font = "bold 15px sans-serif"; ctx.textAlign = "center"; ctx.fillText("+", cx, addY + 19);
+        // 捷径：从输入右侧绕到加法
+        ctx.strokeStyle = col("warn"); ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
+        var rx = cx + bw / 2 + 16;
+        ctx.beginPath();
+        ctx.moveTo(cx + bw / 2, yIn + bh / 2);
+        ctx.lineTo(rx, yIn + bh / 2);
+        ctx.lineTo(rx, addY + 13);
+        ctx.lineTo(cx + 13, addY + 13);
+        ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = col("warn"); ctx.font = "10.5px sans-serif"; ctx.textAlign = "left";
+        ctx.fillText("捷径 S(x)", rx + 4, yIn + bh / 2 - 6);
+        // 输出
+        arrow(addY + 26, addY + 44);
+        box(addY + 44, "ReLU", null, col("accent"));
+        ctx.fillStyle = col("muted"); ctx.font = "10.5px sans-serif"; ctx.textAlign = "center";
+        ctx.fillText("输出", cx, addY + 44 + bh + 16);
+      });
+      if (kind === "basic"){
+        detail.innerHTML =
+          '<div class="kv"><span class="k">用在</span><span class="v">ResNet-18 / 34</span></div>' +
+          '<div class="kv"><span class="k">核尺寸顺序</span><span class="v">3×3 → 3×3</span></div>' +
+          '<div class="kv"><span class="k">层数怎么数</span><span class="v">1 + 8×2 + 1 = 18</span></div>' +
+          '<div class="note"><b>顺序别画错：</b>第一层 3×3 后接 BN 和 ReLU，第二层 3×3 后<b>只接 BN</b>，' +
+          '然后才相加，<b>相加之后才做 ReLU</b>。把 ReLU 画在加法前面是常见错误。</div>' +
+          '<div class="note">BN 考试只画核心结构时，可以用文字标注代替方块。</div>';
+      } else {
+        detail.innerHTML =
+          '<div class="kv"><span class="k">用在</span><span class="v">ResNet-50 / 101 / 152</span></div>' +
+          '<div class="kv"><span class="k">核尺寸顺序</span><span class="v">1×1 → 3×3 → 1×1</span></div>' +
+          '<div class="kv"><span class="k">层数怎么数</span><span class="v">1 + 16×3 + 1 = 50</span></div>' +
+          '<div class="note ok"><b>为什么省参数（以 256→64→64→256 为例）：</b><br>' +
+          '第一层 1×1：256×64 = 16384<br>' +
+          '第二层 3×3：9×64×64 = 36864<br>' +
+          '第三层 1×1：64×256 = 16384<br>' +
+          '合计 <b>69632</b><br>' +
+          '对照一个 256→256 的 3×3：9×256² = <b>589824</b><br>' +
+          '69632 / 589824 ≈ <b>11.8%</b>。这就是「让 3×3 在较窄的通道上运算」的收益。</div>' +
+          '<div class="note">步长为 1 的 1×1 卷积主要在每个空间位置上做<b>通道混合</b>，不改变高宽。</div>';
+      }
+    }
+    refresh();
+
+    /* 捷径对齐 */
+    root.appendChild(el("h3", null, "③ 捷径怎么选：恒等 还是 投影"));
+    var c3 = el("div", "card");
+    c3.appendChild(el("h4", null, "改输入/输出形状，看捷径该怎么走"));
+    var st = { H: 56, Cin: 64, Cout: 64, S: 1 };
+    var SL2 = [
+      { k: "H", label: "高=宽", min: 14, max: 112, step: 14 },
+      { k: "Cin", label: "输入通道", min: 64, max: 512, step: 64 },
+      { k: "Cout", label: "输出通道", min: 64, max: 512, step: 64 },
+      { k: "S", label: "步长", min: 1, max: 2, step: 1 }
+    ];
+    var out3 = el("div"); c3.appendChild(out3);
+    SL2.forEach(function(s){
+      var rw = el("div", "row"), rl = el("label", null, s.label), rg = el("input"), rv = el("span", "val");
+      rg.type = "range"; rg.min = s.min; rg.max = s.max; rg.step = s.step; rg.value = st[s.k];
+      rw.appendChild(rl); rw.appendChild(rg); rw.appendChild(rv); c3.appendChild(rw);
+      rg.addEventListener("input", function(){ st[s.k] = +rg.value; refresh3(); });
+      rv.textContent = st[s.k];
+    });
+    function refresh3(){
+      var Hout = Math.floor((st.H - 1) / st.S) + 1;
+      var same = (Hout === st.H) && (st.Cin === st.Cout);
+      out3.innerHTML =
+        '<div class="kv"><span class="k">主支路输出</span><span class="v">' + Hout + "×" + Hout + "×" + st.Cout + '</span></div>' +
+        '<div class="kv"><span class="k">输入</span><span class="v">' + st.H + "×" + st.H + "×" + st.Cin + '</span></div>' +
+        (same
+          ? '<div class="note ok"><b>高宽与通道全相同 → 用恒等映射 S(x)=x</b>，直接逐元素相加。</div>'
+          : '<div class="note warn"><b>形状不同 → 必须用 1×1 卷积投影</b>，' +
+            '输出 ' + st.Cout + ' 通道、步长 ' + st.S + '、填充 0，可接 BN。' +
+            '尺寸验证：(' + st.H + '−1)/' + st.S + '+1 = ' + Hout + '，对上了。</div>') +
+        '<div class="note"><b>最容易漏的一种：</b>即使高宽不变，只要<b>通道变了</b>也要投影。' +
+        '比如 ResNet-50 第一阶段首块：主支路输出 256 通道、高宽仍 56×56，但旁路拿到的是 64 通道输入，必须用 1×1 把 64 对齐到 256。</div>';
+    }
+    refresh3(); root.appendChild(c3);
+
+    /* 结构表 */
+    root.appendChild(el("h3", null, "④ 结构表怎么读"));
+    var c4 = el("div", "card");
+    c4.innerHTML = '<table class="tbl"><tr><th>部位</th><th>高×宽</th><th>ResNet-18</th><th>ResNet-50</th></tr>' +
+      '<tr><td>首层卷积后</td><td class="num">112×112</td><td>64 通道</td><td>64 通道</td></tr>' +
+      '<tr><td>池化后</td><td class="num">56×56</td><td>64 通道</td><td>64 通道</td></tr>' +
+      '<tr><td>conv2_x</td><td class="num">56×56</td><td>2 块，64</td><td>3 块，256</td></tr>' +
+      '<tr><td>conv3_x</td><td class="num">28×28</td><td>2 块，128</td><td>4 块，512</td></tr>' +
+      '<tr><td>conv4_x</td><td class="num">14×14</td><td>2 块，256</td><td>6 块，1024</td></tr>' +
+      '<tr><td>conv5_x</td><td class="num">7×7</td><td>2 块，512</td><td>3 块，2048</td></tr>' +
+      '<tr><td>全局平均池化</td><td class="num">1×1</td><td>512 个值</td><td>2048 个值</td></tr></table>' +
+      '<div class="formula">224 → 112：7×7 卷积, S=2, P=3 → (224+6−7)/2+1 = 112\n' +
+      '112 → 56 ：3×3 最大池化, S=2, P=1 → (112+2−3)/2+1 = 56</div>' +
+      '<div class="note danger"><b>课件笔误（照片 7195）：</b>把 3×3 最大池化写成 padding=3。' +
+      '按普通尺寸公式会得到 (112+6−3)/2+1 = 58，和配套结构表的 56 对不上。<b>标准实现取 padding=1</b>。' +
+      '首层 7×7 卷积的 padding=3 是正确的。</div>' +
+      '<div class="note"><b>块数 ≠ 层数：</b>表格里「2 块」指 2 个基本块 = 4 层卷积。' +
+      '层数 = 1 + 块数×每块卷积数 + 1（分类全连接）。</div>';
+    root.appendChild(c4);
+  }
+});
+
+/* =========================================================
+   考点 6 卷积（核心计算）
+   ========================================================= */
+function renderMat(host, data, opts){
+  opts = opts || {};
+  var rows = data.length, cols = data[0].length;
+  var box = el("div");
+  var m = el("div", "mat");
+  m.style.gridTemplateColumns = "repeat(" + cols + ", auto)";
+  var hl = opts.hl || {}, out = opts.out || {};
+  for (var i = 0; i < rows; i++){
+    for (var j = 0; j < cols; j++){
+      var s = el("span", null, fmt(data[i][j], opts.dig === undefined ? 0 : opts.dig));
+      var key = i + "," + j;
+      if (hl[key]) s.className = "act";
+      else if (out[key]) s.className = "out";
+      else if (data[i][j] === 0) s.className = "zero";
+      m.appendChild(s);
+    }
+  }
+  box.appendChild(m);
+  if (opts.label) box.appendChild(el("div", "matlabel", opts.label));
+  host.appendChild(box);
+  return m;
+}
+
+SECTIONS.push({
+  id: "p6", no: "06", title: "卷积运算：正向 / 反向 / 转置",
+  desc: "滑窗、回填 dX、累加 dK、铺块做转置卷积，全部逐格演算",
+  hot: true,
+  render: function(root){
+    root.appendChild(el("h2", null, "06 · 卷积运算"));
+    root.appendChild(el("p", "sub", "照片 7209 标了「尤其重要」。要求会计算：正向、反向（dX / dK）、转置卷积。"));
+
+    var CASES = {
+      cls: { name: "课堂原题（10.19）", X: [[1,2,3],[4,5,6],[7,8,9]], K: [[1,0],[-1,2]], G: [[1,2],[3,4]] },
+      exam: { name: "模拟卷第 6 题", X: [[1,0,2],[2,1,0],[0,3,1]], K: [[1,2],[0,-1]], G: [[1,0],[2,1]] },
+      tc: { name: "转置卷积课堂原题（照片 7211）", X: [[0,1],[2,3]], K: [[0,1],[2,3]], G: [[1,0],[2,1]] }
+    };
+    var S = { k: "cls", mode: "fwd", S: 1, P: 0, step: 0 };
+
+    var card = el("div", "card");
+    /* 例子切换 */
+    var segC = el("div", "seg"); segC.style.flexWrap = "wrap";
+    var caseBtns = {};
+    Object.keys(CASES).forEach(function(k, i){
+      var b = el("button", i === 0 ? "on" : null, CASES[k].name);
+      caseBtns[k] = b;
+      b.addEventListener("click", function(){ setCase(k); });
+      segC.appendChild(b);
+    });
+    card.appendChild(el("div", "row")).appendChild(segC);
+    function setCase(k){
+      S.k = k;
+      for (var kk in caseBtns) if (Object.prototype.hasOwnProperty.call(caseBtns, kk)) caseBtns[kk].classList.toggle("on", kk === k);
+      if (k === "tc" && S.S !== 2){
+        S.S = 2;
+        if (typeof rgS !== "undefined"){ rgS.value = 2; rvS.textContent = "2"; }
+      }
+      reset();
+    }
+
+    /* 模式切换 */
+    var segM = el("div", "seg"); segM.style.flexWrap = "wrap";
+    [["正向卷积", "fwd"], ["反向：求 dX", "dx"], ["反向：求 dK", "dk"], ["转置卷积", "tc"]].forEach(function(m, i){
+      var b = el("button", i === 0 ? "on" : null, m[0]);
+      b.addEventListener("click", function(){
+        [].forEach.call(segM.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on");
+        S.mode = m[1];
+        // 转置卷积自动切到课件那张 2×2 原题（照片 7211），步长 2；离开时回到 3×3 主例
+        if (S.mode === "tc"){ if (S.k !== "tc"){ setCase("tc"); return; } }
+        else if (S.k === "tc"){
+          setCase("cls");
+          if (S.S !== 1){ S.S = 1; rgS.value = 1; rvS.textContent = "1"; }
+          reset(); return;
+        }
+        reset();
+      });
+      segM.appendChild(b);
+    });
+    card.appendChild(el("div", "row")).appendChild(segM);
+
+    /* 步长/填充 */
+    var rwS = el("div", "row"), rgS = el("input"), rvS = el("span", "val");
+    rwS.appendChild(el("label", null, "步长 S")); rgS.type = "range"; rgS.min = 1; rgS.max = 3; rgS.step = 1; rgS.value = 1;
+    rvS.textContent = "1"; rwS.appendChild(rgS); rwS.appendChild(rvS); card.appendChild(rwS);
+    var rwP = el("div", "row"), rgP = el("input"), rvP = el("span", "val");
+    rwP.appendChild(el("label", null, "填充 P")); rgP.type = "range"; rgP.min = 0; rgP.max = 1; rgP.step = 1; rgP.value = 0;
+    rvP.textContent = "0"; rwP.appendChild(rgP); rwP.appendChild(rvP); card.appendChild(rwP);
+    rgS.addEventListener("input", function(){ S.S = +rgS.value; rvS.textContent = S.S; reset(); });
+    rgP.addEventListener("input", function(){ S.P = +rgP.value; rvP.textContent = S.P; reset(); });
+
+    /* 矩阵展示区 */
+    var mats = el("div", "matwrap"); card.appendChild(mats);
+    var explain = el("div"); card.appendChild(explain);
+
+    /* 按钮 */
+    var bRow = el("div", "row"); card.appendChild(bRow);
+    var bNext = el("button", "btn primary", "下一步"), bAll = el("button", "btn", "一次算完"), bRst = el("button", "btn ghost", "重置");
+    bRow.appendChild(bNext); bRow.appendChild(bAll); bRow.appendChild(bRst);
+    root.appendChild(card);
+
+    /* ---------- 计算核心 ---------- */
+    function pads(X, P){
+      if (!P) return X.map(function(r){ return r.slice(); });
+      var H = X.length, W = X[0].length;
+      var o = [];
+      for (var i = 0; i < H + 2 * P; i++){
+        var row = [];
+        for (var j = 0; j < W + 2 * P; j++){
+          var ii = i - P, jj = j - P;
+          row.push((ii >= 0 && ii < H && jj >= 0 && jj < W) ? X[ii][jj] : 0);
+        }
+        o.push(row);
+      }
+      return o;
+    }
+    function outDim(L, K, S, P){ return Math.floor((L + 2 * P - K) / S) + 1; }
+    function zero(r, c){ var a = []; for (var i = 0; i < r; i++){ var q = []; for (var j = 0; j < c; j++) q.push(0); a.push(q); } return a; }
+
+    var ST = null;
+    function build(){
+      var C = CASES[S.k], X = C.X, K = C.K, G = C.G;
+      var padX = pads(X, S.P);
+      var Ho = outDim(X.length, K.length, S.S, S.P);
+      var Wo = outDim(X[0].length, K[0].length, S.S, S.P);
+      var st = { X: X, K: K, G: G, padX: padX, Ho: Ho, Wo: Wo, steps: [], mode: S.mode, out: null, dx: null, dk: null, tc: null };
+      var i, j, a, b;
+      if (S.mode === "fwd"){
+        st.out = zero(Ho, Wo);
+        for (i = 0; i < Ho; i++) for (j = 0; j < Wo; j++){
+          var terms = [], sum = 0;
+          for (a = 0; a < K.length; a++) for (b = 0; b < K[0].length; b++){
+            var vx = padX[i * S.S + a][j * S.S + b], vk = K[a][b];
+            terms.push(vx + "×" + (vk < 0 ? "(" + vk + ")" : vk));
+            sum += vx * vk;
+          }
+          st.steps.push({ i: i, j: j, terms: terms, sum: sum, label: "Y(" + (i+1) + "," + (j+1) + ")" });
+        }
+      } else if (S.mode === "dx"){
+        st.dx = zero(X.length, X[0].length);
+        for (i = 0; i < Ho; i++) for (j = 0; j < Wo; j++){
+          st.steps.push({ i: i, j: j, g: G[i][j], label: "G(" + (i+1) + "," + (j+1) + ") = " + G[i][j] });
+        }
+      } else if (S.mode === "dk"){
+        st.dk = zero(K.length, K[0].length);
+        for (i = 0; i < Ho; i++) for (j = 0; j < Wo; j++){
+          st.steps.push({ i: i, j: j, g: G[i][j], label: "窗口(" + (i+1) + "," + (j+1) + ")，上游梯度 " + G[i][j] });
+        }
+      } else {
+        var Lo = (X.length - 1) * S.S - 2 * S.P + K.length;
+        st.tc = zero(Lo, Lo);
+        for (i = 0; i < X.length; i++) for (j = 0; j < X[0].length; j++){
+          st.steps.push({ i: i, j: j, v: X[i][j], label: "输入(" + (i+1) + "," + (j+1) + ") = " + X[i][j] });
+        }
+      }
+      return st;
+    }
+    function reset(){ applyTo(0); }
+    /** 从干净状态重建，再累加到第 n 步。
+     *  必须重建而不是增量 apply：dX/dK/转置卷积都是 += 累加，
+     *  重复 apply 同一批步会重复累加，矩阵数值就错了。 */
+    function applyTo(n){
+      S.step = n;
+      ST = build();
+      applySteps(n);
+      render();
+    }
+
+    function applySteps(n){
+      var st = ST;
+      for (var s = 0; s < n && s < st.steps.length; s++){
+        var p = st.steps[s], i, j, a, b;
+        if (S.mode === "fwd"){
+          st.out[p.i][p.j] = p.sum;
+        } else if (S.mode === "dx"){
+          for (a = 0; a < st.K.length; a++) for (b = 0; b < st.K[0].length; b++){
+            var ti = p.i * S.S + a, tj = p.j * S.S + b;
+            var oi = ti - S.P, oj = tj - S.P;
+            if (oi >= 0 && oi < st.dx.length && oj >= 0 && oj < st.dx[0].length) st.dx[oi][oj] += p.g * st.K[a][b];
+          }
+        } else if (S.mode === "dk"){
+          for (a = 0; a < st.K.length; a++) for (b = 0; b < st.K[0].length; b++){
+            st.dk[a][b] += p.g * st.padX[p.i * S.S + a][p.j * S.S + b];
+          }
+        } else {
+          for (a = 0; a < st.K.length; a++) for (b = 0; b < st.K[0].length; b++){
+            var yi = p.i * S.S + a - S.P, yj = p.j * S.S + b - S.P;
+            if (yi >= 0 && yi < st.tc.length && yj >= 0 && yj < st.tc[0].length) st.tc[yi][yj] += p.v * st.K[a][b];
+          }
+        }
+      }
+    }
+
+    function render(){
+      var st = ST, cur = st.steps[S.step - 1] || null, nxt = st.steps[S.step] || null;
+      mats.innerHTML = "";
+      var hlX = {}, hlK = {}, outY = {};
+      if (nxt){
+        if (S.mode === "fwd" || S.mode === "dx" || S.mode === "dk"){
+          for (var a = 0; a < st.K.length; a++) for (var b = 0; b < st.K[0].length; b++){
+            var ti = nxt.i * S.S + a, tj = nxt.j * S.S + b;
+            var oi = ti - S.P, oj = tj - S.P;
+            if (oi >= 0 && oi < st.X.length && oj >= 0 && oj < st.X[0].length) hlX[oi + "," + oj] = 1;
+            if (st.mode === "dk") hlK[a + "," + b] = 1;
+          }
+        } else {
+          for (var a2 = 0; a2 < st.K.length; a2++) for (var b2 = 0; b2 < st.K[0].length; b2++){
+            var yy = nxt.i * S.S + a2 - S.P, xx2 = nxt.j * S.S + b2 - S.P;
+            if (yy >= 0 && yy < st.tc.length && xx2 >= 0 && xx2 < st.tc[0].length) outY[yy + "," + xx2] = 1;
+          }
+          hlX[nxt.i + "," + nxt.j] = 1;
+        }
+      }
+      // 各模式显示不同组合
+      if (S.mode === "fwd"){
+        renderMat(mats, st.X, { hl: hlX, label: "输入 X", dig: 0 });
+        renderMat(mats, st.K, { label: "核 K", dig: 0 });
+        renderMat(mats, st.out, { label: "输出 Y（" + st.Ho + "×" + st.Wo + "）", dig: 0 });
+      } else if (S.mode === "dx"){
+        renderMat(mats, st.X, { hl: hlX, label: "输入 X（高亮＝本步回填区域）", dig: 0 });
+        renderMat(mats, st.K, { label: "核 K", dig: 0 });
+        renderMat(mats, st.G, { out: nxt ? (function(){ var o = {}; o[nxt.i + "," + nxt.j] = 1; return o; })() : {}, label: "上游梯度 G", dig: 0 });
+        renderMat(mats, st.dx, { label: "dX（累加中）", dig: 0 });
+      } else if (S.mode === "dk"){
+        renderMat(mats, st.X, { hl: hlX, label: "输入 X（高亮＝本步窗口）", dig: 0 });
+        renderMat(mats, st.G, { out: nxt ? (function(){ var o = {}; o[nxt.i + "," + nxt.j] = 1; return o; })() : {}, label: "上游梯度 G", dig: 0 });
+        renderMat(mats, st.dk, { label: "dK（累加中）", dig: 0 });
+      } else {
+        renderMat(mats, st.X, { hl: hlX, label: "主输入（铺块的来源）", dig: 0 });
+        renderMat(mats, st.K, { label: "核 K", dig: 0 });
+        renderMat(mats, st.tc, { out: outY, label: "转置卷积输出（" + st.tc.length + "×" + st.tc[0].length + "）", dig: 0 });
+      }
+
+      // 文字解说
+      var html = "";
+      if (!nxt && S.step >= st.steps.length){
+        html = '<div class="note ok">全部 ' + st.steps.length + " 步算完。</div>";
+      } else if (nxt){
+        if (S.mode === "fwd"){
+          html = '<div class="note">下一步 <b>' + nxt.label + '</b>：<br><span class="mono" style="font-size:12.5px">' +
+            nxt.terms.join(" + ") + " = <b>" + nxt.sum + "</b></span></div>";
+        } else if (S.mode === "dx"){
+          html = '<div class="note">下一步把 <b>' + nxt.g + "×K</b> 回填到高亮区域（" + nxt.label + "）。" +
+            '重叠的位置要<b>累加</b>，不是覆盖。</div>';
+        } else if (S.mode === "dk"){
+          var xs = [];
+          for (var a3 = 0; a3 < st.K.length; a3++) for (var b3 = 0; b3 < st.K[0].length; b3++)
+            xs.push(st.padX[nxt.i * S.S + a3][nxt.j * S.S + b3]);
+          html = '<div class="note">下一步：把窗口里的输入值 (' + xs.join(", ") + ") 与上游梯度 <b>" + nxt.g +
+            "</b> 逐项相乘，累加到 dK 的对应位置。</div>";
+        } else {
+          html = '<div class="note">下一步：输入值 <b>' + nxt.v + "</b> 铺 " + nxt.v + "×K 到输出对应区域（" + nxt.label + "）。步长 " +
+            S.S + (S.S >= st.K.length ? "，四块不重叠。" : "，块与块会重叠，重叠处累加。") + "</div>";
+        }
+      }
+      // 模式提示
+      var tip = {
+        fwd: "正向卷积：一个局部窗口逐项相乘再求和，得到输出的一格。CNN 默认是<b>互相关</b>（不翻核）。",
+        dx: "求 dX：每个输出格把上游梯度乘核，<b>原样回填</b>到它看过的输入窗口。求 dX 拿<b>核权重</b>乘梯度，dX 与 X 同形。",
+        dk: "求 dK：局部导数换成窗口里的<b>输入值</b>。求 dK 拿<b>输入值</b>乘梯度，dK 与 K 同形。",
+        tc: "转置卷积：对每个输入位置，把 v×K 整块铺到输出。与「反向求 dX」是同一个数学运算（乘 Aᵀ），但用途不同。"
+      }[S.mode];
+      explain.innerHTML = '<div class="note">' + tip + "</div>" + html +
+        '<div class="kv"><span class="k">进度</span><span class="v">' + S.step + " / " + st.steps.length + "</span></div>";
+    }
+
+    bNext.addEventListener("click", function(){ if (S.step < ST.steps.length) applyTo(S.step + 1); });
+    bAll.addEventListener("click", function(){ applyTo(ST.steps.length); });
+    bRst.addEventListener("click", reset);
+    reset();
+
+    /* ---------- 尺寸计算器 ---------- */
+    root.appendChild(el("h3", null, "尺寸与参数量计算器"));
+    var cc = el("div", "card");
+    var sz = { Lin: 7, K: 3, S: 2, P: 0 };
+    var szOut = el("div"); cc.appendChild(szOut);
+    [["Lin", "输入边长", 1, 224], ["K", "核边长", 1, 11], ["S", "步长", 1, 4], ["P", "填充", 0, 6]].forEach(function(p){
+      var rw = el("div", "row"), rl = el("label", null, p[1]), rg = el("input"), rv = el("span", "val");
+      rg.type = "range"; rg.min = p[2]; rg.max = p[3]; rg.step = 1; rg.value = sz[p[0]];
+      rw.appendChild(rl); rw.appendChild(rg); rw.appendChild(rv); cc.appendChild(rw);
+      rv.textContent = sz[p[0]];
+      rg.addEventListener("input", function(){ sz[p[0]] = +rg.value; rv.textContent = sz[p[0]]; refreshSz(); });
+    });
+    function refreshSz(){
+      var Lo = outDim(sz.Lin, sz.K, sz.S, sz.P);
+      szOut.innerHTML = '<div class="formula">Lout = ⌊(' + sz.Lin + " + 2×" + sz.P + " − " + sz.K + ")/" + sz.S + "⌋ + 1 = ⌊" +
+        ((sz.Lin + 2 * sz.P - sz.K) / sz.S).toFixed(2) + "⌋ + 1 = <b>" + Lo + "</b></div>" +
+        '<div class="note">向下取整的含义：最后那个不完整的窗口<b>直接舍去</b>。高度和宽度要分别算。</div>' +
+        '<div class="formula">AlexNet 首层：输入 227×227×3，96 个 11×11 核，S=4，P=0\n' +
+        '  单边 = (227−11)/4+1 = 55　→ 输出 55×55×96\n' +
+        '  每核 = 11×11×3+1 = 364　→ 总参数 364×96 = <b>34944</b></div>' +
+        '<div class="formula">多通道：params = (Kh·Kw·Cin + 1)·Cout\n' +
+        '  32×32×3 用 6 个 5×5 核（S=1,P=0）\n' +
+        '  输出 (32−5)/1+1 = 28 → 28×28×6\n' +
+        '  参数 (5×5×3+1)×6 = 76×6 = <b>456</b></div>' +
+        '<div class="note warn"><b>权值共享：</b>每个核扫描 28×28 个位置，但复用同一组 76 个权重。这就是卷积比全连接省参数的根本原因。</div>';
+    }
+    refreshSz(); root.appendChild(cc);
+
+    /* ---------- 数学卷积 vs 互相关 ---------- */
+    root.appendChild(el("h3", null, "数学卷积 vs 互相关（陷阱题）"));
+    var cm = el("div", "card");
+    cm.innerHTML = '<p>CNN 里说的「卷积」实际上是<b>互相关</b>：直接把核盖上去乘加，<b>不翻核</b>。</p>' +
+      '<p>题面明确写「按卷积定义」时，要先把核上下翻转再左右翻转（等于转 180°）。</p>' +
+      '<div class="formula">原核 K：      翻转后：\n  1   0          2  -1\n -1   2          0   1</div>' +
+      '<div class="formula">同一左上窗口 (1,2 / 4,5)：\n' +
+      '  互相关：1×1 + 2×0 + 4×(−1) + 5×2 = <b>7</b>\n' +
+      '  数学卷积：1×2 + 2×(−1) + 4×0 + 5×1 = <b>5</b></div>' +
+      '<div class="note"><b>判据：</b>写「CNN 卷积」「卷积层」→ 用原核；写「按卷积定义」「翻转卷积核」→ 用翻过的核；' +
+      '核中心对称（比如全 1 的核）→ 翻不翻结果一样。</div>';
+    root.appendChild(cm);
+
+    /* ---------- 转置卷积公式 ---------- */
+    root.appendChild(el("h3", null, "转置卷积的尺寸公式"));
+    var ct = el("div", "card");
+    ct.innerHTML = '<div class="formula">Lout = (Lin − 1)·S − 2P + K</div>' +
+      '<div class="formula">课堂原题（照片 7211）：输入与核的两行都是 (0,1)、(2,3)，S=2，P=0\n' +
+      '  尺寸 = (2−1)×2 − 0 + 2 = <b>4</b>\n' +
+      '  铺块：0K、1K、2K、3K 依次放到四个角，S=核宽 → 不重叠\n' +
+      '  输出 = 0 0 0 1 / 0 0 2 3 / 0 2 0 3 / 4 6 6 9</div>' +
+      '<div class="note">若把 S 改成 1，输出变 3×3，四块在中央相遇，中央值 = 0×3 + 1×2 + 2×1 + 3×0 = <b>4</b>。</div>' +
+      '<div class="note warn">两种算法（铺块法 / 插零翻核法）结果相同，<b>考试只选一种做，别混着算</b>。</div>' +
+      '<div class="note">即使输出尺寸被放大，<b>原始像素信息无法靠这个操作普遍恢复</b>。「反卷积」这个名字有误导性。</div>';
+    root.appendChild(ct);
+  }
+});
+
+/* =========================================================
+   考点 7 计算图与反向传播
+   ========================================================= */
+SECTIONS.push({
+  id: "p7", no: "07", title: "计算图与反向传播",
+  desc: "给模型要会画，能算出梯度；w 的两条路径别漏",
+  hot: true,
+  render: function(root){
+    root.appendChild(el("h2", null, "07 · 计算图与反向传播"));
+    root.appendChild(el("p", "sub", "前向从左往右记数值，反向从损失往回乘局部导数。"));
+
+    var P = { x: 2, w: 1, b: 1, y: 2 };
+    var card = el("div", "card");
+    card.appendChild(el("h4", null, "改输入，看整张图的数值怎么变"));
+    [["x", -3, 4], ["w", -2, 3], ["b", -3, 3], ["y", -2, 5]].forEach(function(p){
+      var rw = el("div", "row"), rl = el("label", null, p[0]), rg = el("input"), rv = el("span", "val");
+      rg.type = "range"; rg.min = p[1]; rg.max = p[2]; rg.step = 0.5; rg.value = P[p[0]];
+      rw.appendChild(rl); rw.appendChild(rg); rw.appendChild(rv); card.appendChild(rw);
+      rv.textContent = P[p[0]];
+      rg.addEventListener("input", function(){ P[p[0]] = +rg.value; rv.textContent = P[p[0]]; reset(); });
+    });
+
+    var formulas = el("div", "card"); formulas.style.background = "var(--panel2)";
+    formulas.innerHTML = '<div class="formula" style="margin:0">a = w·x　z = a + b　h = ReLU(z)\nŷ = h + w　e = ŷ − y　L = ½e²</div>';
+    card.appendChild(formulas);
+
+    var nodeBox = el("div"); card.appendChild(nodeBox);
+    var bRow = el("div", "row"); card.appendChild(bRow);
+    var bF = el("button", "btn primary", "▶ 前向"), bB = el("button", "btn", "◀ 反向"), bR = el("button", "btn ghost", "重置");
+    bRow.appendChild(bF); bRow.appendChild(bB); bRow.appendChild(bR);
+    var summ = el("div"); card.appendChild(summ);
+    root.appendChild(card);
+
+    var idx = 0;
+    var NODES = [];
+    function buildNodes(){
+      var x = P.x, w = P.w, b = P.b, y = P.y;
+      var a = w * x, z = a + b, h = Math.max(0, z), yh = h + w, e = yh - y, L = 0.5 * e * e;
+      // 反向
+      var dLde = e, dLdyh = dLde * 1, dLdh = dLdyh * 1, wDirect = dLdyh * 1;
+      var dz = z > 0 ? 1 : 0;
+      var dLdz = dLdh * dz, dLda = dLdz * 1, dLdb = dLdz * 1;
+      var wMul = dLda * x, dLdx = dLda * w;
+      var dLdw = wMul + wDirect;
+      return [
+        { k: "a = w·x", fv: a, g: dLda, local: "∂a/∂w = x = " + x + "，∂a/∂x = w = " + w, note: "w 在这里第一次被用到" },
+        { k: "z = a + b", fv: z, g: dLdz, local: "对 a、b 都是 1" },
+        { k: "h = ReLU(z)", fv: h, g: dLdh, local: "z = " + fmt(z, 2) + (z > 0 ? " > 0 → 导数 1" : " ≤ 0 → 导数 0（这条支路断了！）") },
+        { k: "ŷ = h + w", fv: yh, g: dLdyh, local: "对 h、w 都是 1", note: "w 第二次被用到（直接支路）" },
+        { k: "e = ŷ − y", fv: e, g: dLde, local: "对 ŷ 是 1，对 y 是 −1" },
+        { k: "L = ½e²", fv: L, g: 1, local: "对 e 的导数 = e = " + fmt(e, 4) }
+      ];
+    }
+    function reset(){ idx = 0; NODES = buildNodes(); renderNodes(); summ.innerHTML = '<div class="note">点「▶ 前向」逐节点算数值，点「◀ 反向」逐节点传梯度。</div>'; }
+    function renderNodes(){
+      var html = "";
+      for (var i = 0; i < NODES.length; i++){
+        var n = NODES[i];
+        var fwdShown = idx >= (i + 1);          // 前向显示到第 i 个
+        var bwdShown = idx >= (NODES.length + (NODES.length - i));
+        html += '<div class="card" style="margin:6px 0;padding:10px 12px;background:' +
+          (fwdShown ? "var(--panel2)" : "transparent") + '">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">' +
+          '<span class="mono" style="font-size:13px;font-weight:600">' + n.k + '</span>' +
+          '<span class="mono" style="font-size:12.5px;color:var(--accent)">' +
+          (fwdShown ? "前向 = " + fmt(n.fv, 4) : "前向 = ?") + '</span></div>' +
+          '<div class="mono" style="font-size:11.5px;color:var(--accent2);margin-top:3px">' +
+          (bwdShown ? "梯度 dL/d(此) = " + fmt(n.g, 4) + "　｜　局部导数：" + n.local : "") + '</div>' +
+          (n.note && (fwdShown || bwdShown) ? '<div style="font-size:11.5px;color:var(--warn);margin-top:3px">⚠ ' + n.note + '</div>' : "") +
+          '</div>';
+      }
+      nodeBox.innerHTML = html;
+    }
+    bF.addEventListener("click", function(){
+      if (idx < NODES.length){ idx++; renderNodes(); }
+      if (idx >= NODES.length){
+        var L = NODES[NODES.length - 1].fv;
+        summ.innerHTML = '<div class="note ok">前向完成，L = <b>' + fmt(L, 4) + "</b>。现在点「◀ 反向」。</div>";
+      }
+    });
+    bB.addEventListener("click", function(){
+      if (idx < NODES.length){ idx = NODES.length; }
+      if (idx < NODES.length * 2){ idx++; renderNodes(); }
+      if (idx >= NODES.length * 2){
+        var last = NODES[0];
+        var wMul = last.g * P.x, wDir = NODES[3].g;
+        var dw = wMul + wDir;
+        summ.innerHTML = '<div class="note ok"><b>结论：</b>dL/dw = ' + fmt(wMul, 4) + "（乘法路径） + " + fmt(wDir, 4) +
+          "（直接加路径） = <b>" + fmt(dw, 4) + "</b>；dL/db = " + fmt(NODES[1].g, 4) + "；dL/dx = " + fmt(last.g * P.w, 4) + "</div>" +
+          (P.w < 0 && (P.x * P.w + P.b) <= 0
+            ? '<div class="note danger"><b>注意这个变式：</b>ReLU 现在是关的（z ≤ 0），主支路梯度归零，但直接加 w 的路径仍然给梯度。' +
+              "所以「某条路梯度为 0」不等于「w 不受影响」。</div>"
+            : "");
+      }
+    });
+    bR.addEventListener("click", reset);
+    reset();
+
+    root.appendChild(el("h3", null, "每个节点的局部导数（背下来）"));
+    var c2 = el("div", "card");
+    c2.innerHTML = '<table class="tbl"><tr><th>运算</th><th>对输入的局部导数</th><th>收到上游梯度 g 后</th></tr>' +
+      '<tr><td>a + b</td><td>都是 1</td><td>两个输入各收到 g</td></tr>' +
+      '<tr><td>a − b</td><td>对 a 是 1，对 b 是 −1</td><td>分别收到 g、−g</td></tr>' +
+      '<tr><td>a·b</td><td>对 a 是 b，对 b 是 a</td><td>分别收到 g·b、g·a</td></tr>' +
+      '<tr><td>½a²</td><td>对 a 是 a</td><td>收到 g·a</td></tr>' +
+      '<tr><td>ReLU(z)</td><td>正区间 1，负区间 0</td><td>z&gt;0 收到 g，z&lt;0 收到 0</td></tr></table>' +
+      '<div class="note">每个局部导数回答的是<b>「只看这一个节点，改动一个输入会怎样」</b>。乘上已经传来的上游梯度，才得到这个输入对最终损失的影响。</div>';
+    root.appendChild(c2);
+
+    root.appendChild(el("h3", null, "模拟卷第 7 题原题"));
+    var c3 = el("div", "card");
+    c3.innerHTML = '<p>模型：h = ReLU(w·x + b)，ŷ = 2h + w，L = ½(ŷ − y)²。给 x=3、w=2、b=−1、y=4。</p>' +
+      '<div class="formula">前向：wx = 2×3 = 6　z = 6−1 = 5　h = ReLU(5) = 5\n' +
+      '      ŷ = 2×5 + 2 = 12　e = 12−4 = 8　L = ½×64 = <b>32</b></div>' +
+      '<div class="formula">反向：dL/de = e = 8　→　dL/dŷ = 8\n' +
+      '  路径①（直接加 w）：8 × 1 = 8\n' +
+      '  路径②（经 2、ReLU、wx）：8 × 2 × 1 × 3 = 48\n' +
+      '  dL/dw = 8 + 48 = <b>56</b>\n' +
+      '  dL/db = 8 × 2 × 1 × 1 = <b>16</b></div>' +
+      '<div class="note danger"><b>只在图上画一条 w 路径，答案就从 56 变成 48。</b>这是本题唯一的设计意图。</div>' +
+      '<div class="note">若还要更新（η=0.01）：w_new = 2 − 0.01×56 = 1.44，b_new = −1 − 0.01×16 = −1.16。' +
+      "两个更新都用旧位置算出的梯度。</div>";
+    root.appendChild(c3);
+  }
+});
+
+/* =========================================================
+   考点 8 交叉熵
+   ========================================================= */
+SECTIONS.push({
+  id: "p8", no: "08", title: "损失函数与交叉熵",
+  desc: "Softmax、损失、梯度 q−p，以及老师讲的那段 KL = 交叉熵 − 熵",
+  hot: true,
+  render: function(root){
+    root.appendChild(el("h2", null, "08 · 损失函数与交叉熵"));
+    root.appendChild(el("p", "sub", "拖着 logit 滑块，看概率、损失、梯度一起变。"));
+
+    var card = el("div", "card");
+    var L = { z: [0, 1.2, 0.2], cls: 1 };
+    var segT = el("div", "seg");
+    [0, 1, 2].forEach(function(k, i){
+      var b = el("button", (L.cls === k) ? "on" : null, "真类 = 第 " + (k + 1) + " 类");
+      b.addEventListener("click", function(){
+        [].forEach.call(segT.children, function(x){ x.classList.remove("on"); });
+        b.classList.add("on"); L.cls = k; refresh();
+      });
+      segT.appendChild(b);
+    });
+    card.appendChild(el("div", "row")).appendChild(segT);
+
+    ["第1类 logit", "第2类 logit", "第3类 logit"].forEach(function(nm, k){
+      var rw = el("div", "row"), rl = el("label", null, nm), rg = el("input"), rv = el("span", "val");
+      rg.type = "range"; rg.min = -3; rg.max = 3; rg.step = 0.1; rg.value = L.z[k];
+      rw.appendChild(rl); rw.appendChild(rg); rw.appendChild(rv); card.appendChild(rw);
+      rv.textContent = L.z[k].toFixed(1);
+      rg.addEventListener("input", function(){ L.z[k] = +rg.value; rv.textContent = L.z[k].toFixed(1); refresh(); });
+    });
+    var cvs = mkCanvas(120); card.appendChild(cvs);
+    var out = el("div"); card.appendChild(out);
+    root.appendChild(card);
+
+    function softmax(z){
+      var m = Math.max.apply(null, z), e = z.map(function(v){ return Math.exp(v - m); });
+      var s = e.reduce(function(a, b){ return a + b; }, 0);
+      return e.map(function(v){ return v / s; });
+    }
+    function refresh(){
+      var q = softmax(L.z);
+      var loss = -Math.log(q[L.cls]);
+      var grad = q.map(function(v, i){ return v - (i === L.cls ? 1 : 0); });
+      // 熵 H(p)=0（one-hot），交叉熵 = 损失，KL = 损失
+      draw(cvs, function(ctx, w, h){
+        var n = 3, bw = (w - 40) / n, base = h - 26;
+        var mx = Math.max.apply(null, q);
+        ctx.font = "11px sans-serif"; ctx.textAlign = "center";
+        for (var i = 0; i < n; i++){
+          var bh = (q[i] / Math.max(mx, 0.01)) * (h - 50);
+          var x = 20 + i * bw + 6;
+          ctx.fillStyle = (i === L.cls) ? col("accent2") : col("accent");
+          ctx.fillRect(x, base - bh, bw - 12, bh);
+          ctx.fillStyle = col("fg2");
+          ctx.fillText(fmt(q[i], 3) + (i === L.cls ? " 真" : ""), x + (bw - 12) / 2, base + 14);
+        }
+        // 负对数曲线参考
+        var ax = { X: function(v){ return 30 + v * (w - 50); }, Y: function(v){ return 14 + (1 - v / 4) * (h - 50) * 0 + 0; } };
+        ctx.strokeStyle = col("line"); ctx.beginPath(); ctx.moveTo(20, base); ctx.lineTo(w - 20, base); ctx.stroke();
+        ctx.fillStyle = col("muted"); ctx.textAlign = "left";
+        ctx.fillText("预测概率", 20, h - 6);
+      });
+      out.innerHTML =
+        '<div class="kv"><span class="k">Softmax 概率 q</span><span class="v">(' + q.map(function(v){ return fmt(v, 3); }).join(", ") + ')</span></div>' +
+        '<div class="kv"><span class="k">真类概率 q<sub>y</sub></span><span class="v">' + fmt(q[L.cls], 4) + '</span></div>' +
+        '<div class="kv"><span class="k">交叉熵损失 −ln q<sub>y</sub></span><span class="v">' + fmt(loss, 4) + '</span></div>' +
+        '<div class="kv"><span class="k">梯度 ∂ℓ/∂z = q − p</span><span class="v">(' + grad.map(function(v){ return fmt(v, 3); }).join(", ") + ')</span></div>' +
+        '<div class="kv"><span class="k">梯度和（必为 0）</span><span class="v">' + fmt(grad.reduce(function(a, b){ return a + b; }, 0), 6) + '</span></div>' +
+        '<div class="note"><b>为什么梯度和为 0：</b>Softmax 输出和为 1，约束在单纯形上，梯度必然和为 0。</div>' +
+        '<div class="note warn"><b>一手验证「一手算一个 log」：</b>ℓ = ln Σexp(z) − z<sub>y</sub> = ln(' +
+        fmt(Math.exp(L.z[0]) + Math.exp(L.z[1]) + Math.exp(L.z[2]), 3) + ") − (" + L.z[L.cls].toFixed(1) + ") = " +
+        fmt(loss, 4) + "。因为 one-hot 下只有真类那一项留下来。</div>";
+    }
+    refresh();
+
+    root.appendChild(el("h3", null, "老师视频里那段推导（PDF 漏掉的部分）"));
+    var c2 = el("div", "card");
+    c2.innerHTML =
+      '<p>那页 PPT 只有四行：</p>' +
+      '<div class="formula">熵      H(p)   = −Σ p(x) log p(x)\n' +
+      '交叉熵  H(p,q) = −Σ p(x) log q(x)\n' +
+      '相对熵  KL(p‖q)= Σ p(x) log[p(x)/q(x)]\n' +
+      '关系    KL(p,q)= H(p,q) − H(p)</div>' +
+      '<p>老师说「用交叉熵减去任务自身的那个熵，把差异单独拎出来」。这一步他没写完，这就是补全：</p>' +
+      '<div class="formula">KL(p‖q) = Σ p log(p/q)\n' +
+      '        = Σ p log p − Σ p log q\n' +
+      '        = −H(p) + H(p,q)\n' +
+      '        = H(p,q) − H(p)</div>' +
+      '<p>当标签是 one-hot，设真类为 k，则 p(k)=1、其余 0：</p>' +
+      '<div class="formula">H(p) = −[1·log1 + 0 + 0] = <b>0</b>\n' +
+      'KL(p‖q) = H(p,q) − 0 = H(p,q) = <b>−log q(k)</b></div>' +
+      '<div class="note ok"><b>三层结论，按这个层次记：</b><br>' +
+      '① p 是标签分布、固定不变，H(p) 是常数 → 最小化交叉熵 ≡ 最小化 KL。one-hot 下 H(p)=0，两者数值也相等。<br>' +
+      '② 损失的实际数值就是 −log(模型给正确类别的概率)。越自信且答对，越接近 0。<br>' +
+      '③ 负例为什么不用管：p(x)=0 的那些项，0·log q(x) 恒等于 0，对损失无贡献。所以 PyTorch 的 CrossEntropyLoss 只取 target 那一维。</div>' +
+      '<div class="note"><b>通俗版：</b>把分布想成一套密码本。熵 = 用最优编码编真实分布，平均花多少字；交叉熵 = 拿按 q 设计的密码本去编 p，平均多花多少字。' +
+      '交叉熵 = 熵 + 冤枉字。分类任务里答案永远 100% 确定（one-hot），熵为 0，所以冤枉字就等于交叉熵本身。</div>' +
+      '<div class="note warn"><b>工程提醒：</b>PyTorch 的 CrossEntropyLoss 内部是 log_softmax + NLLLoss，输入要<b>未过 softmax 的 logits</b>。自己再做一次 softmax 就是重复归一化。</div>';
+    root.appendChild(c2);
+
+    root.appendChild(el("h3", null, "模拟卷第 8 题原题"));
+    var c3 = el("div", "card");
+    c3.innerHTML = '<p>三类分数 (0, ln3, ln2)，真类为第 3 类。另一条样本真类概率 3/4，求两条平均交叉熵。</p>' +
+      '<div class="formula">指数 = (1, 3, 2)，和 = 6 → q = (1/6, 1/2, 1/3)\n' +
+      'ℓ₁ = −ln(1/3) = ln3 ≈ 1.099\n' +
+      '梯度 q − p = (1/6, 1/2, −2/3)　和 = 1/6+3/6−4/6 = 0 ✓\n' +
+      'ℓ₂ = −ln(3/4) = ln(4/3)\n' +
+      '平均 = [ln3 + ln(4/3)]/2 = ln4/2 = <b>ln2 ≈ 0.693</b></div>' +
+      '<div class="note ok"><b>这道题的精妙处：</b>相加后对数合并成 ln4，除以 2 正好是 ln2。算完发现答案很整齐，说明走对了。</div>' +
+      '<div class="note">二分类：ℓ = −[y·ln q + (1−y)·ln(1−q)]。y=0 时要用<b>负类概率 1−q</b>，不是 q。' +
+      '例：q=0.9，y=1 → −ln0.9≈0.105；y=0 → −ln0.1≈2.303。</div>';
+    root.appendChild(c3);
+  }
+});
+
+/* =========================================================
+   考点 9 熵与决策树
+   ========================================================= */
+SECTIONS.push({
+  id: "p9", no: "09", title: "熵与决策树",
+  desc: "熵是什么、四种熵怎么算、15 人贷款题完整复算",
+  hot: true,
+  render: function(root){
+    root.appendChild(el("h2", null, "09 · 熵与决策树"));
+    root.appendChild(el("p", "sub", "先搞懂「惊讶程度」，再算四种熵，最后把贷款题走一遍。"));
+
+    /* --- 熵曲线 --- */
+    root.appendChild(el("h3", null, "① 熵是什么：惊讶程度的平均"));
+    var c1 = el("div", "card");
+    c1.innerHTML = '<div class="formula">概率 p 的事件发生，信息量 = −log₂p\nH(p) = −Σ pₖ log₂ pₖ</div>' +
+      '<div class="note">概率 1 的事件 → 信息量 0；概率 1/2 → 1 bit；概率 1/8 → 3 bit。<br>' +
+      '熵还等于「用最优编码方案编这个分布，平均每条消息要多少位」——两种说法是同一件事。</div>';
+    var rw = el("div", "row"), rg = el("input"), rv = el("span", "val");
+    rw.appendChild(el("label", null, "正类占比 p")); rg.type = "range"; rg.min = 0.01; rg.max = 0.99; rg.step = 0.01; rg.value = 0.5;
+    rw.appendChild(rg); rw.appendChild(rv); c1.appendChild(rw);
+    var cvs1 = mkCanvas(180); c1.appendChild(cvs1);
+    var out1 = el("div"); c1.appendChild(out1);
+    function H2(p){ if (p <= 0 || p >= 1) return 0; return -(p * Math.log2(p) + (1 - p) * Math.log2(1 - p)); }
+    function refresh1(){
+      var p = +rg.value; rv.textContent = p.toFixed(2);
+      draw(cvs1, function(ctx, w, h){
+        var ax = axes(ctx, w, h, { l: 34, r: 12, t: 12, b: 24 }, 0, 1, 0, 1.15);
+        ctx.strokeStyle = col("accent"); ctx.lineWidth = 2.4; ctx.beginPath();
+        for (var i = 0; i <= 200; i++){
+          var pp = i / 200;
+          if (pp <= 0 || pp >= 1) continue;
+          var vv = H2(pp);
+          if (i === 0) ctx.moveTo(ax.X(pp), ax.Y(vv)); else ctx.lineTo(ax.X(pp), ax.Y(vv));
+        }
+        ctx.stroke();
+        ctx.strokeStyle = col("line"); ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(ax.X(p), 12); ctx.lineTo(ax.X(p), h - 24); ctx.stroke();
+        var hv = H2(p);
+        ctx.fillStyle = col("accent2"); ctx.beginPath(); ctx.arc(ax.X(p), ax.Y(hv), 6, 0, 7); ctx.fill();
+        ctx.fillStyle = col("muted"); ctx.font = "10px ui-monospace,monospace"; ctx.textAlign = "center";
+        ctx.fillText("p", w / 2, h - 7);
+        ctx.textAlign = "right"; ctx.fillText("1.0", 30, ax.Y(1) + 4); ctx.fillText("0", 30, ax.Y(0) + 4);
+      });
+      out1.innerHTML = '<div class="kv"><span class="k">比例 (' + p.toFixed(2) + ", " + (1 - p).toFixed(2) + ")</span><span class=\"v\">H = " + fmt(H2(p), 3) + " bit</span></div>" +
+        '<div class="note">' + (Math.abs(p - 0.5) < 0.02 ? "两类均分，最难猜，熵取到最大值 <b>1 bit</b>。" :
+          (p > 0.5 ? "多数类较明显，不确定性下降。" : "多数类较明显（负类那边），不确定性下降。")) +
+        "K 个类别最均匀时熵为 <b>log₂K</b>（2 类→1，3 类→1.585，4 类→2）。</div>";
+    }
+    rg.addEventListener("input", refresh1);
+    refresh1(); root.appendChild(c1);
+
+    /* --- 四种熵 --- */
+    root.appendChild(el("h3", null, "② 决策树要算的四个量（别混）"));
+    var c2 = el("div", "card");
+    c2.innerHTML = '<table class="tbl"><tr><th>量</th><th style="text-align:left">用哪些比例</th><th style="text-align:left">回答什么</th></tr>' +
+      '<tr><td>父节点熵 H(D)</td><td style="text-align:left">父节点内各类别占比</td><td style="text-align:left">分组前有多混杂</td></tr>' +
+      '<tr><td>子节点熵 H(Dᵥ)</td><td style="text-align:left">组内各类别占比</td><td style="text-align:left">组内有多混杂</td></tr>' +
+      '<tr><td>条件熵 H(D|A)</td><td style="text-align:left">组占比加权子节点熵</td><td style="text-align:left">分组后的平均不确定性</td></tr>' +
+      '<tr><td>划分熵 HA(D)</td><td style="text-align:left">只拿组大小/父节点数</td><td style="text-align:left">分到哪支有多不确定</td></tr></table>' +
+      '<div class="formula">H(D|A) = Σᵥ (|Dᵥ|/|D|)·H(Dᵥ)\n' +
+      'g(D,A) = H(D) − H(D|A)\n' +
+      'HA(D)  = −Σᵥ (|Dᵥ|/|D|)·log₂(|Dᵥ|/|D|)\n' +
+      'gR     = g / HA</div>' +
+      '<div class="note danger"><b>最容易混的一点：</b>条件熵的加权权重是组占比，但求的是 <b>H(Dᵥ)——组内标签熵</b>；' +
+      '划分熵的加权权重也是组占比，但求的是 <b>log₂(组占比)——只看组大小，完全不看标签</b>。</div>' +
+      '<div class="note"><b>为什么需要增益比：</b>信息增益偏爱取值多的特征。极端情况按唯一学号拆分，每组只有一个样本、标签必然纯，条件熵=0，信息增益=父节点熵，看起来完美但毫无泛化意义。' +
+      '增益比用划分熵做分母把这种偏好压下去。</div>' +
+      '<div class="note">若划分只有一个分支，HA=0，除零 → 跳过该候选。原版 C4.5 是先在信息增益不低于平均值的候选里挑，再比较增益比。题面明确规定时按题设。</div>';
+    root.appendChild(c2);
+
+    /* --- 15 人贷款题 --- */
+    root.appendChild(el("h3", null, "③ 15 人贷款题：完整复算"));
+    var c3 = el("div", "card");
+    var FEATS = [
+      { name: "年龄", groups: [[2,3],[3,2],[4,1]], labels: ["青年","中年","老年"] },
+      { name: "工作", groups: [[5,0],[4,6]], labels: ["有","无"] },
+      { name: "房产", groups: [[6,0],[3,6]], labels: ["有","无"] },
+      { name: "信贷", groups: [[1,4],[4,2],[4,0]], labels: ["一般","好","很好"] }
+    ];
+    var HD = H2(9 / 15);
+    function Hgrp(ok, no){ var n = ok + no; if (!n) return 0; var p = ok / n; return H2(p); }
+    var tbl = el("table", "tbl"); c3.appendChild(tbl);
+    var tbody = el("tbody"); tbl.appendChild(tbody);
+    var detail = el("div"); c3.appendChild(detail);
+    var rows = [];
+    FEATS.forEach(function(F){
+      var tot = 0, cond = 0, sizes = [];
+      F.groups.forEach(function(g){ var n = g[0] + g[1]; tot += n; sizes.push(n); });
+      F.groups.forEach(function(g, i){
+        var n = sizes[i];
+        cond += (n / tot) * Hgrp(g[0], g[1]);
+      });
+      var gain = HD - cond;
+      var ha = 0;
+      sizes.forEach(function(n){ var p = n / tot; if (p > 0) ha -= p * Math.log2(p); });
+      rows.push({ name: F.name, cond: cond, gain: gain, ha: ha, gr: ha > 0 ? gain / ha : 0, sizes: sizes, groups: F.groups, labels: F.labels });
+    });
+    var html = '<tr><th>特征</th><th>分支计数(批准,拒绝)</th><th>条件熵</th><th>信息增益</th><th>增益比</th></tr>';
+    rows.forEach(function(r, i){
+      html += '<tr data-i="' + i + '"><td>' + r.name + '</td><td class="num" style="font-size:11px">' +
+        r.groups.map(function(g, k){ return r.labels[k] + "(" + g[0] + "," + g[1] + ")"; }).join("，") +
+        '</td><td class="num">' + fmt(r.cond) + '</td><td class="num">' + fmt(r.gain) + '</td><td class="num">' + fmt(r.gr) + '</td></tr>';
+    });
+    tbody.innerHTML = html;
+    // 点击行看逐步计算
+    var trs = tbody.querySelectorAll("tr[data-i]");
+    for (var ti = 0; ti < trs.length; ti++){
+      (function(tr){
+        tr.style.cursor = "pointer";
+        tr.addEventListener("click", function(){
+          var r = rows[+tr.getAttribute("data-i")];
+          var steps = r.groups.map(function(g, k){
+            var n = g[0] + g[1];
+            return "  " + r.labels[k] + "组 (" + g[0] + "批准," + g[1] + "拒绝)，共 " + n + " 人：H = " + fmt(Hgrp(g[0], g[1]));
+          }).join("\n");
+          var terms = r.groups.map(function(g, k){ return "(" + r.sizes[k] + "/15)×" + fmt(Hgrp(g[0], g[1])); }).join(" + ");
+          detail.innerHTML = '<div class="note"><b>父节点熵：</b>H(D) = −(9/15)log₂(9/15) − (6/15)log₂(6/15) = <b>' + fmt(HD) + '</b></div>' +
+            '<div class="formula">' + steps + '\n\n条件熵 H(D|A) = ' + terms + '\n              = ' + fmt(r.cond) + '\n' +
+            '信息增益 g = ' + fmt(HD) + ' − ' + fmt(r.cond) + ' = <b>' + fmt(r.gain) + '</b>\n' +
+            '划分熵 HA = ' + fmt(r.ha) + '（只看各组大小）\n' +
+            '增益比 gR = ' + fmt(r.gain) + '/' + fmt(r.ha) + ' = <b>' + fmt(r.gr) + '</b></div>';
+        });
+      })(trs[ti]);
+    }
+    c3.appendChild(el("p", "sub", "点表格任意一行，看这一行的逐步计算。"));
+    c3.appendChild(el("div", "note ok", "<b>结论：</b>按信息增益选「房产」（0.420 最大）。有房组 6 人全批准，已成纯节点直接判批准；无房组只拿剩下的 9 人继续按「工作」划分。" +
+      "<br><b>注意分母：</b>这一步的分母是 <b>9</b>，不是 15。已经离开当前分支的那 6 个人不用再计入——这是决策树手算题最常见的错。"));
+    c3.appendChild(el("div", "note", "<b>一个巧合别慌：</b>房产的划分熵 0.971 恰好等于父节点熵 0.971。原因是分支比例 6:9 和类别比例 9:6 互为交换，而熵对交换不敏感。"));
+    root.appendChild(c3);
+
+    /* --- 三者关系 --- */
+    root.appendChild(el("h3", null, "④ 熵 / 交叉熵 / KL 三者关系"));
+    var c4 = el("div", "card");
+    c4.innerHTML = '<div class="formula">D_KL(p‖q) = Σ pₖ ln(pₖ/qₖ) = H(p,q) − H(p)</div>' +
+      '<div class="note"><b>验算 p=q=(½,½)：</b>KL = 0；交叉熵 = ln2 ≈ 0.693；H(p) 也是 ln2；KL = ln2 − ln2 = 0 ✓<br>' +
+      '这个例子说明「交叉熵不为 0」和「预测完全正确」可以同时成立。</div>' +
+      '<table class="tbl"><tr><th>区别</th><th style="text-align:left">内容</th></tr>' +
+      '<tr><td>底数</td><td style="text-align:left">树题用 log₂（bit），分类损失用 ln（nat）。题目指定就按题目</td></tr>' +
+      '<tr><td>最小值</td><td style="text-align:left">交叉熵最小值不一定为 0。q=p 时取到 H(p)；只有 one-hot 时理想损失才是 0</td></tr>' +
+      '<tr><td>对称性</td><td style="text-align:left">KL 不对称 ⚠ 不是距离。它衡量「用 q 近似 p 多付的编码代价」</td></tr></table>';
+    root.appendChild(c4);
+
+    root.appendChild(el("h3", null, "模拟卷第 9 题原题"));
+    var c5 = el("div", "card");
+    c5.innerHTML = '<p>节点正负各 4 个。A 分 (3正,0负)、(1正,4负)；B 分 (3正,1负)、(1正,3负)。</p>' +
+      '<div class="formula">父节点：4 正 4 负 → H(D) = <b>1 bit</b>\n\n' +
+      'A：第一组纯 → H=0；第二组 (1/5,4/5) → H≈0.722\n' +
+      '   H(D|A) = (3/8)×0 + (5/8)×0.722 ≈ <b>0.451</b>\n' +
+      '   g(A) = 1 − 0.451 = <b>0.549</b>\n' +
+      '   HA(3:5) ≈ 0.954　→ gR(A) ≈ <b>0.575</b>\n\n' +
+      'B：两组都是 (3/4,1/4) → H ≈ 0.811\n' +
+      '   H(D|B) = 0.5×0.811 + 0.5×0.811 ≈ <b>0.811</b>\n' +
+      '   g(B) = 1 − 0.811 = <b>0.189</b>\n' +
+      '   HA(4:4) = 1　→ gR(B) = <b>0.189</b></div>' +
+      '<div class="note ok">ID3 比信息增益 → 选 <b>A</b>（0.549 &gt; 0.189）。按增益比也是 A（0.575 &gt; 0.189），两个判据一致。</div>' +
+      '<div class="note warn"><b>答题提示：</b>熵的运算全程保留 5 位以上中间位数，最后统一四舍五入到三位。中途就舍入，误差会累积到增益比上。</div>';
+    root.appendChild(c5);
+  }
+});
+
+/* =========================================================
+   自测
+   ========================================================= */
+function renderTest(){
+  var w = el("div");
+  w.appendChild(el("h2", null, "自测 · 12 道"));
+  w.appendChild(el("p", "sub", "选完立刻判卷并给解释。"));
+  var score = el("div", "card");
+  var done = {}, right = 0;
+  score.innerHTML = '<div class="kv"><span class="k">已答</span><span class="v" id="__done">0 / 12</span></div>' +
+    '<div class="kv"><span class="k">正确</span><span class="v" id="__right">0</span></div>' +
+    '<div class="pbar"><i id="__bar" style="width:0%"></i></div>';
+  w.appendChild(score);
+
+  var QS = [
+    { q: "模型把训练损失降到 0，能推出新样本上的损失也是 0 吗？", o: ["能，说明模型完全正确", "不能，训练损失只评价已知样本", "能，只要测试集和训练集同分布"], a: 1,
+      e: "训练损失只评价这批已知样本。高容量模型可能记住噪声，或利用只在训练数据中碰巧成立的关系。要判断泛化必须看验证集/测试集。" },
+    { q: "用验证集选了训练轮次，然后用测试集报告结果，这个流程", o: ["可以，这是标准做法", "不行，测试集被污染了", "只有小数据集才不行"], a: 0,
+      e: "标准流程就是这个：训练集拟合权重 → 验证集选轮次/超参数 → 测试集只报告一次。反过来用测试集选轮次再用它报告，才是错的。" },
+    { q: "先把图片做翻转增强，再随机划分训练/测试集，问题是", o: ["没问题", "同一张图的原图与翻转版可能分到两边，造成泄漏", "只会让训练变慢"], a: 1,
+      e: "数据泄漏。正确做法是先切分，再只对训练部分做增强。" },
+    { q: "两层仿射层串联 W₂(W₁x+b₁)+b₂ 等价于", o: ["一个更复杂的非线性函数", "一层仿射函数 (W₂W₁)x + (W₂b₁+b₂)", "无法化简"], a: 1,
+      e: "这是恒等式。没有非线性激活，堆多少层都还在同一类函数里，能力上限就是线性分类器。" },
+    { q: "ReLU 在 z = −2 处的导数是", o: ["−2", "1", "0"], a: 2,
+      e: "ReLU 负区间输出恒为 0，斜率是 0。所以该位置的梯度传不回去，这就是「神经元死掉」。" },
+    { q: "Adam 第二步递推 m₂、v₂ 时，应该用", o: ["修正后的 m̂₁、v̂₁", "原始的 m₁、v₁", "随便哪个都行"], a: 1,
+      e: "必须用原始状态。偏差修正得到的 m̂、v̂ 只用于当轮参数更新，不写回状态。这是 Adam 手算最大的坑。" },
+    { q: "AdaGrad 与 RMSProp 的主要区别是", o: ["AdaGrad 累计平方和只增不减，RMSProp 用移动平均能回落", "AdaGrad 用动量，RMSProp 不用", "两者完全一样"], a: 0,
+      e: "AdaGrad 的 r 单调递增，有效学习率只会变小；RMSProp 用 ρ 加权让旧平方向量衰减，有效学习率能回升。" },
+    { q: "ResNet 的 Bottleneck 主支路卷积核尺寸顺序是", o: ["3×3 → 3×3", "1×1 → 3×3 → 1×1", "3×3 → 1×1 → 3×3"], a: 1,
+      e: "先 1×1 降通道，再在窄通道上做 3×3，最后 1×1 升通道。BasicBlock 才是 3×3 → 3×3。" },
+    { q: "一个 5×5 输入，3×3 核，步长 2，无填充，输出边长是", o: ["2", "3", "1"], a: 0,
+      e: "⌊(5+0−3)/2⌋+1 = ⌊1⌋+1 = 2。舍去的那个不完整窗口不参与计算。" },
+    { q: "求卷积层对输入的梯度 dX 时，局部导数是", o: ["窗口里的输入值", "卷积核里的权重", "上游梯度"], a: 1,
+      e: "求 dX 拿核权重乘梯度，dX 与 X 同形；求 dK 则拿输入值乘梯度，dK 与 K 同形。这两者搞反是最高频失分点。" },
+    { q: "one-hot 标签下，交叉熵损失等于", o: ["−log(模型给真实类别的概率)", "熵 H(p) 本身", "KL 散度加熵"], a: 0,
+      e: "因为 H(p)=0，KL(p‖q)=H(p,q)−H(p)=H(p,q)，而交叉熵在 one-hot 下只剩 −log q(真类) 一项。" },
+    { q: "决策树的增益比为什么要除以划分熵 HA", o: ["为了归一化数值范围", "为了抑制信息增益对「取值多的特征」的偏好", "没有实际意义"], a: 1,
+      e: "取值越多，HA 越大、分母越大，把信息增益的偏好压下去。典型反例是按唯一学号拆分，信息增益极高但毫无泛化意义。" }
+  ];
+
+  var box = el("div");
+  QS.forEach(function(Q, qi){
+    var d = el("div", "q");
+    d.appendChild(el("div", "qt", (qi + 1) + ". " + Q.q));
+    var expl = el("div", "expl", Q.e);
+    Q.o.forEach(function(opt, oi){
+      var b = el("button", "opt", opt);
+      b.addEventListener("click", function(){
+        if (done[qi]) return;
+        done[qi] = true;
+        var ok = (oi === Q.a);
+        if (ok) right++;
+        // 标出所有选项
+        [].forEach.call(d.querySelectorAll(".opt"), function(x, xi){
+          if (xi === Q.a){ x.classList.add("right"); x.innerHTML += '<span class="mk">✓</span>'; }
+          else if (xi === oi){ x.classList.add("wrong"); x.innerHTML += '<span class="mk">✗</span>'; }
+        });
+        expl.classList.add("show");
+        var n = Object.keys(done).length;
+        document.getElementById("__done").textContent = n + " / " + QS.length;
+        document.getElementById("__right").textContent = right;
+        document.getElementById("__bar").style.width = (n / QS.length * 100) + "%";
+        if (n === QS.length){
+          toast("答完 " + n + " 题，正确 " + right + " 道");
+        }
+      });
+      d.appendChild(b);
+    });
+    d.appendChild(expl);
+    box.appendChild(d);
+  });
+  w.appendChild(box);
+  VIEW.appendChild(w);
+}
+
+/* =========================================================
+   速查 / 自测 / 关于
+   ========================================================= */
+function renderCheat(){
+  var w = el("div");
+  w.appendChild(el("h2", null, "速查卡"));
+  w.appendChild(el("p", "sub", "考前十分钟只看这一页。"));
+  var c = el("div", "card");
+  c.innerHTML =
+    '<h4 style="margin-top:0">卷积</h4>' +
+    '<div class="formula">Lout = ⌊(Lin + 2P − K)/S⌋ + 1\nparams = (Kh·Kw·Cin + 1)·Cout\n转置卷积 Lout = (Lin−1)·S − 2P + K</div>' +
+    '<h4>梯度下降</h4>' +
+    '<div class="formula">GD      θ ← θ − η·g\nMomentum m = βm + (1−β)g\nAdaGrad  r += g²\nRMSProp  r = ρr + (1−ρ)g²\nAdam     m,v + 偏差修正 m̂=m/(1−β₁ᵗ)</div>' +
+    '<h4>交叉熵</h4>' +
+    '<div class="formula">q = softmax(z)　ℓ = −Σ p·ln q = −ln q(真类)\n∂ℓ/∂z = q − p　（和为 0）\nH(p,q) = H(p) + KL(p‖q)</div>' +
+    '<h4>熵 / 决策树</h4>' +
+    '<div class="formula">H(D)    = −Σ pₖ log₂ pₖ\nH(D|A)  = Σ (|Dᵥ|/|D|)·H(Dᵥ)\ng(D,A)  = H(D) − H(D|A)\nHA(D)   = −Σ (|Dᵥ|/|D|) log₂(|Dᵥ|/|D|)\ngR      = g / HA</div>' +
+    '<h4>ResNet</h4>' +
+    '<div class="formula">BasicBlock  3×3 → 3×3\nBottleneck  1×1 → 3×3 → 1×1\n形状同→恒等捷径；不同→1×1 投影\n层数 = 1 + 块数×卷积数 + 1</div>';
+  w.appendChild(c);
+  VIEW.appendChild(w);
+}
+
+function renderAbout(){
+  var w = el("div");
+  w.appendChild(el("h2", null, "关于"));
+  var c = el("div", "card");
+  c.innerHTML =
+    '<p>本 App 依据以下材料整理，所有算例均已重算核对：</p>' +
+    '<p>· 《机器学习期末复习 · 9 个考点详解》33 页<br>' +
+    '· 10.19 课堂视频（熵 / 交叉熵 / KL 散度）转写<br>' +
+    '· 10.19 课堂视频知识点总结（3 页）<br>' +
+    '· 11.9 课堂照片（7191 标「RSNET要考」、7209 标「尤其重要」等）</p>' +
+    '<div class="note">完全离线，零权限，不联网、不读存储。</div>' +
+    '<div class="note">主题：按右上角 ◐ 在「跟随系统 / 浅色 / 深色」之间循环，选择会记住。</div>';
+  w.appendChild(c);
+  VIEW.appendChild(w);
+}
+
+/* 启动 */
+applyTheme();
+go("home");
+</script>
+</body>
+</html>
